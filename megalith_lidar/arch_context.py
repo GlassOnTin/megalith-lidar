@@ -454,6 +454,38 @@ def query_local_vlm_academic_context(
     return None
 
 
+_COUNTIES_CACHE: Optional[List] = None
+
+
+def lookup_ceremonial_county(lat: float, lon: float) -> str:
+    global _COUNTIES_CACHE
+    if _COUNTIES_CACHE is None:
+        _COUNTIES_CACHE = []
+        try:
+            from shapely.geometry import shape
+            for p_try in [
+                Path("/mnt/bulk/megalith-lidar/catalog/uk_ceremonial_counties.geojson"),
+                Path(__file__).resolve().parents[1] / "docs" / "uk_counties.geojson",
+            ]:
+                if p_try.exists():
+                    data = json.loads(p_try.read_text(encoding="utf-8"))
+                    for f in data.get("features", []):
+                        g = shape(f["geometry"])
+                        _COUNTIES_CACHE.append((f["properties"]["county"], g, g.bounds))
+                    break
+        except Exception:
+            pass
+    if not _COUNTIES_CACHE:
+        return "England"
+    from shapely.geometry import Point
+    pt = Point(float(lon), float(lat))
+    for cname, geom, (minx, miny, maxx, maxy) in _COUNTIES_CACHE:
+        if minx <= lon <= maxx and miny <= lat <= maxy:
+            if geom.contains(pt):
+                return cname
+    return min(_COUNTIES_CACHE, key=lambda c: c[1].distance(pt))[0]
+
+
 def enrich_candidates_with_archaeological_context(
     candidates: List[Dict],
     extractor: NHLESpatialContextExtractor,
@@ -523,6 +555,8 @@ def enrich_candidates_with_archaeological_context(
         nearby_nhle, cluster = extractor.query_context(e, n)
         cand["nearby_nhle_monuments"] = nearby_nhle
         cand["nhle_cluster_summary"] = cluster
+        if not cand.get("county") and cand.get("lat") is not None and cand.get("lon") is not None:
+            cand["county"] = lookup_ceremonial_county(float(cand["lat"]), float(cand["lon"]))
 
         cached_entry = cache.get(ckey)
         if cached_entry and cached_entry.get("note") and str(cached_entry["note"]).strip().endswith((".", "!", "?")):

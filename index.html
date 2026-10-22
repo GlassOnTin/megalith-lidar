@@ -715,6 +715,12 @@
               </select>
             </label>
             <label>
+              County:
+              <select id="countySelect">
+                <option value="">All Counties</option>
+              </select>
+            </label>
+            <label>
               <input type="checkbox" id="chkOnlyDiag" />
               Only show sites with 4-panel LiDAR image rendered
             </label>
@@ -851,6 +857,7 @@
     map.getPane("candidatesPane").style.zIndex = 650;
 
     const squaresLayer = L.layerGroup().addTo(map);
+    const countyBoundaryLayer = L.layerGroup().addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
     const selectedHaloLayer = L.layerGroup().addTo(map);
 
@@ -860,6 +867,7 @@
     let summaryData = null;
     let romanSummaryData = null;
     let enclosureSummaryData = null;
+    let countiesGeoJSON = null;
     let geojsonFeatures = [];
     let romanFeatures = [];
     let enclosureFeatures = [];
@@ -868,6 +876,32 @@
     let sortCol = "confidence";
     let sortDir = "desc";
     let activeMobilePanel = 1; // Default to Panel 2 (16m Local Relief) on mobile portrait
+
+    function pointInRing(lon, lat, ring) {
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function resolveCountyFromGeoJSON(lat, lon) {
+      if (!countiesGeoJSON || !countiesGeoJSON.features) return "England";
+      for (const f of countiesGeoJSON.features) {
+        const g = f.geometry;
+        if (!g) continue;
+        const polys = g.type === "Polygon" ? [g.coordinates] : (g.type === "MultiPolygon" ? g.coordinates : []);
+        for (const poly of polys) {
+          if (poly.length > 0 && pointInRing(lon, lat, poly[0])) {
+            return f.properties.county;
+          }
+        }
+      }
+      return "England";
+    }
 
     const TAB_EXPLAINERS = {
       unidentified:
@@ -1160,14 +1194,66 @@
       }
     }
 
+    function updateCountyDropdown() {
+      const countySel = document.getElementById("countySelect");
+      if (!countySel) return;
+      const curCounty = countySel.value || "";
+      const op = document.getElementById("opSelect").value;
+      const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+
+      const sourceList = currentTab === "roman"
+        ? romanFeatures
+        : (currentTab === "enclosure"
+          ? enclosureFeatures
+          : (currentTab === "unidentified"
+            ? geojsonFeatures
+            : geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures)));
+
+      const countsByCounty = {};
+      let totalInTab = 0;
+      sourceList.forEach((f) => {
+        const p = f.properties;
+        if (op === "fpr_0.01" && !p.passes_fpr_0_01) return;
+        if (onlyDiag && !p.diagnostic_png) return;
+        const tabOk = (currentTab === "roman" || currentTab === "enclosure")
+          ? matchesTab(p, "unidentified")
+          : matchesTab(p, currentTab);
+        if (!tabOk) return;
+        const c = p.county || "England";
+        countsByCounty[c] = (countsByCounty[c] || 0) + 1;
+        totalInTab += 1;
+      });
+
+      const allCountiesSet = new Set(Object.keys(countsByCounty));
+      geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures).forEach((f) => {
+        if (f.properties && f.properties.county) allCountiesSet.add(f.properties.county);
+      });
+      if (curCounty) allCountiesSet.add(curCounty);
+
+      const sortedCounties = Array.from(allCountiesSet).sort((a, b) => {
+        const diff = (countsByCounty[b] || 0) - (countsByCounty[a] || 0);
+        if (diff !== 0) return diff;
+        return a.localeCompare(b);
+      });
+
+      countySel.innerHTML = `<option value="">All Counties (${totalInTab})</option>` +
+        sortedCounties.map((c) => {
+          const cnt = countsByCounty[c] || 0;
+          return `<option value="${c}" ${c === curCounty ? "selected" : ""}>${c} (${cnt})</option>`;
+        }).join("");
+    }
+
     function updateTabCounts() {
       const op = document.getElementById("opSelect").value;
       const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+      const countySel = document.getElementById("countySelect");
+      const curCounty = countySel ? countySel.value : "";
 
       const baseList = geojsonFeatures.filter((f) => {
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
+        if (curCounty && (p.county || "England") !== curCounty) return false;
         return true;
       });
 
@@ -1175,6 +1261,7 @@
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
+        if (curCounty && (p.county || "England") !== curCounty) return false;
         return true;
       });
 
@@ -1182,6 +1269,7 @@
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
+        if (curCounty && (p.county || "England") !== curCounty) return false;
         return true;
       });
 
@@ -1204,7 +1292,8 @@
       if (encEl) encEl.textContent = cEnc;
     }
 
-    function renderActiveView(autoSelectFirst = false) {
+    function renderActiveView(autoSelectFirst = false, fitToCounty = false) {
+      updateCountyDropdown();
       updateTabCounts();
       document.getElementById("tabExplainer").innerHTML = TAB_EXPLAINERS[currentTab] || "";
 
@@ -1219,6 +1308,32 @@
 
       const op = document.getElementById("opSelect").value;
       const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+      const countySel = document.getElementById("countySelect");
+      const curCounty = countySel ? countySel.value : "";
+
+      countyBoundaryLayer.clearLayers();
+      if (curCounty && countiesGeoJSON && countiesGeoJSON.features) {
+        const cFeat = countiesGeoJSON.features.find((f) => f.properties && f.properties.county === curCounty);
+        if (cFeat) {
+          const cLayer = L.geoJSON(cFeat, {
+            pane: "squaresPane",
+            style: {
+              color: "#58a6ff",
+              weight: 2.2,
+              dashArray: "6,4",
+              fillColor: "#58a6ff",
+              fillOpacity: 0.05
+            }
+          }).addTo(countyBoundaryLayer);
+          if (fitToCounty) {
+            try {
+              map.fitBounds(cLayer.getBounds(), { padding: [24, 24], maxZoom: 11 });
+            } catch (_e) {}
+          }
+        }
+      } else if (fitToCounty && !curCounty) {
+        map.setView([52.85, -1.85], 6);
+      }
 
       markersLayer.clearLayers();
       const tbody = document.getElementById("candTableBody");
@@ -1235,6 +1350,7 @@
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
+        if (curCounty && (p.county || "England") !== curCounty) return false;
         if (currentTab === "roman" || currentTab === "enclosure") {
           return matchesTab(p, "unidentified");
         }
@@ -1301,7 +1417,7 @@
         });
         marker.addTo(markersLayer);
 
-        const rowCopyText = `${p.os_grid_ref} | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
+        const rowCopyText = `${p.os_grid_ref} (${p.county || "England"}) | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
         const tr = document.createElement("tr");
         tr.className = "cand-row" + (key === selectedFeatureKey ? " selected-row" : "");
         tr.dataset.key = key;
@@ -1312,6 +1428,7 @@
               <strong>${p.os_grid_ref}</strong>
               <button class="row-copy-btn" type="button" title="Copy this row to clipboard">Copy</button>
             </div>
+            ${p.county ? `<div class="muted" style="font-size:11px;margin-top:2px;">${p.county}</div>` : ""}
           </td>
           <td>${formatClass(p.predicted_class)}</td>
           <td><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && Math.abs(p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : ""}</td>
@@ -1346,13 +1463,14 @@
 
     async function init() {
       const bust = Date.now();
-      const [sumResp, gjResp, rSumResp, rGjResp, eSumResp, eGjResp] = await Promise.all([
+      const [sumResp, gjResp, rSumResp, rGjResp, eSumResp, eGjResp, cntResp] = await Promise.all([
         fetch(`${DATA_BASE}docs/survey_summary.json?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/candidates.geojson?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/roman_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
         fetch(`${DATA_BASE}docs/roman_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
         fetch(`${DATA_BASE}docs/enclosure_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
-        fetch(`${DATA_BASE}docs/enclosure_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null)
+        fetch(`${DATA_BASE}docs/enclosure_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
+        fetch(`${DATA_BASE}docs/uk_counties.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null)
       ]);
       summaryData = await sumResp.json();
       const gj = await gjResp.json();
@@ -1371,6 +1489,15 @@
         const egj = await eGjResp.json();
         enclosureFeatures = egj.features || [];
       }
+      if (cntResp && cntResp.ok) {
+        countiesGeoJSON = await cntResp.json();
+      }
+      geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures).forEach((f) => {
+        const p = f.properties;
+        if (p && !p.county && p.lat != null && p.lon != null) {
+          p.county = resolveCountyFromGeoJSON(p.lat, p.lon);
+        }
+      });
 
       const qp = summaryData.queue_progress || {};
       const englandPct = ((qp.total_scanned_area_km2 || 0) / 130279.0 * 100).toFixed(2);
@@ -1563,6 +1690,7 @@
       });
 
       document.getElementById("opSelect").addEventListener("change", () => renderActiveView(true));
+      document.getElementById("countySelect").addEventListener("change", () => renderActiveView(true, true));
       document.getElementById("chkOnlyDiag").addEventListener("change", () => renderActiveView(true));
 
       const btnCopyAll = document.getElementById("btnCopyVisibleRows");
