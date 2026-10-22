@@ -316,6 +316,12 @@
     .mobile-panel-switcher {
       display: none;
     }
+    .mobile-only-lidar-dock {
+      display: none;
+    }
+    .desktop-only-lidar-dock {
+      display: block;
+    }
     .panel-legend {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -398,17 +404,18 @@
         font-size: 12px;
       }
       .tab-explainer {
-        font-size: 13.5px;
-        line-height: 1.45;
-        padding: 8px 10px;
-        margin-bottom: 8px;
-        max-height: 78px;
+        font-size: 13px;
+        line-height: 1.4;
+        padding: 6px 9px;
+        margin-bottom: 6px;
+        max-height: 46px;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
       .controls {
-        font-size: 13.5px;
-        gap: 8px;
+        font-size: 13px;
+        gap: 6px;
+        margin-bottom: 6px;
         width: 100%;
         max-width: 100%;
         min-width: 0;
@@ -431,21 +438,30 @@
         max-width: 100%;
         min-width: 0;
         text-overflow: ellipsis;
-        padding: 6px 8px;
+        padding: 5px 8px;
       }
       .btn-link {
         font-size: 13px;
-        padding: 6px 10px;
+        padding: 5px 9px;
       }
       .table-scroll {
         width: 100%;
         max-width: 100%;
         min-width: 0;
-        max-height: 36vh;
+        max-height: 25vh;
         overflow-x: auto;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
+      }
+      .mobile-only-lidar-dock {
+        display: block;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+      }
+      .desktop-only-lidar-dock {
+        display: none;
       }
       .table-scroll table {
         min-width: 720px;
@@ -725,6 +741,9 @@
             <tbody id="candTableBody"></tbody>
           </table>
         </div>
+
+        <!-- Mobile portrait LiDAR dock placed directly below the candidate table -->
+        <div id="tableBottomLidarDock" class="mobile-only-lidar-dock"></div>
 
         <!-- Statistical benchmark view (hidden unless tab 4 is clicked) -->
         <div id="statsContainer" class="hidden">
@@ -1032,6 +1051,7 @@
         `;
       }
 
+      const mobileDock = document.getElementById("tableBottomLidarDock");
       if (p.diagnostic_png) {
         const panelOffsetsPct = [0, -25.048, -50.096, -75.144];
         const curOff = panelOffsetsPct[activeMobilePanel] || 0;
@@ -1048,38 +1068,61 @@
           </label>
         `).join("");
 
+        const legendItemsHtml = `
+          <div data-panel-desc="0" class="${activeMobilePanel === 0 ? "active-panel-desc" : ""}">
+            <strong>Panel 1 (Left): Bare-Earth Slope</strong>
+            Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
+          </div>
+          <div data-panel-desc="1" class="${activeMobilePanel === 1 ? "active-panel-desc" : ""}">
+            <strong>Panel 2: 16 m Local Relief</strong>
+            Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
+          </div>
+          <div data-panel-desc="2" class="${activeMobilePanel === 2 ? "active-panel-desc" : ""}">
+            <strong>Panel 3: Surface Canopy (nDSM)</strong>
+            Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
+          </div>
+          <div data-panel-desc="3" class="${activeMobilePanel === 3 ? "active-panel-desc" : ""}">
+            <strong>Panel 4 (Right): Model Probability</strong>
+            Pink/red highlight shows where the neural network detects monument geometry.
+          </div>
+        `;
+
+        if (mobileDock) {
+          mobileDock.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13.5px;">
+              <div><strong>${p.os_grid_ref}</strong> · <span class="muted">${formatClass(p.predicted_class)}</span></div>
+              <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong></div>
+            </div>
+            <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
+              ${radiosHtml}
+            </div>
+            <div class="diag-viewport">
+              <img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
+            </div>
+            <div class="panel-legend" id="panelLegendBox">
+              ${legendItemsHtml}
+            </div>
+          `;
+        }
+
         html += `
-          <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
-            ${radiosHtml}
-          </div>
-          <div class="diag-viewport">
-            <img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
-          </div>
-          <div class="panel-legend" id="panelLegendBox">
-            <div data-panel-desc="0" class="${activeMobilePanel === 0 ? "active-panel-desc" : ""}">
-              <strong>Panel 1 (Left): Bare-Earth Slope</strong>
-              Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
-            </div>
-            <div data-panel-desc="1" class="${activeMobilePanel === 1 ? "active-panel-desc" : ""}">
-              <strong>Panel 2: 16 m Local Relief</strong>
-              Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
-            </div>
-            <div data-panel-desc="2" class="${activeMobilePanel === 2 ? "active-panel-desc" : ""}">
-              <strong>Panel 3: Surface Canopy (nDSM)</strong>
-              Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
-            </div>
-            <div data-panel-desc="3" class="${activeMobilePanel === 3 ? "active-panel-desc" : ""}">
-              <strong>Panel 4 (Right): Model Probability</strong>
-              Pink/red highlight shows where the neural network detects monument geometry.
+          <div class="desktop-only-lidar-dock">
+            <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
+            <div class="panel-legend">
+              ${legendItemsHtml}
             </div>
           </div>
         `;
       } else {
-        html += `
-          <div style="margin-top:10px;padding:10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:12.5px;" class="muted">
-            No 4-panel PNG was cached for this lower-ranked window in the square (the scanner saves diagnostic PNGs for the top-scoring windows per 2 km × 2 km square to keep repository size small). Use the OpenStreetMap or Aerial Satellite buttons above to inspect this location, or check "Only show sites with 4-panel LiDAR image rendered" on the left.
+        const noPngHtml = `
+          <div style="margin-top:8px;padding:8px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:13px;" class="muted">
+            No 4-panel PNG was cached for this lower-ranked window in the square. Check "Only show sites with 4-panel LiDAR image rendered" above or use the OpenStreetMap / Aerial Satellite buttons below.
           </div>
         `;
+        if (mobileDock) {
+          mobileDock.innerHTML = noPngHtml;
+        }
+        html += `<div class="desktop-only-lidar-dock">${noPngHtml}</div>`;
       }
       card.innerHTML = html;
       const switcher = document.getElementById("mobilePanelSwitcher");
@@ -1168,6 +1211,8 @@
       const isStats = currentTab === "stats";
       document.getElementById("listControls").classList.toggle("hidden", isStats);
       document.getElementById("candidateListContainer").classList.toggle("hidden", isStats);
+      const bottomDock = document.getElementById("tableBottomLidarDock");
+      if (bottomDock) bottomDock.classList.toggle("hidden", isStats);
       document.getElementById("statsContainer").classList.toggle("hidden", !isStats);
 
       if (isStats) return;
