@@ -255,11 +255,26 @@
     th.sortable.active-sort .sort-arrow {
       opacity: 1;
     }
-    tr.cand-row { cursor: pointer; }
+    tr.cand-row { cursor: pointer; user-select: text; -webkit-user-select: text; }
+    tr.cand-row td { user-select: text; -webkit-user-select: text; }
     tr.cand-row:hover { background: var(--panel-alt); }
     tr.cand-row.selected-row {
       background: rgba(255, 214, 0, 0.14);
       outline: 1px solid rgba(255, 214, 0, 0.45);
+    }
+    .row-copy-btn {
+      background: rgba(88, 166, 255, 0.12);
+      border: 1px solid rgba(88, 166, 255, 0.35);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .row-copy-btn:hover {
+      background: rgba(88, 166, 255, 0.25);
+      color: #fff;
     }
     .table-scroll {
       max-height: 420px;
@@ -429,18 +444,23 @@
         <div class="tab-explainer" id="tabExplainer"></div>
 
         <!-- Filter controls for tabs 1-3 -->
-        <div class="controls" id="listControls">
-          <label>
-            Confidence threshold:
-            <select id="opSelect">
-              <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 61.1×)</option>
-              <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 16.4×)</option>
-            </select>
-          </label>
-          <label>
-            <input type="checkbox" id="chkOnlyDiag" />
-            Only show sites with 4-panel LiDAR image rendered
-          </label>
+        <div class="controls" id="listControls" style="justify-content:space-between;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <label>
+              Confidence threshold:
+              <select id="opSelect">
+                <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 61.1×)</option>
+                <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 16.4×)</option>
+              </select>
+            </label>
+            <label>
+              <input type="checkbox" id="chkOnlyDiag" />
+              Only show sites with 4-panel LiDAR image rendered
+            </label>
+          </div>
+          <button class="btn-link" id="btnCopyVisibleRows" type="button" style="cursor:pointer;">
+            Copy Visible Table Rows
+          </button>
         </div>
 
         <!-- Candidate table (shown for tabs 1, 2, 3) -->
@@ -826,11 +846,18 @@
         marker.on("click", () => selectCandidate(p, true));
         marker.addTo(markersLayer);
 
+        const rowCopyText = `${p.os_grid_ref} | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
         const tr = document.createElement("tr");
         tr.className = "cand-row" + (key === selectedFeatureKey ? " selected-row" : "");
         tr.dataset.key = key;
+        tr.dataset.copyRow = rowCopyText;
         tr.innerHTML = `
-          <td><strong>${p.os_grid_ref}</strong></td>
+          <td style="white-space:nowrap;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+              <strong>${p.os_grid_ref}</strong>
+              <button class="row-copy-btn" type="button" title="Copy this row to clipboard">Copy</button>
+            </div>
+          </td>
           <td>${formatClass(p.predicted_class)}</td>
           <td><strong>${p.confidence.toFixed(3)}</strong></td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
@@ -838,7 +865,21 @@
           <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}</td>
           <td class="muted">${contextNote(p)}</td>
         `;
-        tr.addEventListener("click", () => selectCandidate(p, true));
+        const rowBtn = tr.querySelector(".row-copy-btn");
+        if (rowBtn && navigator.clipboard) {
+          rowBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            navigator.clipboard.writeText(rowCopyText).then(() => {
+              rowBtn.textContent = "Copied!";
+              setTimeout(() => { rowBtn.textContent = "Copy"; }, 1400);
+            });
+          });
+        }
+        tr.addEventListener("click", () => {
+          const sel = window.getSelection ? window.getSelection().toString().trim() : "";
+          if (sel.length > 0) return;
+          selectCandidate(p, true);
+        });
         tbody.appendChild(tr);
       });
 
@@ -1019,6 +1060,22 @@
 
       document.getElementById("opSelect").addEventListener("change", () => renderActiveView(true));
       document.getElementById("chkOnlyDiag").addEventListener("change", () => renderActiveView(true));
+
+      const btnCopyAll = document.getElementById("btnCopyVisibleRows");
+      if (btnCopyAll && navigator.clipboard) {
+        btnCopyAll.addEventListener("click", () => {
+          const rows = Array.from(document.querySelectorAll("#candTableBody tr.cand-row"))
+            .map((tr) => tr.dataset.copyRow || "")
+            .filter(Boolean);
+          const header = "OS Grid Ref | Predicted Form | Score | 16 m Relief | Footprint | Coordinates | Spatial Cross-Check Note";
+          const payload = [header, ...rows].join("\n");
+          navigator.clipboard.writeText(payload).then(() => {
+            const orig = btnCopyAll.textContent;
+            btnCopyAll.textContent = `Copied ${rows.length} Rows!`;
+            setTimeout(() => { btnCopyAll.textContent = orig; }, 1600);
+          });
+        });
+      }
 
       renderActiveView(true);
     }
