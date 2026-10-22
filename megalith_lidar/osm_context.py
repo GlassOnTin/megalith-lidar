@@ -611,7 +611,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif (ndsm_m >= 1.10 and slope_m >= 0.15) or (ndsm_m >= 0.55 and slope_m >= 0.085):
+        elif ndsm_m >= 0.75 or (ndsm_m >= 0.50 and slope_m >= 0.075):
             osm_conf.append(
                 {
                     "osm_id": "lidar/clamp_or_scrub",
@@ -622,7 +622,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif rel_m >= 2.20 or (slope_m >= 0.20 and rel_m >= 1.80):
+        elif rel_m >= 2.00 or (slope_m >= 0.145 and rel_m >= 1.50):
             osm_conf.append(
                 {
                     "osm_id": "lidar/reservoir_or_bund",
