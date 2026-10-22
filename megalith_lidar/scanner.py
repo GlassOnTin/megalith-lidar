@@ -110,9 +110,16 @@ def extract_candidates_from_tile(
 
         # Descriptive physical observables from raw (unstandardized) features:
         # band_fine_4m + band_med_16m = z - G_16(z) in metres
-        local_relief_16m = raw_features[0, ys, xs] + raw_features[1, ys, xs]
+        full_rel_16 = raw_features[0] + raw_features[1]
+        local_relief_16m = full_rel_16[ys, xs]
         signed_relief_m = float(local_relief_16m[np.argmax(np.abs(local_relief_16m))])
         max_pos_relief_m = float(np.max(local_relief_16m))
+        cy_i = min(h - 1, max(0, int(round(cy_px))))
+        cx_i = min(w - 1, max(0, int(round(cx_px))))
+        centroid_relief_m = float(full_rel_16[cy_i, cx_i])
+        ry0, ry1 = max(0, cy_i - 14), min(h, cy_i + 15)
+        rx0, rx1 = max(0, cx_i - 14), min(w, cx_i + 15)
+        patch_min_relief_m = float(np.min(full_rel_16[ry0:ry1, rx0:rx1]))
         grad_vals = raw_features[3, ys, xs]
         ndsm_m = float(np.expm1(np.max(raw_features[5, ys, xs])))
 
@@ -152,6 +159,8 @@ def extract_candidates_from_tile(
                 "elongation": round(elongation, 2),
                 "est_local_relief_m": round(signed_relief_m, 2),
                 "max_positive_relief_m": round(max_pos_relief_m, 2),
+                "centroid_local_relief_m": round(centroid_relief_m, 2),
+                "patch_min_relief_m": round(patch_min_relief_m, 2),
                 "est_surface_prominence_m": round(ndsm_m, 2),
                 "mean_slope_tangent": round(float(np.mean(grad_vals)), 3),
                 "has_lidar_tin_facet": has_tin_facet,

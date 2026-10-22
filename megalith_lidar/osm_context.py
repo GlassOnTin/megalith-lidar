@@ -597,6 +597,8 @@ def annotate_candidates_with_spatial_context(
         ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))
         rel_m = float(cand.get("est_local_relief_m", 0.5))
         max_pos_rel_m = float(cand.get("max_positive_relief_m", max(rel_m, 0.0)))
+        centroid_rel_m = float(cand.get("centroid_local_relief_m", rel_m))
+        patch_min_rel_m = float(cand.get("patch_min_relief_m", 0.0))
         slope_m = float(cand.get("mean_slope_tangent", 0.08))
         has_tin_facet = bool(cand.get("has_lidar_tin_facet", False))
 
@@ -628,6 +630,17 @@ def annotate_candidates_with_spatial_context(
                     "osm_id": "lidar/reservoir_or_bund",
                     "subtype": f"covered_reservoir_or_steep_bund (relief={rel_m:+.2f}m, slope={slope_m:.2f})",
                     "name": "Covered reservoir, steep embankment, or modern spoil bund",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        elif patch_min_rel_m <= -0.35 and centroid_rel_m < 0.25:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/cut_fill_bund",
+                    "subtype": f"cut_and_fill_u_bund_or_pit (bank={rel_m:+.2f}m, pit={patch_min_rel_m:+.2f}m, center={centroid_rel_m:+.2f}m)",
+                    "name": "Cut-and-fill U-bund, military gun-pit, or quarry scoop embankment",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,
