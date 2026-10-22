@@ -1,0 +1,23 @@
+# Virtual environments & caches
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Bulk local LiDAR cache & model checkpoints (symlinked to /mnt/bulk/megalith-lidar)
+data
+tiles/
+tiles_cache/
+features_cache/
+osm_cache/
+checkpoints/
+catalog/
+national_survey/
+*.pt
+*.pth
+*.npz
+*.tif
+*.tiff
