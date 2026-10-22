@@ -1,0 +1,261 @@
+{
+  "updated_at_utc": "2026-10-22T21:43:38Z",
+  "squares_scanned": 60,
+  "area_km2": 240.0,
+  "total_detections": 445,
+  "rediscovered_nhle_scheduled": 66,
+  "rediscovered_osm_archaeology": 5,
+  "unidentified_candidates": 178,
+  "unidentified_candidates_fpr_0_01": 55,
+  "heldout_test_evaluation": {
+    "n_samples": 265,
+    "n_positives": 83,
+    "n_negatives": 182,
+    "roc_auc": 0.8313,
+    "roc_auc_ci95": [
+      0.7719,
+      0.8841
+    ],
+    "pr_auc_sample_prevalence": 0.7378,
+    "pr_auc_ci95": [
+      0.6664,
+      0.8097
+    ],
+    "brier_score_uncalibrated": 0.1516,
+    "brier_score_calibrated": 0.1483,
+    "ece_uncalibrated": 0.0684,
+    "ece_calibrated": 0.0731,
+    "operating_points": {
+      "fpr_0.01": {
+        "val_selected_threshold": 0.79959,
+        "tpr_recall": 0.2651,
+        "tpr_ci95": [
+          0.1687,
+          0.3614
+        ],
+        "fpr_false_positive_rate": 0.0055,
+        "fpr_ci95": [
+          0.0,
+          0.0165
+        ],
+        "youden_j": 0.2596,
+        "likelihood_ratio_pos": 48.2,
+        "ppv_at_prior_0.01": 0.3274,
+        "ppv_at_prior_0.001": 0.046
+      },
+      "fpr_0.05": {
+        "val_selected_threshold": 0.71295,
+        "tpr_recall": 0.3976,
+        "tpr_ci95": [
+          0.2892,
+          0.506
+        ],
+        "fpr_false_positive_rate": 0.0549,
+        "fpr_ci95": [
+          0.022,
+          0.0934
+        ],
+        "youden_j": 0.3427,
+        "likelihood_ratio_pos": 7.24,
+        "ppv_at_prior_0.01": 0.0682,
+        "ppv_at_prior_0.001": 0.0072
+      },
+      "fpr_0.10": {
+        "val_selected_threshold": 0.62216,
+        "tpr_recall": 0.4699,
+        "tpr_ci95": [
+          0.3614,
+          0.5783
+        ],
+        "fpr_false_positive_rate": 0.0769,
+        "fpr_ci95": [
+          0.0385,
+          0.1209
+        ],
+        "youden_j": 0.393,
+        "likelihood_ratio_pos": 6.11,
+        "ppv_at_prior_0.01": 0.0581,
+        "ppv_at_prior_0.001": 0.0061
+      },
+      "max_youden_j": {
+        "val_selected_threshold": 0.23625,
+        "tpr_recall": 0.8313,
+        "tpr_ci95": [
+          0.7467,
+          0.9036
+        ],
+        "fpr_false_positive_rate": 0.2912,
+        "fpr_ci95": [
+          0.2308,
+          0.3571
+        ],
+        "youden_j": 0.5401,
+        "likelihood_ratio_pos": 2.85,
+        "ppv_at_prior_0.01": 0.028,
+        "ppv_at_prior_0.001": 0.0028
+      }
+    }
+  },
+  "subgroup_and_confounding_analysis": {
+    "discrimination_by_negative_null": {
+      "random_national": {
+        "n_negatives": 53,
+        "roc_auc": 0.8796,
+        "ci95": [
+          0.8162,
+          0.9332
+        ]
+      },
+      "matched_environment": {
+        "n_negatives": 51,
+        "roc_auc": 0.7665,
+        "ci95": [
+          0.6851,
+          0.8476
+        ]
+      },
+      "anthropogenic_non_enclosure": {
+        "n_negatives": 38,
+        "roc_auc": 0.8161,
+        "ci95": [
+          0.737,
+          0.8935
+        ]
+      },
+      "woodland_canopy_and_pit": {
+        "n_negatives": 20,
+        "roc_auc": 0.8054,
+        "ci95": [
+          0.6934,
+          0.8982
+        ]
+      },
+      "trackside_and_field_boundary": {
+        "n_negatives": 20,
+        "roc_auc": 0.9235,
+        "ci95": [
+          0.8662,
+          0.9699
+        ]
+      }
+    },
+    "operating_point_breakdowns": {
+      "fpr_0.01": {
+        "threshold": 0.79959,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.1538,
+          "iron_age_hillfort_banjo_enclosure": 0.4186,
+          "cross_ridge_dyke_field_system": 0.0741
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0,
+          "matched_environment": 0.0196,
+          "anthropogenic_non_enclosure": 0.0,
+          "woodland_canopy_and_pit": 0.0,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.2727
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.0769
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.3696
+          }
+        }
+      },
+      "fpr_0.05": {
+        "threshold": 0.71295,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.3077,
+          "iron_age_hillfort_banjo_enclosure": 0.5814,
+          "cross_ridge_dyke_field_system": 0.1481
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0377,
+          "matched_environment": 0.0784,
+          "anthropogenic_non_enclosure": 0.0789,
+          "woodland_canopy_and_pit": 0.05,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.4545
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.2308
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.4783
+          }
+        }
+      },
+      "fpr_0.10": {
+        "threshold": 0.62216,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.4615,
+          "iron_age_hillfort_banjo_enclosure": 0.6279,
+          "cross_ridge_dyke_field_system": 0.2222
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0377,
+          "matched_environment": 0.1373,
+          "anthropogenic_non_enclosure": 0.1053,
+          "woodland_canopy_and_pit": 0.05,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.5455
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.2308
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.587
+          }
+        }
+      },
+      "max_youden_j": {
+        "threshold": 0.23625,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.8462,
+          "iron_age_hillfort_banjo_enclosure": 0.8605,
+          "cross_ridge_dyke_field_system": 0.7778
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.1887,
+          "matched_environment": 0.3922,
+          "anthropogenic_non_enclosure": 0.3158,
+          "woodland_canopy_and_pit": 0.4,
+          "trackside_and_field_boundary": 0.15
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.8182
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.6923
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.913
+          }
+        }
+      }
+    }
+  }
+}
