@@ -2,6 +2,8 @@
 
 Scale-space terrain segmentation and calibrated national survey pipeline for recognising prehistoric earthworks and megalithic monuments in Environment Agency 1 m UK LiDAR data.
 
+Inspired by landscape archaeologist Adam Morgan Ibbotson's video on LiDAR survey in the Thornborough Henges landscape ([https://youtu.be/D_R0bgNgY2o](https://youtu.be/D_R0bgNgY2o)). This repository provides statistical terrain screening, calibrated probability maps, and open GeoJSON/LiDAR diagnostic outputs so archaeologists and Historic Environment Record (HER) researchers can inspect and interpret the results.
+
 Live out-of-sample survey map and diagnostic viewer: [https://glassontin.github.io/megalith-lidar/](https://glassontin.github.io/megalith-lidar/)
 
 ## Design and Bias Controls
