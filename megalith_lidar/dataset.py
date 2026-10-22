@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
+from scipy.ndimage import binary_dilation
 from torch.utils.data import Dataset
 
 from megalith_lidar.catalog import (
@@ -315,7 +316,7 @@ class MegalithLidarDataset(Dataset):
 
     def _load_features_and_mask(self, spec: Dict) -> Tuple[np.ndarray, np.ndarray]:
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v2_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"v3_{spec['sample_id']}.npz"
             if f_path.exists():
                 try:
                     with np.load(f_path) as d:
@@ -341,11 +342,33 @@ class MegalithLidarDataset(Dataset):
                 spec["n_max"],
                 size=dtm.shape[0],
             )
+            # Refine oversized NHLE legal-buffer polygons (> 600 m^2):
+            # Keep active local-relief earthwork pixels as the positive monument class,
+            # mark tree canopy (nDSM >= 2.5m) as background (0), and mark flat legal-buffer
+            # pasture inside the polygon as IGNORE_INDEX (255) so the segmentation head does
+            # not learn to paint 40m x 40m halos over flat farmland.
+            pos_px = mask > 0
+            if int(np.sum(pos_px)) > 600:
+                rel16 = np.abs(features[0] + features[1])
+                ndsm = np.expm1(features[5])
+                rel_th = max(0.20, float(np.percentile(rel16[pos_px], 75)))
+                earthwork = pos_px & (rel16 >= rel_th) & (ndsm < 2.5)
+                earthwork = binary_dilation(earthwork, iterations=2) & pos_px & (ndsm < 2.5)
+                if int(np.sum(earthwork)) < 36:
+                    ys, xs = np.where(pos_px)
+                    cy, cx = float(np.mean(ys)), float(np.mean(xs))
+                    yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                    core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 10.0**2) & pos_px & (ndsm < 2.5)
+                    earthwork = earthwork | core
+                refined = np.zeros_like(mask, dtype=np.uint8)
+                refined[pos_px & (~earthwork) & (ndsm < 2.5)] = 255
+                refined[earthwork] = mask[earthwork]
+                mask = refined
         else:
             mask = np.zeros(dtm.shape, dtype=np.uint8)
 
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v2_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"v3_{spec['sample_id']}.npz"
             np.savez_compressed(f_path, features=features.astype(np.float16), mask=mask)
         return features, mask
 
@@ -358,7 +381,7 @@ class MegalithLidarDataset(Dataset):
 
         # Measure physical local relief SNR (95th percentile of |band_fine + band_med| inside polygon)
         # before augmentation for stratified evaluation
-        pos_px = mask > 0
+        pos_px = (mask > 0) & (mask < 255)
         if np.any(pos_px):
             raw_local_relief = np.abs(
                 features[0, pos_px] * self.channel_std[0, 0, 0] + features[1, pos_px] * self.channel_std[1, 0, 0]

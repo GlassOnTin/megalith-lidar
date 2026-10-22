@@ -161,6 +161,7 @@ def test_model_forward_and_loss():
     criterion = MegalithLoss()
     target_mask = torch.zeros(2, 256, 256, dtype=torch.long)
     target_mask[0, 100:130, 100:130] = CLASS_MEGALITHIC_TOMB_LONG_BARROW
+    target_mask[0, 80:100, 80:100] = 255  # IGNORE_INDEX legal-buffer pixels
     target_tile = torch.tensor([1.0, 0.0])
     target_type = torch.tensor([CLASS_MEGALITHIC_TOMB_LONG_BARROW, 0], dtype=torch.long)
 
@@ -175,6 +176,9 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
     assert classify_osm_tags({"building": "temple", "historic": "monument", "name": "Temple of Venus"})[0] == "osm_confounder"
     assert classify_osm_tags({"natural": "sinkhole"})[0] == "osm_confounder"
     assert classify_osm_tags({"landuse": "quarry", "abandoned": "yes"})[0] == "osm_confounder"
+    assert classify_osm_tags({"power": "pole"})[0] == "osm_confounder"
+    assert classify_osm_tags({"barrier": "hedge"})[0] == "osm_confounder"
+    assert classify_osm_tags({"highway": "track"})[0] == "osm_confounder"
 
     lat_cairn, lon_cairn = bng_to_latlon(348860.0, 522420.0)
     lat_sink, lon_sink = bng_to_latlon(348897.0, 522085.0)
@@ -190,6 +194,21 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
         {"easting": 348898.0, "northing": 522084.0, "confidence": 0.8765, "is_known_monument": False},
         {"easting": 349500.0, "northing": 522900.0, "confidence": 0.8456, "is_known_monument": False},
         {"easting": 348768.0, "northing": 522384.0, "confidence": 0.9650, "is_known_monument": True},
+        {
+            "easting": 349600.0,
+            "northing": 522900.0,
+            "confidence": 0.8200,
+            "est_surface_prominence_m": 12.5,
+            "is_known_monument": False,
+        },
+        {
+            "easting": 349700.0,
+            "northing": 522900.0,
+            "confidence": 0.8100,
+            "est_local_relief_m": -1.15,
+            "max_positive_relief_m": 0.08,
+            "is_known_monument": False,
+        },
     ]
     annotate_candidates_with_spatial_context(cands, idx)
 
@@ -201,4 +220,6 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
     assert cands[2]["confidence"] == 0.8456
     assert cands[3]["context_category"] == "rediscovered_nhle_scheduled"
     assert cands[3]["confidence"] == 0.9650
+    assert cands[4]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert cands[5]["context_category"] == "flagged_modern_or_karst_confounder"
 

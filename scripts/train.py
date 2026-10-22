@@ -3,14 +3,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
+import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader
 
@@ -28,6 +30,37 @@ from megalith_lidar.stats import (
     evaluate_predictions_statistically,
     select_validation_thresholds,
 )
+from megalith_lidar.terrain_features import compute_terrain_features
+
+NEGATIVE_SUBTYPES = (
+    "random_national",
+    "matched_environment",
+    "anthropogenic_non_target",
+    "woodland_canopy_and_pit",
+    "trackside_and_field_boundary",
+)
+
+
+def _classify_hard_negative_tile(dtm: np.ndarray, dsm: np.ndarray) -> Optional[str]:
+    """
+    Classify a monument-free 256x256 tile into a targeted hard-negative confounder category:
+      - 'woodland_canopy_and_pit': tree canopy (>=20% nDSM > 2.5m) with sub-canopy relief, or deep marl/chalk pit.
+      - 'trackside_and_field_boundary': open agricultural land with hedgerow/fence/trackside boundary relief bumps.
+    """
+    if dtm.shape != (256, 256) or dsm.shape != (256, 256):
+        return None
+    ndsm = np.maximum(dsm - dtm, 0.0)
+    feats = compute_terrain_features(dtm, dsm)
+    rel16 = feats[0] + feats[1]
+    canopy_frac = float(np.mean(ndsm > 2.5))
+    hedge_frac = float(np.mean((ndsm > 0.8) & (ndsm <= 3.5)))
+    p995_rel = float(np.percentile(np.abs(rel16), 99.5))
+    p005_rel = float(np.percentile(rel16, 0.5))
+    if (canopy_frac >= 0.20 and p995_rel >= 0.28) or p005_rel <= -0.95:
+        return "woodland_canopy_and_pit"
+    if canopy_frac < 0.20 and hedge_frac >= 0.008 and p995_rel >= 0.25:
+        return "trackside_and_field_boundary"
+    return None
 
 
 def upgrade_manifest_with_unbiased_nulls(
@@ -44,10 +77,14 @@ def upgrade_manifest_with_unbiased_nulls(
          honestly as `'matched_environment'` and `non_megalithic_earthwork` as `'anthropogenic_non_target'`.
       3. Sample and download `target_random_national` Uniform National Random land negatives across all
          unique 20km x 20km land blocks of England (1 weight per block, independent of monument density).
+      4. Ensure split-balanced hard negative confounder categories ('woodland_canopy_and_pit' and
+         'trackside_and_field_boundary', 120 train / 20 val / 20 test each, preserving the exact 6:1:1
+         SHA-256 block split prevalence ratio).
     """
     raw = json.loads(manifest_path.read_text(encoding="utf-8"))
     updated: List[Dict] = []
     has_random_national = 0
+    existing_hard_counts: Dict[Tuple[str, str], int] = Counter()
 
     for item in raw:
         ce = (int(item["e_min"]) + int(item["e_max"])) // 2
@@ -68,6 +105,8 @@ def upgrade_manifest_with_unbiased_nulls(
                 item["negative_subtype"] = "anthropogenic_non_target"
             elif sub == "random_national":
                 has_random_national += 1
+            elif sub in ("woodland_canopy_and_pit", "trackside_and_field_boundary"):
+                existing_hard_counts[(sub, item["split"])] += 1
             updated.append(item)
 
     needed = max(0, target_random_national - has_random_national)
@@ -116,6 +155,122 @@ def upgrade_manifest_with_unbiased_nulls(
                     added.append(r)
         added.sort(key=lambda x: x["sample_id"])
         updated.extend(added[:needed])
+
+    # 4. Mine split-balanced hard negative confounders ('woodland_canopy_and_pit', 'trackside_and_field_boundary')
+    target_per_split = {"train": 120, "val": 20, "test": 20}
+    subtypes_to_mine = ("woodland_canopy_and_pit", "trackside_and_field_boundary")
+    missing_quotas: Dict[Tuple[str, str], int] = {}
+    for st in subtypes_to_mine:
+        for sp, targ in target_per_split.items():
+            rem = max(0, targ - existing_hard_counts[(st, sp)])
+            if rem > 0:
+                missing_quotas[(st, sp)] = rem
+
+    if missing_quotas:
+        print(f"      Mining hard-negative confounder tiles for quotas: {missing_quotas}...")
+        used_bboxes = {(int(m["e_min"]), int(m["e_max"]), int(m["n_min"]), int(m["n_max"])) for m in updated}
+        pat = re.compile(r"tile_E(\d+)_(\d+)_N(\d+)_(\d+)\.npz$")
+        disk_pool_by_split: Dict[str, List[Tuple[int, int, int, int]]] = {"train": [], "val": [], "test": []}
+        for p in tile_cache_dir.rglob("tile_E*.npz"):
+            m = pat.match(p.name)
+            if not m:
+                continue
+            e0, e1, n0, n1 = map(int, m.groups())
+            if e1 - e0 != 256 or n1 - n0 != 256 or (e0, e1, n0, n1) in used_bboxes:
+                continue
+            if catalog.query_bbox(e0 - 80, n0 - 80, e1 + 80, n1 + 80):
+                continue
+            sp = assign_spatial_split((e0 + e1) // 2, (n0 + n1) // 2)
+            disk_pool_by_split[sp].append((e0, e1, n0, n1))
+
+        rng_h = np.random.default_rng(seed + 77)
+        for sp in ("train", "val", "test"):
+            disk_pool_by_split[sp].sort()
+            rng_h.shuffle(disk_pool_by_split[sp])
+            for e0, e1, n0, n1 in disk_pool_by_split[sp]:
+                if all(missing_quotas.get((st, sp), 0) <= 0 for st in subtypes_to_mine):
+                    break
+                pair = fetch_or_load_paired_tile(e0, e1, n0, n1, tile_cache_dir)
+                if pair is None:
+                    continue
+                st = _classify_hard_negative_tile(pair[0], pair[1])
+                if st in subtypes_to_mine and missing_quotas.get((st, sp), 0) > 0:
+                    ce, cn = (e0 + e1) // 2, (n0 + n1) // 2
+                    updated.append(
+                        {
+                            "sample_id": f"neg_{st[:8]}_E{ce}_N{cn}",
+                            "list_entry": 0,
+                            "name": f"Hard negative confounder ({st})",
+                            "primary_class": CLASS_BACKGROUND,
+                            "is_positive": False,
+                            "negative_subtype": st,
+                            "e_min": e0,
+                            "e_max": e1,
+                            "n_min": n0,
+                            "n_max": n1,
+                            "split": sp,
+                        }
+                    )
+                    used_bboxes.add((e0, e1, n0, n1))
+                    missing_quotas[(st, sp)] -= 1
+
+        # Top up any remaining train/val quotas via WCS sampling inside train/val 20km blocks
+        for sp in ("train", "val", "test"):
+            if all(missing_quotas.get((st, sp), 0) <= 0 for st in subtypes_to_mine):
+                continue
+            sp_blocks = sorted(
+                {
+                    (int(r.easting // 20000), int(r.northing // 20000))
+                    for r in catalog.records
+                    if assign_spatial_split(int(r.easting // 20000) * 20000 + 10000, int(r.northing // 20000) * 20000 + 10000) == sp
+                }
+            )
+            wcs_coords = []
+            need_total = sum(max(0, missing_quotas.get((st, sp), 0)) for st in subtypes_to_mine)
+            attempts = 0
+            while len(wcs_coords) < need_total * 4 and attempts < need_total * 20:
+                attempts += 1
+                bx, by = sp_blocks[int(rng_h.integers(0, len(sp_blocks)))]
+                ce = int(bx * 20000 + rng_h.integers(1000, 19000))
+                cn = int(by * 20000 + rng_h.integers(1000, 19000))
+                e0, e1, n0, n1 = ce - 128, ce + 128, cn - 128, cn + 128
+                if (e0, e1, n0, n1) not in used_bboxes and not catalog.query_bbox(e0 - 80, n0 - 80, e1 + 80, n1 + 80):
+                    wcs_coords.append((e0, e1, n0, n1))
+                    used_bboxes.add((e0, e1, n0, n1))
+
+            def _fetch_and_classify(coord: Tuple[int, int, int, int]):
+                e0, e1, n0, n1 = coord
+                pair = fetch_or_load_paired_tile(e0, e1, n0, n1, tile_cache_dir)
+                if pair is None:
+                    return None
+                st = _classify_hard_negative_tile(pair[0], pair[1])
+                if st is None:
+                    return None
+                return (st, e0, e1, n0, n1)
+
+            with ThreadPoolExecutor(max_workers=10) as pool:
+                for res in pool.map(_fetch_and_classify, wcs_coords):
+                    if res is None:
+                        continue
+                    st, e0, e1, n0, n1 = res
+                    if missing_quotas.get((st, sp), 0) > 0:
+                        ce, cn = (e0 + e1) // 2, (n0 + n1) // 2
+                        updated.append(
+                            {
+                                "sample_id": f"neg_{st[:8]}_E{ce}_N{cn}",
+                                "list_entry": 0,
+                                "name": f"Hard negative confounder ({st})",
+                                "primary_class": CLASS_BACKGROUND,
+                                "is_positive": False,
+                                "negative_subtype": st,
+                                "e_min": e0,
+                                "e_max": e1,
+                                "n_min": n0,
+                                "n_max": n1,
+                                "split": sp,
+                            }
+                        )
+                        missing_quotas[(st, sp)] -= 1
 
     updated.sort(key=lambda x: x["sample_id"])
     manifest_path.write_text(json.dumps(updated, indent=2), encoding="utf-8")
@@ -179,10 +334,11 @@ def collect_split_predictions(
         n_batches += 1
 
         seg_probs = torch.sigmoid(seg_logit)
-        bin_mask = (mask > 0).float()
+        valid_px = (mask != 255).float()
+        bin_mask = ((mask > 0) & (mask != 255)).float()
         pos_mask = tile_label > 0.5
         if torch.any(pos_mask):
-            pred_bin = (seg_probs[pos_mask] >= 0.5).float()
+            pred_bin = (seg_probs[pos_mask] >= 0.5).float() * valid_px[pos_mask]
             gt_bin = bin_mask[pos_mask]
             pos_pixel_inter += float((pred_bin * gt_bin).sum().item())
             pos_pixel_union += float((pred_bin.sum() + gt_bin.sum()).item())
@@ -252,7 +408,7 @@ def compute_detailed_subgroup_analysis(
 
     # 1. Sub-null ROC-AUC (testing environmental & anthropogenic confounding)
     null_roc_aucs = {}
-    for subtype in ("random_national", "matched_environment", "anthropogenic_non_target"):
+    for subtype in NEGATIVE_SUBTYPES:
         neg_sub_mask = np.array(
             [not manifest_by_id[sid]["is_positive"] and manifest_by_id[sid].get("negative_subtype") == subtype for sid in sids]
         )
@@ -283,7 +439,7 @@ def compute_detailed_subgroup_analysis(
                 cls_tpr[CLASS_NAMES[cls_id]] = round(float(np.mean(pred_pos[cm])), 4)
 
         neg_fpr = {}
-        for subtype in ("random_national", "matched_environment", "anthropogenic_non_target"):
+        for subtype in NEGATIVE_SUBTYPES:
             nm = np.array(
                 [not manifest_by_id[sid]["is_positive"] and manifest_by_id[sid].get("negative_subtype") == subtype for sid in sids]
             )
@@ -372,9 +528,9 @@ def main() -> None:
     print("      Train channel mean:", np.round(ch_mean, 4).tolist())
     print("      Train channel std :", np.round(ch_std, 4).tolist())
 
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory=True, drop_last=True)
-    val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory=True)
-    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory=True)
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
+    val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     # Compute exact class balance weight on train split so effective prior P(Y=1) = 0.50 during training
     n_pos_train = sum(1 for m in train_specs if m["is_positive"])

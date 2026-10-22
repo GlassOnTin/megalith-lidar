@@ -385,8 +385,8 @@
         <span>Selecting a site zooms the map to its British National Grid coordinates and displays its 4-panel 1 m LiDAR elevation breakdown on the right, with a direct link to inspect it on OpenStreetMap.</span>
       </div>
       <div class="guide-step">
-        <strong>3. Switch Tabs for Known Sites or Model Statistics</strong>
-        <span>Use the tabs above the list if you want to see already-known Scheduled Monuments rediscovered during blind testing, modern quarries/sinkholes filtered out via OpenStreetMap, or ROC-AUC statistical benchmarks.</span>
+        <strong>3. Check the National Coverage Map (Right Panel)</strong>
+        <span><strong>Important:</strong> This is a statistically sampled survey, <em>not</em> a full wall-to-wall scan of Britain. The national map shows the exact <strong>2 km × 2 km sample squares</strong> (<span id="guideAreaSpan">408 km²</span>, ~0.31% of England) scanned so far; blank areas of the country have not yet been processed.</span>
       </div>
     </div>
   </div>
@@ -428,8 +428,8 @@
           <label>
             Confidence threshold:
             <select id="opSelect">
-              <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 47.2×)</option>
-              <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 15.5×)</option>
+              <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 61.1×)</option>
+              <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 16.4×)</option>
             </select>
           </label>
           <label>
@@ -512,8 +512,24 @@
 
       <div class="card">
         <div class="card-header">
-          <h2>Interactive UK Survey Map (Showing Current Tab &amp; Threshold)</h2>
-          <div class="sub muted">Dashed circles = scanned 2 km × 2 km squares · Solid dots = detections in active tab</div>
+          <h2>National Survey Coverage Map — Regions Scanned So Far</h2>
+          <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Zoom Out to Full England Overview</button>
+        </div>
+        <div style="background:rgba(255, 214, 0, 0.08);border:1px solid rgba(255, 214, 0, 0.35);border-radius:4px;padding:8px 10px;margin-bottom:8px;font-size:12.5px;">
+          <strong>Coverage Note:</strong> Only the marked <strong>2 km × 2 km sample squares</strong> (<span id="mapCoverageSummary">102 squares = 408.0 km², or 0.31% of England</span>) have been scanned so far. Any region outside these boxes has <strong>not</strong> yet been evaluated by the model.
+        </div>
+        <div class="controls" style="margin-bottom:8px;justify-content:space-between;">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <label>
+              <input type="checkbox" id="chkShowScannedSquares" checked />
+              Show scanned 2 km × 2 km squares
+            </label>
+            <span class="muted" style="font-size:12px;">
+              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Held-Out Monument Landscape Square ·
+              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Uniform National Null Square ·
+              <span class="dot" style="background:var(--gold);"></span> Detection in Active Tab
+            </span>
+          </div>
         </div>
         <div id="map"></div>
       </div>
@@ -797,8 +813,17 @@
       geojsonFeatures = gj.features || [];
 
       const qp = summaryData.queue_progress || {};
+      const englandPct = ((qp.total_scanned_area_km2 || 0) / 130279.0 * 100).toFixed(2);
       document.getElementById("surveyProgressBadge").textContent =
-        `${qp.completed_squares} squares scanned (${qp.total_scanned_area_km2} km²) · Updated ${summaryData.updated_at_utc}`;
+        `${qp.completed_squares} squares scanned (${qp.total_scanned_area_km2} km², ${englandPct}% of England) · Updated ${summaryData.updated_at_utc}`;
+      const covEl = document.getElementById("mapCoverageSummary");
+      if (covEl) {
+        covEl.textContent = `${qp.completed_squares} squares = ${qp.total_scanned_area_km2} km² (${englandPct}% of England's 130,279 km²; ${qp.pending_squares} test squares remaining in queue)`;
+      }
+      const guideAreaEl = document.getElementById("guideAreaSpan");
+      if (guideAreaEl) {
+        guideAreaEl.textContent = `${qp.total_scanned_area_km2} km² across ${qp.completed_squares} squares`;
+      }
 
       const tm = summaryData.heldout_test_evaluation || {};
       const base = summaryData.scalar_baseline_test || {};
@@ -838,7 +863,9 @@
       const nullLabels = {
         random_national: "Uniform National Null (random England 20 km land blocks)",
         matched_environment: "Matched-Environment Null (400–1600 m from monuments)",
-        anthropogenic_non_target: "Anthropogenic Non-Target Null (medieval/industrial earthworks)"
+        anthropogenic_non_target: "Anthropogenic Non-Target Null (medieval/industrial earthworks)",
+        woodland_canopy_and_pit: "Woodland Canopy & Marl/Chalk Pit Hard Negatives",
+        trackside_and_field_boundary: "Trackside & Agricultural Field-Boundary Hard Negatives"
       };
       const nullBody = document.getElementById("nullTableBody");
       Object.keys(nullLabels).forEach((k) => {
@@ -878,18 +905,34 @@
         streamBody.appendChild(tr);
       });
 
-      (summaryData.scanned_squares || []).forEach((sq) => {
-        const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
-        const c = L.circleMarker([sq.center_lat, sq.center_lon], {
-          radius: 10,
-          color: color,
-          weight: 1.2,
-          dashArray: "3,3",
-          fillOpacity: 0.05
-        }).bindTooltip(
-          `Scanned 2 km × 2 km square: ${sq.os_grid_ref}<br/>Stream: ${sq.sampling_stream}<br/>NHLE: ${sq.rediscovered_nhle_scheduled_count}, Confounders: ${sq.flagged_modern_or_karst_confounders_count}, Unidentified: ${sq.unidentified_candidates_count}`
-        );
-        c.addTo(squaresLayer);
+      function renderScannedSquares() {
+        squaresLayer.clearLayers();
+        if (!document.getElementById("chkShowScannedSquares").checked) return;
+        (summaryData.scanned_squares || []).forEach((sq) => {
+          const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
+          const tip = `<strong>Scanned 2 km × 2 km Square: ${sq.os_grid_ref}</strong><br/>Stream: ${sq.sampling_stream}<br/>Rediscovered NHLE: ${sq.rediscovered_nhle_scheduled_count} · Filtered Confounders: ${sq.flagged_modern_or_karst_confounders_count}<br/>Unidentified Candidates: ${sq.unidentified_candidates_count} (${sq.unidentified_candidates_fpr_0_01_count || 0} @ Strict 1% FPR)`;
+          if (sq.bounds_latlon && sq.bounds_latlon.length === 2) {
+            L.rectangle(sq.bounds_latlon, {
+              color: color,
+              weight: 2,
+              fillColor: color,
+              fillOpacity: 0.18
+            }).bindTooltip(tip).addTo(squaresLayer);
+          }
+          L.circleMarker([sq.center_lat, sq.center_lon], {
+            radius: 6,
+            color: color,
+            weight: 1.5,
+            dashArray: "3,2",
+            fillColor: color,
+            fillOpacity: 0.15
+          }).bindTooltip(tip).addTo(squaresLayer);
+        });
+      }
+      renderScannedSquares();
+      document.getElementById("chkShowScannedSquares").addEventListener("change", renderScannedSquares);
+      document.getElementById("btnResetNationalView").addEventListener("click", () => {
+        map.setView([52.85, -1.85], 6);
       });
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import torch
 from PIL import Image, ImageDraw
-from scipy.ndimage import gaussian_filter, label
+from scipy.ndimage import gaussian_filter, label, uniform_filter
 
 from megalith_lidar.catalog import (
     CLASS_NAMES,
@@ -64,6 +64,11 @@ def extract_candidates_from_tile(
     if num_comp == 0:
         return []
 
+    slope_arr = raw_features[3]
+    slope_mean = uniform_filter(slope_arr, size=9)
+    slope_std = np.sqrt(np.maximum(uniform_filter(slope_arr * slope_arr, size=9) - slope_mean * slope_mean, 0.0))
+    tile_tin_px = int(np.sum((slope_arr > 0.03) & (slope_std < 0.0022)))
+
     candidates: List[Dict] = []
     for comp_id in range(1, num_comp + 1):
         ys, xs = np.where(labeled == comp_id)
@@ -107,8 +112,14 @@ def extract_candidates_from_tile(
         # band_fine_4m + band_med_16m = z - G_16(z) in metres
         local_relief_16m = raw_features[0, ys, xs] + raw_features[1, ys, xs]
         signed_relief_m = float(local_relief_16m[np.argmax(np.abs(local_relief_16m))])
+        max_pos_relief_m = float(np.max(local_relief_16m))
         grad_vals = raw_features[3, ys, xs]
         ndsm_m = float(np.expm1(np.max(raw_features[5, ys, xs])))
+
+        py0, py1 = max(0, int(cy_px) - 48), min(h, int(cy_px) + 48)
+        px0, px1 = max(0, int(cx_px) - 48), min(w, int(cx_px) + 48)
+        patch_tin_px = int(np.sum(slope_std[py0:py1, px0:px1] < 0.0018))
+        has_tin_facet = bool(tile_tin_px >= 6000 or patch_tin_px >= 120)
 
         nearby = catalog.find_nearby(easting, northing, max_distance_m=known_match_radius_m)
         is_known = len(nearby) > 0
@@ -140,8 +151,10 @@ def extract_candidates_from_tile(
                 "area_m2": round(area_m2, 1),
                 "elongation": round(elongation, 2),
                 "est_local_relief_m": round(signed_relief_m, 2),
+                "max_positive_relief_m": round(max_pos_relief_m, 2),
                 "est_surface_prominence_m": round(ndsm_m, 2),
                 "mean_slope_tangent": round(float(np.mean(grad_vals)), 3),
+                "has_lidar_tin_facet": has_tin_facet,
                 "is_known_monument": is_known,
                 "matched_monument": matched_info,
             }

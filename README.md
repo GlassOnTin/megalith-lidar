@@ -19,46 +19,56 @@ Remote-sensing models for archaeology fail when they overfit to regional elevati
    - Log-compressed above-ground surface prominence (`log(1 + max(0, DSM - DTM))`).
    Unit tests in `tests/test_pipeline.py` verify altitude shift invariance and exact equivariance under the 8-element dihedral group D₄ (rotations by 0°, 90°, 180°, 270° and reflections).
 
-2. Exact polygon supervision (`megalith_lidar/catalog.py`): Ground-truth masks are rasterised directly from the 20,003 Historic England National Heritage List for England (NHLE Layer 6) Scheduled Monument polygons in British National Grid (`EPSG:27700`) at 1 m resolution, with no synthetic circular radius inflation. Monument titles are categorised into three target morphological classes (`megalithic_tomb_long_barrow`, `stone_circle_henge_alignment`, `round_barrow_cairn`) and a non-target class (`other_scheduled_monument`) using generic morphological terms.
+2. Exact polygon supervision with legal-buffer refinement (`megalith_lidar/catalog.py`, `megalith_lidar/dataset.py`): Ground-truth masks are rasterised directly from the 20,003 Historic England National Heritage List for England (NHLE Layer 6) Scheduled Monument polygons in British National Grid (`EPSG:27700`) at 1 m resolution. On large legal scheduling polygons (`> 600 m²`), active local-relief earthworks (`|z - G_16(z)|` above the 75th polygon percentile or `0.20 m`, with `nDSM < 2.5 m`) are retained as positive pixels while flat surrounding pasture inside the scheduling boundary is masked with `IGNORE_INDEX = 255` and tall woodland canopy (`nDSM >= 2.5 m`) is labelled background (`0`).
 
 3. Hash-based 20 km spatial block split (`megalith_lidar/dataset.py`): Every 256 m × 256 m tile is assigned to `train` (75%), `val` (12.5%), or `test` (12.5%) purely from the SHA-256 digest of its 20 km × 20 km British National Grid block coordinates `(E // 20000, N // 20000)`. No manual overrides or pinned blocks exist. Positive tiles receive a deterministic uniform spatial offset in `[-56 m, +56 m]` so the network cannot learn a centre-of-tile prior.
 
-4. Three negative null distributions (`megalith_lidar/dataset.py`): To test whether the model separates prehistoric monuments from background terrain rather than upland roughness, negatives are drawn from three explicit distributions:
-   - `random_national` (`n = 420`): Sampled uniformly across all land-bearing 20 km × 20 km blocks of England (1 weight per block, independent of monument density), at least 500 m from any Scheduled Monument.
+4. Five negative null distributions (`megalith_lidar/dataset.py`, `scripts/train.py`): To test whether the model separates prehistoric monuments from background terrain and modern rural confounders, negatives (`n = 1,347` tiles) are drawn from five explicit distributions:
+   - `random_national` (`n = 420`): Sampled uniformly across all land-bearing 20 km × 20 km blocks of England (1 weight per block, independent of monument density), outside all Scheduled Monuments.
    - `matched_environment` (`n = 419`): Sampled inside the same 20 km × 20 km blocks as positive monuments (`400 m` to `1,600 m` away, outside all Scheduled Monuments), matching local geology, slope, and LiDAR flight characteristics.
    - `anthropogenic_non_target` (`n = 216`): Non-prehistoric earthworks and structures (medieval priories, industrial spoil heaps, World War II batteries, post-medieval quarries).
+   - `woodland_canopy_and_pit` (`n = 160`): Monument-free woodland canopy (`>= 20%` `nDSM > 2.5 m`) and sunken marl/chalk/quarry pits (`0.5th` percentile `16 m` relief `<= -0.95 m`).
+   - `trackside_and_field_boundary` (`n = 132`): Open agricultural land with hedgerow, trackside, and field-corner boundary relief bumps.
 
-5. Validation-only Platt calibration and threshold locking (`megalith_lidar/stats.py`): Logistic Platt scaling (`P(y=1|s) = σ(a·s + b)`) and operating thresholds (`1%`, `5%`, and `10%` false positive rate, plus Youden's `J`) are fitted exclusively on the validation split (`n = 353` tiles) and evaluated once on the held-out test split (`n = 263` tiles) with 8-way D₄ test-time augmentation.
+5. Validation-only Platt calibration and threshold locking (`megalith_lidar/stats.py`): Logistic Platt scaling (`P(y=1|s) = σ(a·s + b)`) and operating thresholds (`1%`, `5%`, and `10%` false positive rate, plus Youden's `J`) are fitted exclusively on the validation split (`n = 386` tiles) and evaluated once on the held-out test split (`n = 303` tiles) with 8-way D₄ test-time augmentation.
 
-6. Unaltered model probabilities and OpenStreetMap spatial cross-check (`megalith_lidar/scanner.py`, `megalith_lidar/osm_context.py`): Connected components are extracted directly from the calibrated probability map without heuristic topographic bonuses. Each candidate is then cross-checked against NHLE Layer 6 polygons and the OpenStreetMap v0.6 API (`https://api.openstreetmap.org/api/0.6/map.json`) and labelled as one of four categories without mutating its probability score:
+6. Unaltered model probabilities and OpenStreetMap + intrinsic LiDAR confounder cross-check (`megalith_lidar/scanner.py`, `megalith_lidar/osm_context.py`): Connected components are extracted directly from the calibrated probability map without heuristic topographic bonuses. Each candidate is then cross-checked against NHLE Layer 6 polygons, the OpenStreetMap v0.6 API (`https://api.openstreetmap.org/api/0.6/map.json`), and intrinsic 1 m LiDAR observables (tall canopy `nDSM >= 2.8 m`, steep silage/manure clamps `nDSM >= 1.1 m` with `slope >= 0.18`, sunken pits `relief < -0.15 m`, or interpolated TIN voids) and labelled as one of four categories without mutating its probability score:
    - `rediscovered_nhle_scheduled` (within 45 m of a Scheduled Monument polygon)
    - `rediscovered_osm_archaeology` (within 45 m of an unscheduled OSM `man_made=cairn`, `historic=megalith|archaeological_site|tumulus|barrow`, or `megalith_type=*`)
-   - `flagged_modern_or_karst_confounder` (inside or within 40 m of a mapped quarry, sinkhole, embankment, covered reservoir, golf feature, landscaped park building/folly, or railway earthwork)
-   - `unidentified_candidate` (outside NHLE Scheduled Monuments, outside OSM recorded archaeology, and outside mapped OSM confounders)
+   - `flagged_modern_or_karst_confounder` (inside or within feature-specific radii of mapped quarries, sinkholes, farmyards, tracks/roads, hedges/fences, power poles, woodlands, military ranges, or steep surface clamps/pits)
+   - `unidentified_candidate` (outside NHLE Scheduled Monuments, outside OSM recorded archaeology, and outside mapped/intrinsic confounders)
 
 ## Held-Out Test Split Evaluation
 
-Evaluated on `n = 263` held-out test tiles (`143` positives, `120` negatives across non-overlapping 20 km × 20 km BNG blocks) using 1,000 stratified bootstrap resamples for 95% confidence intervals (`checkpoints/evaluation_metrics_v2_unbiased.json`):
+Evaluated on `n = 303` held-out test tiles (`143` positives, `160` negatives across non-overlapping 20 km × 20 km BNG blocks) using 1,000 stratified bootstrap resamples for 95% confidence intervals (`checkpoints/evaluation_metrics_v2_unbiased.json`):
 
 | Metric / Negative Null Comparison | Estimate | 95% Bootstrap CI | Sample Size |
 | :--- | :---: | :---: | :---: |
-| Overall Test ROC-AUC (all nulls combined) | `0.8393` | `[0.7909, 0.8821]` | `143 pos vs 120 neg` |
-| Overall Test PR-AUC | `0.8902` | `[0.8572, 0.9216]` | `143 pos vs 120 neg` |
-| Scalar local-relief baseline ROC-AUC | `0.5506` | `[0.4832, 0.6210]` | `143 pos vs 120 neg` |
-| Positives vs `random_national` null ROC-AUC | `0.8745` | `[0.8220, 0.9203]` | `143 pos vs 53 neg` |
-| Positives vs `matched_environment` null ROC-AUC | `0.8156` | `[0.7532, 0.8714]` | `143 pos vs 51 neg` |
-| Positives vs `anthropogenic_non_target` null ROC-AUC | `0.7987` | `[0.6984, 0.8864]` | `143 pos vs 16 neg` |
-| Calibration Brier score (test split) | `0.1590` | — | `n = 263` |
-| Expected Calibration Error (ECE, 10 bins) | `0.0799` | — | `n = 263` |
+| Overall Test ROC-AUC (all 5 nulls combined) | `0.8675` | `[0.8248, 0.9070]` | `143 pos vs 160 neg` |
+| Overall Test PR-AUC | `0.8623` | `[0.8180, 0.9042]` | `143 pos vs 160 neg` |
+| Scalar local-relief baseline ROC-AUC | `0.5329` | `[0.4696, 0.5988]` | `143 pos vs 160 neg` |
+| Positives vs `random_national` null ROC-AUC | `0.8976` | `[0.8527, 0.9379]` | `143 pos vs 53 neg` |
+| Positives vs `trackside_and_field_boundary` null ROC-AUC | `0.8899` | `[0.8140, 0.9479]` | `143 pos vs 20 neg` |
+| Positives vs `woodland_canopy_and_pit` null ROC-AUC | `0.8836` | `[0.8220, 0.9360]` | `143 pos vs 20 neg` |
+| Positives vs `anthropogenic_non_target` null ROC-AUC | `0.8459` | `[0.7432, 0.9266]` | `143 pos vs 16 neg` |
+| Positives vs `matched_environment` null ROC-AUC | `0.8280` | `[0.7660, 0.8795]` | `143 pos vs 51 neg` |
+| Calibration Brier score (test split) | `0.1412` | — | `n = 303` |
+| Expected Calibration Error (ECE, 10 bins) | `0.0525` | — | `n = 303` |
 
 ### Out-of-Sample Operating Points (Locked on Validation Split)
 
-| Validation Target | Locked Tile Threshold | Test TPR (Recall) | Test Overall FPR | FPR on `random_national` | FPR on `matched_env` | FPR on `anthropogenic` | Positive Likelihood Ratio (`LR+`) | Prior-Adjusted PPV (`π = 10⁻³`) | Prior-Adjusted PPV (`π = 10⁻²`) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `fpr_0.01` | `0.9428` | `39.16%` | `0.83%` | `0.00%` | `0.00%` | `6.25%` | `47.18×` | `4.51%` | `32.28%` |
-| `fpr_0.05` | `0.8343` | `51.75%` | `3.33%` | `3.77%` | `1.96%` | `6.25%` | `15.54×` | `1.53%` | `13.57%` |
-| `fpr_0.10` | `0.6593` | `62.24%` | `5.83%` | `3.77%` | `3.92%` | `18.75%` | `10.68×` | `1.06%` | `9.73%` |
-| `max_youden_j` | `0.6617` | `62.24%` | `5.83%` | `3.77%` | `3.92%` | `18.75%` | `10.68×` | `1.06%` | `9.73%` |
+| Validation Target | Locked Tile Threshold | Test TPR (Recall) | Test Overall FPR | FPR on `random_national` | FPR on `matched_env` | FPR on `anthropogenic` | FPR on `woodland_pit` | FPR on `trackside` | Positive Likelihood Ratio (`LR+`) | Prior-Adjusted PPV (`π = 10⁻³`) | Prior-Adjusted PPV (`π = 10⁻²`) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `fpr_0.01` | `0.9153` | `38.46%` | `0.63%` | `0.00%` | `0.00%` | `6.25%` | `0.00%` | `0.00%` | `61.05×` | `5.76%` | `38.14%` |
+| `fpr_0.05` | `0.8071` | `51.05%` | `3.12%` | `1.89%` | `3.92%` | `6.25%` | `5.00%` | `0.00%` | `16.36×` | `1.61%` | `14.18%` |
+| `fpr_0.10` | `0.6959` | `61.54%` | `3.75%` | `1.89%` | `5.88%` | `6.25%` | `5.00%` | `0.00%` | `16.41×` | `1.62%` | `14.22%` |
+| `max_youden_j` | `0.7030` | `61.54%` | `3.75%` | `1.89%` | `5.88%` | `6.25%` | `5.00%` | `0.00%` | `16.41×` | `1.62%` | `14.22%` |
+
+## Sampled National Survey Coverage (`408.0 km²` / `0.31%` of England)
+
+This survey is a statistically sampled out-of-sample evaluation, not a completed wall-to-wall scan of Great Britain. The national coverage map on [https://glassontin.github.io/megalith-lidar/](https://glassontin.github.io/megalith-lidar/) plots the exact `102` held-out `2 km × 2 km` squares (`408.0 km²`, `0.31%` of England's `130,279 km²` land area) scanned so far:
+- `47` `uniform_national_null` squares (`188.0 km²`): `4` unidentified candidates at the strict `1%` FPR operating point (`0.021 / km²`, or `1` per `47 km²`) and `37` at the `5%` FPR operating point (`0.197 / km²`).
+- `55` `heldout_test_landscape` squares (`220.0 km²`): `81` rediscovered NHLE Scheduled Monuments, `3` rediscovered unscheduled OSM archaeological monuments, `20` unidentified candidates at the `1%` FPR operating point (`0.091 / km²`, `4.3×` the null background density), and `93` at the `5%` FPR operating point (`0.423 / km²`).
 
 ## Limitations and Unverified Scope
 

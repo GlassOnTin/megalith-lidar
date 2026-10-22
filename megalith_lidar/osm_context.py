@@ -30,11 +30,14 @@ OSM_CONFOUNDER_MAN_MADE_VALUES = frozenset(
         "spoil_heap",
         "reservoir_covered",
         "bunker_silo",
+        "silage_clamp",
+        "manure_heap",
         "adit",
         "mineshaft",
         "water_works",
         "wastewater_plant",
         "storage_tank",
+        "silo",
         "works",
         "mast",
         "tower",
@@ -42,6 +45,8 @@ OSM_CONFOUNDER_MAN_MADE_VALUES = frozenset(
         "pier",
         "breakwater",
         "groyne",
+        "pipeline",
+        "cutline",
     }
 )
 
@@ -60,6 +65,12 @@ OSM_CONFOUNDER_LANDUSE_VALUES = frozenset(
         "garages",
         "construction",
         "brownfield",
+        "farmyard",
+        "allotments",
+        "orchard",
+        "cemetery",
+        "churchyard",
+        "forest",
     }
 )
 
@@ -97,6 +108,11 @@ OSM_CONFOUNDER_NATURAL_VALUES = frozenset(
         "shingle",
         "beach",
         "dune",
+        "wood",
+        "tree",
+        "tree_row",
+        "water",
+        "wetland",
     }
 )
 
@@ -106,18 +122,63 @@ OSM_CONFOUNDER_WATERWAY_VALUES = frozenset(
         "weir",
         "lock_gate",
         "canal",
+        "river",
+        "stream",
         "ditch",
         "drain",
     }
 )
 
+OSM_CONFOUNDER_HIGHWAY_VALUES = frozenset(
+    {
+        "motorway",
+        "motorway_link",
+        "trunk",
+        "trunk_link",
+        "primary",
+        "secondary",
+        "tertiary",
+        "unclassified",
+        "residential",
+        "service",
+        "track",
+        "bridleway",
+        "byway",
+        "road",
+    }
+)
 
-def classify_osm_tags(tags: Dict[str, str]) -> Optional[Tuple[str, str]]:
+OSM_CONFOUNDER_POWER_VALUES = frozenset(
+    {
+        "pole",
+        "tower",
+        "line",
+        "minor_line",
+        "substation",
+        "plant",
+        "generator",
+    }
+)
+
+OSM_CONFOUNDER_BARRIER_VALUES = frozenset(
+    {
+        "hedge",
+        "fence",
+        "wall",
+        "ditch",
+        "retaining_wall",
+        "embankment",
+        "city_wall",
+    }
+)
+
+
+def classify_osm_tags_with_radius(tags: Dict[str, str]) -> Optional[Tuple[str, str, float]]:
     """
-    Classify an OpenStreetMap tag dictionary into either:
-      - ("osm_archaeology", subtype_description)
-      - ("osm_confounder", subtype_description)
-      - None (neutral background feature such as footpath or parish boundary)
+    Classify an OpenStreetMap tag dictionary into:
+      - ("osm_archaeology", subtype_description, match_radius_m)
+      - ("osm_confounder", subtype_description, match_radius_m)
+      - None
     """
     if not tags:
         return None
@@ -131,12 +192,16 @@ def classify_osm_tags(tags: Dict[str, str]) -> Optional[Tuple[str, str]]:
     natural = tags.get("natural", "")
     waterway = tags.get("waterway", "")
     railway = tags.get("railway", "")
+    highway = tags.get("highway", "")
+    power = tags.get("power", "")
+    barrier = tags.get("barrier", "")
+    military = tags.get("military", "")
 
     # Standing buildings (including 18th-century garden temples/follies) are confounders, not earthworks
     if building and building != "no":
         if historic:
-            return ("osm_confounder", f"building={building} (historic={historic})")
-        return ("osm_confounder", f"building={building}")
+            return ("osm_confounder", f"building={building} (historic={historic})", 35.0)
+        return ("osm_confounder", f"building={building}", 35.0)
 
     # Prehistoric / earthwork archaeology recorded in OSM
     if (
@@ -157,25 +222,44 @@ def classify_osm_tags(tags: Dict[str, str]) -> Optional[Tuple[str, str]]:
             label_parts.append(f"archaeological_site={tags['archaeological_site']}")
         if "site_type" in tags:
             label_parts.append(f"site_type={tags['site_type']}")
-        return ("osm_archaeology", ", ".join(label_parts) or "osm_archaeology")
+        return ("osm_archaeology", ", ".join(label_parts) or "osm_archaeology", 45.0)
 
-    # Modern anthropogenic or karst/geomorphological confounders
+    # Modern anthropogenic, agricultural, utility, forestry, or karst confounders
+    if military and military != "no":
+        return ("osm_confounder", f"military={military}", 35.0)
     if man_made in OSM_CONFOUNDER_MAN_MADE_VALUES:
-        return ("osm_confounder", f"man_made={man_made}")
+        return ("osm_confounder", f"man_made={man_made}", 35.0)
     if landuse in OSM_CONFOUNDER_LANDUSE_VALUES:
-        return ("osm_confounder", f"landuse={landuse}")
+        rad = 24.0 if landuse == "forest" else 30.0
+        return ("osm_confounder", f"landuse={landuse}", rad)
     if golf in OSM_CONFOUNDER_GOLF_VALUES:
-        return ("osm_confounder", f"golf={golf}")
+        return ("osm_confounder", f"golf={golf}", 35.0)
     if leisure in OSM_CONFOUNDER_LEISURE_VALUES:
-        return ("osm_confounder", f"leisure={leisure}")
+        return ("osm_confounder", f"leisure={leisure}", 35.0)
     if natural in OSM_CONFOUNDER_NATURAL_VALUES:
-        return ("osm_confounder", f"natural={natural}")
+        rad = 24.0 if natural in {"wood", "tree", "tree_row"} else 30.0
+        return ("osm_confounder", f"natural={natural}", rad)
     if waterway in OSM_CONFOUNDER_WATERWAY_VALUES:
-        return ("osm_confounder", f"waterway={waterway}")
+        rad = 18.0 if waterway in {"stream", "ditch", "drain"} else 28.0
+        return ("osm_confounder", f"waterway={waterway}", rad)
     if railway in {"rail", "abandoned", "disused", "embankment", "cutting", "tram", "light_rail"}:
-        return ("osm_confounder", f"railway={railway}")
+        return ("osm_confounder", f"railway={railway}", 30.0)
+    if power in OSM_CONFOUNDER_POWER_VALUES:
+        return ("osm_confounder", f"power={power}", 18.0)
+    if highway in OSM_CONFOUNDER_HIGHWAY_VALUES:
+        return ("osm_confounder", f"highway={highway}", 35.0)
+    if barrier in OSM_CONFOUNDER_BARRIER_VALUES:
+        return ("osm_confounder", f"barrier={barrier}", 15.0)
 
     return None
+
+
+def classify_osm_tags(tags: Dict[str, str]) -> Optional[Tuple[str, str]]:
+    """Backwards-compatible 2-tuple wrapper around `classify_osm_tags_with_radius`."""
+    res = classify_osm_tags_with_radius(tags)
+    if res is None:
+        return None
+    return (res[0], res[1])
 
 
 def _point_in_polygon(e: float, n: float, ring: Sequence[Tuple[float, float]]) -> bool:
@@ -240,6 +324,7 @@ class OSMParsedFeature:
     coords_27700: List[Tuple[float, float]]
     is_closed_area: bool
     bbox_27700: Tuple[float, float, float, float]
+    match_radius_m: float = 35.0
 
 
 class OSMSpatialIndex:
@@ -282,10 +367,10 @@ class OSMSpatialIndex:
             tags = el.get("tags")
             if not tags:
                 continue
-            classified = classify_osm_tags(tags)
+            classified = classify_osm_tags_with_radius(tags)
             if classified is None:
                 continue
-            cat, subtype = classified
+            cat, subtype, rad = classified
             pt = nodes_27700.get(int(el["id"]))
             if pt is None:
                 continue
@@ -300,6 +385,7 @@ class OSMSpatialIndex:
                     coords_27700=[pt],
                     is_closed_area=False,
                     bbox_27700=(e_val, n_val, e_val, n_val),
+                    match_radius_m=rad,
                 )
             )
 
@@ -308,23 +394,23 @@ class OSMSpatialIndex:
             tags = el.get("tags")
             if not tags:
                 continue
-            classified = classify_osm_tags(tags)
+            classified = classify_osm_tags_with_radius(tags)
             if classified is None:
                 continue
-            cat, subtype = classified
+            cat, subtype, rad = classified
             nd_ids = el.get("nodes", [])
             coords = [nodes_27700[nid] for nid in nd_ids if nid in nodes_27700]
             if not coords:
                 continue
             is_closed = len(nd_ids) >= 4 and nd_ids[0] == nd_ids[-1]
-            # Linear embankments/cliff lines are not filled area polygons unless tagged area=yes or landuse/leisure/building
             has_area_tag = (
                 tags.get("area") == "yes"
                 or "landuse" in tags
                 or "leisure" in tags
                 or "building" in tags
                 or "golf" in tags
-                or tags.get("natural") in {"sinkhole", "bare_rock", "scree", "shingle", "beach", "dune"}
+                or "military" in tags
+                or tags.get("natural") in {"sinkhole", "bare_rock", "scree", "shingle", "beach", "dune", "wood", "water", "wetland"}
                 or cat == "osm_archaeology"
             )
             is_area = is_closed and has_area_tag
@@ -340,6 +426,7 @@ class OSMSpatialIndex:
                     coords_27700=coords,
                     is_closed_area=is_area,
                     bbox_27700=(min(es_w), min(ns_w), max(es_w), max(ns_w)),
+                    match_radius_m=rad,
                 )
             )
 
@@ -348,10 +435,10 @@ class OSMSpatialIndex:
             tags = rel.get("tags")
             if not tags:
                 continue
-            classified = classify_osm_tags(tags)
+            classified = classify_osm_tags_with_radius(tags)
             if classified is None:
                 continue
-            cat, subtype = classified
+            cat, subtype, rad = classified
             for mem in rel.get("members", []):
                 if mem.get("type") == "way" and mem.get("role", "outer") in {"outer", ""}:
                     way_el = raw_ways.get(mem.get("ref"))
@@ -374,6 +461,7 @@ class OSMSpatialIndex:
                             coords_27700=coords,
                             is_closed_area=is_closed,
                             bbox_27700=(min(es_w), min(ns_w), max(es_w), max(ns_w)),
+                            match_radius_m=rad,
                         )
                     )
 
@@ -384,17 +472,21 @@ class OSMSpatialIndex:
         easting: float,
         northing: float,
         archaeology_radius_m: float = 45.0,
-        confounder_radius_m: float = 40.0,
+        confounder_radius_m: Optional[float] = None,
     ) -> Dict[str, List[Dict]]:
         """
         Return all OSM recorded archaeological sites within `archaeology_radius_m` and
-        all OSM modern/karst confounders within `confounder_radius_m` (or containing polygon).
+        all OSM confounders within their feature-specific `match_radius_m` (or containing polygon).
         """
         arch_matches: List[Dict] = []
         conf_matches: List[Dict] = []
 
         for feat in self.features:
-            max_r = archaeology_radius_m if feat.category == "osm_archaeology" else confounder_radius_m
+            if feat.category == "osm_archaeology":
+                max_r = archaeology_radius_m
+            else:
+                max_r = confounder_radius_m if confounder_radius_m is not None else feat.match_radius_m
+
             b_emin, b_nmin, b_emax, b_nmax = feat.bbox_27700
             if (
                 easting < b_emin - max_r
@@ -484,10 +576,14 @@ def fetch_or_load_osm_context(
 def annotate_candidates_with_spatial_context(
     candidates: List[Dict],
     osm_index: Optional[OSMSpatialIndex],
+    max_canopy_ndsm_m: float = 2.8,
+    min_positive_relief_m: float = 0.25,
 ) -> List[Dict]:
     """
     Annotate each candidate detection with OpenStreetMap archaeological and confounder context
-    WITHOUT altering `confidence`, `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
+    plus intrinsic 1m LiDAR physical confounder checks (tree canopy / standing structure nDSM,
+    sunken marl/chalk pits, or LiDAR void/TIN facets) WITHOUT altering `confidence`,
+    `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
     """
     for cand in candidates:
         osm_arch = []
@@ -495,7 +591,70 @@ def annotate_candidates_with_spatial_context(
         if osm_index is not None:
             res = osm_index.query_point(cand["easting"], cand["northing"])
             osm_arch = res["osm_archaeology_matches"]
-            osm_conf = res["osm_confounder_matches"]
+            osm_conf = list(res["osm_confounder_matches"])
+
+        # Intrinsic 1m LiDAR physical confounder checks (when outside known monuments)
+        ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))
+        rel_m = float(cand.get("est_local_relief_m", 0.5))
+        max_pos_rel_m = float(cand.get("max_positive_relief_m", max(rel_m, 0.0)))
+        slope_m = float(cand.get("mean_slope_tangent", 0.08))
+        has_tin_facet = bool(cand.get("has_lidar_tin_facet", False))
+
+        if ndsm_m >= max_canopy_ndsm_m:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/ndsm",
+                    "subtype": f"canopy_or_structure (nDSM={ndsm_m:.1f}m)",
+                    "name": "Tall tree canopy or standing structure",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        elif ndsm_m >= 1.10 and slope_m >= 0.18:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/clamp_or_tank",
+                    "subtype": f"steep_surface_heap_or_tank (nDSM={ndsm_m:.1f}m, slope={slope_m:.2f})",
+                    "name": "Agricultural silage clamp, manure heap, or tank",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        elif slope_m >= 0.20 and rel_m >= 1.80:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/steep_bund",
+                    "subtype": f"steep_bund_or_spoil (relief={rel_m:+.2f}m, slope={slope_m:.2f})",
+                    "name": "Steep-walled modern bund or spoil heap",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        if rel_m < -0.15 or max_pos_rel_m < min_positive_relief_m:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/pit",
+                    "subtype": f"sunken_pit_or_pond (relief={rel_m:+.2f}m)",
+                    "name": "Negative-relief pit, pond, or marl scoop",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        if has_tin_facet:
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/void",
+                    "subtype": "lidar_coverage_edge_or_tin_facet",
+                    "name": "LiDAR coverage boundary or interpolated TIN facet",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
 
         cand["osm_archaeology_matches"] = osm_arch
         cand["osm_confounder_matches"] = osm_conf

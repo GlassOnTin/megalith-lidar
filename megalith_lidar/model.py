@@ -195,8 +195,8 @@ class MegalithLoss(nn.Module):
         super().__init__()
         self.pos_pixel_weight = pos_pixel_weight
         self.pos_tile_weight = pos_tile_weight
-        self.register_buffer("cls_weights", torch.tensor([0.5, 2.0, 2.0, 1.5], dtype=torch.float32))
-        self.register_buffer("type_weights", torch.tensor([1.0, 1.5, 1.5, 1.2], dtype=torch.float32))
+        self.register_buffer("cls_weights", torch.tensor([0.5, 1.3, 1.3, 1.8], dtype=torch.float32))
+        self.register_buffer("type_weights", torch.tensor([1.0, 1.2, 1.2, 1.2], dtype=torch.float32))
 
     def forward(
         self,
@@ -210,18 +210,22 @@ class MegalithLoss(nn.Module):
         tile_logits = outputs["tile_logits"].squeeze(1)  # (B,)
         type_logits = outputs["type_logits"]  # (B, C)
 
-        bin_mask = (target_mask > 0).float()
+        valid_px = target_mask != 255
+        valid_f = valid_px.float()
+        bin_mask = ((target_mask > 0) & valid_px).float()
 
-        # 1. Pixel Focal + BCE with moderate pos_pixel_weight (avoids painting whole hillsides positive)
+        # 1. Pixel Focal + BCE with moderate pos_pixel_weight, ignoring legal-buffer pixels (255)
         pw = torch.tensor(self.pos_pixel_weight, device=seg_logits.device, dtype=seg_logits.dtype)
         bce_pixel = F.binary_cross_entropy_with_logits(seg_logits, bin_mask, pos_weight=pw, reduction="none")
         probs = torch.sigmoid(seg_logits)
         pt = torch.where(bin_mask > 0.5, probs, 1.0 - probs)
-        focal_loss = ((1.0 - pt).pow(2.0) * bce_pixel).mean()
+        focal_map = (1.0 - pt).pow(2.0) * bce_pixel * valid_f
+        focal_loss = focal_map.sum() / valid_f.sum().clamp(min=1.0)
 
-        # 2. Soft Dice loss on positive tiles only (so empty negative tiles don't have 1/(union+1) noise)
-        inter = (probs * bin_mask).sum(dim=(1, 2))
-        union = probs.sum(dim=(1, 2)) + bin_mask.sum(dim=(1, 2))
+        # 2. Soft Dice loss on positive tiles only (excluding IGNORE_INDEX=255 legal-buffer pixels)
+        probs_valid = probs * valid_f
+        inter = (probs_valid * bin_mask).sum(dim=(1, 2))
+        union = probs_valid.sum(dim=(1, 2)) + bin_mask.sum(dim=(1, 2))
         pos_tile_mask = target_tile > 0.5
         if torch.any(pos_tile_mask):
             dice_loss = (1.0 - (2.0 * inter[pos_tile_mask] + 1.0) / (union[pos_tile_mask] + 1.0)).mean()
@@ -235,9 +239,9 @@ class MegalithLoss(nn.Module):
         ptw = torch.tensor(self.pos_tile_weight, device=seg_logits.device, dtype=seg_logits.dtype)
         mil_peak_loss = F.binary_cross_entropy_with_logits(topk_64, target_tile.float(), pos_weight=ptw)
 
-        # 4. Multi-class segmentation cross-entropy
+        # 4. Multi-class segmentation cross-entropy with ignore_index=255
         cls_w = self.cls_weights.to(device=cls_seg_logits.device, dtype=cls_seg_logits.dtype)
-        ce_seg = F.cross_entropy(cls_seg_logits, target_mask.long(), weight=cls_w)
+        ce_seg = F.cross_entropy(cls_seg_logits, target_mask.long(), weight=cls_w, ignore_index=255)
 
         # 5. Tile-level binary presence loss with prevalence correction
         tile_bce = F.binary_cross_entropy_with_logits(tile_logits, target_tile.float(), pos_weight=ptw)

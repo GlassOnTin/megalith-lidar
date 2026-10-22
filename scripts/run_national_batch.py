@@ -206,6 +206,9 @@ def export_public_docs(
     """
     docs_dir = Path(docs_dir)
     docs_diag_dir = docs_dir / "diagnostics"
+    if docs_diag_dir.exists():
+        for old_png in docs_diag_dir.glob("*.png"):
+            old_png.unlink(missing_ok=True)
     docs_diag_dir.mkdir(parents=True, exist_ok=True)
 
     eval_metrics = {}
@@ -292,6 +295,8 @@ def export_public_docs(
 
         st["unidentified_candidates_fpr_0_01"] += unid_001
 
+        lat_sw, lon_sw = bng_to_latlon(sq["e_min"], sq["n_min"])
+        lat_ne, lon_ne = bng_to_latlon(sq["e_max"], sq["n_max"])
         square_summaries.append(
             {
                 "square_id": sq_id,
@@ -299,6 +304,7 @@ def export_public_docs(
                 "split": sq.get("split", "test"),
                 "os_grid_ref": sq.get("os_grid_ref", ""),
                 "bbox_epsg27700": [sq["e_min"], sq["n_min"], sq["e_max"], sq["n_max"]],
+                "bounds_latlon": [[round(lat_sw, 5), round(lon_sw, 5)], [round(lat_ne, 5), round(lon_ne, 5)]],
                 "center_lat": sq["center_lat"],
                 "center_lon": sq["center_lon"],
                 "area_km2": area_km2,
@@ -374,6 +380,9 @@ def main() -> None:
     )
     parser.add_argument("--max-squares", type=int, default=4)
     parser.add_argument("--device", type=str, default="cuda:1")
+    parser.add_argument("--rescore-completed", action="store_true", help="Re-score all completed squares with current model & OSM context")
+    parser.add_argument("--shard-idx", type=int, default=0, help="Shard index for parallel rescoring")
+    parser.add_argument("--num-shards", type=int, default=1, help="Total number of parallel shards")
     parser.add_argument("--git-push", action="store_true", help="Commit and push updated docs/ to GitHub")
     args = parser.parse_args()
 
@@ -422,7 +431,70 @@ def main() -> None:
     channel_std = np.array(ckpt["channel_std"], dtype=np.float32)
 
     scanned_now = 0
+    if args.rescore_completed:
+        completed_items = []
+        for q in queue_state["queue"]:
+            if q.get("status") != "completed":
+                continue
+            rep_p = survey_dir / q["square_id"] / f"{q['square_id']}_report.json"
+            if rep_p.exists():
+                rep_d = json.loads(rep_p.read_text(encoding="utf-8"))
+                if int(rep_d.get("unidentified_candidates_count", 1)) == 0:
+                    continue
+            completed_items.append(q)
+        shard_items = [
+            item for idx, item in enumerate(completed_items) if idx % max(args.num_shards, 1) == args.shard_idx
+        ]
+        for idx, item in enumerate(shard_items, 1):
+            sq_id = item["square_id"]
+            e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
+            t0 = time.time()
+            out_dir = survey_dir / sq_id
+            diag_sub = out_dir / "diagnostics"
+            if diag_sub.exists():
+                for old_p in diag_sub.glob("*.png"):
+                    old_p.unlink(missing_ok=True)
+            summary = scan_region(
+                model=model,
+                catalog=catalog,
+                channel_mean=channel_mean,
+                channel_std=channel_std,
+                calibrator=calibrator,
+                tile_prob_threshold=th_005,
+                pixel_prob_threshold=pixel_th_005,
+                e_min=e_min,
+                e_max=e_max,
+                n_min=n_min,
+                n_max=n_max,
+                device=device,
+                tile_cache_dir=tile_cache_dir,
+                output_dir=out_dir,
+                region_name=sq_id,
+                osm_cache_dir=osm_cache_dir,
+            )
+            gj_path = out_dir / f"{sq_id}_candidates.geojson"
+            if gj_path.exists():
+                gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
+                for feat in gj_data.get("features", []):
+                    p = feat.get("properties", {})
+                    p["passes_fpr_0_01"] = bool(
+                        float(p.get("calibrated_tile_prob", 0.0)) >= th_001
+                        and float(p.get("peak_prob", 0.0)) >= pixel_th_001
+                    )
+                gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+            print(
+                f"[rescore shard {args.shard_idx}/{args.num_shards}] ({idx}/{len(shard_items)}) {sq_id} ({round(time.time() - t0, 1)}s): "
+                f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
+                f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
+                f"Confounder={summary['flagged_modern_or_karst_confounders_count']}, "
+                f"Unid={summary['unidentified_candidates_count']}"
+            )
+        if args.num_shards > 1:
+            return
+
     for item in queue_state["queue"]:
+        if args.rescore_completed:
+            break
         if item.get("status") != "pending":
             continue
         if scanned_now >= args.max_squares:
