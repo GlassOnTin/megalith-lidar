@@ -6,6 +6,107 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          -3.459043,
+          50.798583
+        ]
+      },
+      "properties": {
+        "easting": 297272.5,
+        "northing": 100906.3,
+        "lat": 50.798583,
+        "lon": -3.459043,
+        "os_grid_ref": "SS 97272 00906",
+        "confidence": 0.8083,
+        "peak_prob": 0.8203,
+        "mean_prob": 0.7722,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 3675.0,
+        "elongation": 1.28,
+        "est_local_relief_m": 1.85,
+        "max_positive_relief_m": 1.85,
+        "centroid_local_relief_m": 0.28,
+        "patch_min_relief_m": -0.39,
+        "est_surface_prominence_m": 19.11,
+        "mean_slope_tangent": 0.136,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": true,
+        "matched_monument": {
+          "list_entry": 1017193,
+          "name": "Sections of two deer park pales and watering pond at Killerton Park",
+          "class": "other_scheduled_monument",
+          "distance_m": 12.8
+        },
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "rediscovered_nhle_scheduled",
+        "calibrated_tile_prob": 0.7599,
+        "raw_tile_logit": 1.6416,
+        "window_bbox": [
+          297152,
+          100768,
+          297408,
+          101024
+        ],
+        "region_name": "enclosure_null_test_E296000_N100000",
+        "diagnostic_png": "enclosure_null_test_E296000_N100000_rediscovered_01_E297152_N100768_conf808.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E296000_N100000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017193,
+            "name": "Sections of two deer park pales and watering pond at Killerton Park",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 371.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017192,
+            "name": "Dolbury Hillfort, 230m North of Killerton House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 485.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1019108,
+            "name": "Holy well 230m north west of Lower Comberoy Cottages",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1884.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1020935,
+            "name": "Paddleford Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2338.0,
+            "bearing": "WSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South-West Peninsula upland / valley landscape",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 16,
+          "prehistoric_within_5km": 4
+        },
+        "arch_context_note": "Situated within the South-West Peninsula upland / valley landscape, this detection independently recovers the scheduled monument 'Sections of two deer park pales and watering pond at Killerton Park' (NHLE #1017193, centroid offset 12.8 m) in a held-out test square. In 1 m bare-earth LiDAR, the earthwork survives as a curvilinear rampart-and-ditch enclosure (3675 m\u00b2 footprint, ~68 m span, 1.28\u00d7 elongation) with +1.85 m of 16 m local relief and a mean scarp gradient of 0.136 (7.7\u00b0; surface canopy nDSM 19.11 m). The site lies within a recorded monument cluster containing 3 scheduled monuments (0 prehistoric) within 2 km and 16 within 5 km.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8083,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           -2.26227,
           51.463193
         ]
@@ -4989,7 +5090,7 @@
         "lat": 50.611286,
         "lon": -4.612328,
         "os_grid_ref": "SX 15270 82322",
-        "confidence": 0.8373,
+        "confidence": 0.2931,
         "peak_prob": 0.8507,
         "mean_prob": 0.7972,
         "predicted_class_id": 2,
@@ -5007,8 +5108,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "vlm/visual_audit",
+            "subtype": "vlm_obvious_false_positive",
+            "name": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8293,
         "raw_tile_logit": 2.1719,
         "window_bbox": [
@@ -5064,10 +5174,12 @@
           "nhle_within_5km": 74,
           "prehistoric_within_5km": 40
         },
-        "arch_context_note": "Situated in the Bodmin Moor granite upland & moorland fringe (Cornwall) within an active monument landscape (27 scheduled monuments within 2 km and 74 within 5 km, closest being Round cairn 460m north of Showery Tor (NHLE #1011213, 615 m SSW) and Round cairn 567m north-west of Showery Tor (NHLE #1011214, 771 m SW)), the 1 m DTM isolates a curvilinear rampart-and-ditch enclosure (12100 m\u00b2 footprint, ~124 m span, 1.11\u00d7 elongation) rising +1.29 m above its 16 m local trend surface with weathered scarp gradients of 0.099 (5.7\u00b0), morphologically consistent with a Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement. Moderate surface roughness (nDSM 1.14 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the Bodmin Moor granite upland, this candidate lies 615 m SSW of the Bronze Age round cairn (NHLE #1011213) and 771 m SW of another (NHLE #1011214). The 1m LiDAR close-up reveals a sharp, continuous linear scarp and deep ditch running diagonally across the 80m tile, contradicting the model's proposed banjo enclosure footprint. This linear morphology is a modern trackway or boundary ditch embankment, requiring immediate HER consultation and historic map analysis to reject the prehistoric hillfort classification.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "OBVIOUS_MODERN_CONFOUNDER",
         "raw_unet_confidence": 0.8373,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "OBVIOUS_FALSE_POSITIVE",
+        "vlm_downrate_reason": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund"
       }
     },
     {
@@ -14030,10 +14142,12 @@
           "nhle_within_5km": 36,
           "prehistoric_within_5km": 24
         },
-        "arch_context_note": "Situated in the Eden Valley & North Cumbrian upland fringe (Cumbria) within an active monument landscape (17 scheduled monuments within 2 km and 36 within 5 km, closest being Round cairn on Heughscar Hill (NHLE #1011589, 807 m SSE) and Round cairn west of Riddingleys Top, Askham Fell (NHLE #1007368, 1291 m SE)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (9397 m\u00b2 footprint, ~109 m span, 1.29\u00d7 elongation) rising +0.83 m above its 16 m local trend surface with weathered scarp gradients of 0.128 (7.3\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 1.29 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the Eden Valley upland fringe, this candidate lies within a dense prehistoric ritual landscape, positioned 807 m SSE of a Bronze Age round cairn (NHLE #1011589) and 1291 m SE of another (NHLE #1007368). The 1m LiDAR close-up reveals a smooth, continuous oval footprint (9397 m\u00b2) with a raised yellow bank and a shallow central depression, lacking the sharp right-angles of rectilinear enclosures or the linear geometry of modern tracks. Given the 0.83 m relief and 7.3-degree scarp slope, this likely represents a degraded hut circle or small pound; however, a HER search and fieldwalking are required to distinguish genuine prehistoric settlement from a natural glacial moround.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8976,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -14808,10 +14922,12 @@
           "nhle_within_5km": 41,
           "prehistoric_within_5km": 26
         },
-        "arch_context_note": "Situated in the Eden Valley & North Cumbrian upland fringe (Cumbria) within an active monument landscape (23 scheduled monuments within 2 km and 41 within 5 km, closest being Round cairn west of Riddingleys Top, Askham Fell (NHLE #1007368, 203 m NNE) and Round cairn 50m north east of White Raise round cairn, Askham Fell (NHLE #1007373, 420 m SW)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (4731 m\u00b2 footprint, ~78 m span, 1.19\u00d7 elongation) rising +0.31 m above its 16 m local trend surface with weathered scarp gradients of 0.073 (4.2\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 0.27 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the Eden Valley upland fringe, this candidate lies 203m south-southwest of the Bronze Age round cairn at Riddingleys Top (NHLE #1007368) and 420m northeast of a cairn near White Raise (NHLE #1007373). The 1m LiDAR close-up reveals a faint, sub-circular earthwork footprint of 4731m\u00b2 with low axial elongation (1.19x), displaying a subtle raised yellow perimeter on the 16m Local Relief and a gentle mean scarp slope of 0.073. Given the weak topographic signature and low relief (+0.31m), this likely represents a heavily ploughed or turf-covered prehistoric enclosure or hut circle, requiring targeted HER consultation and geophysical survey to confirm its morphology.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8504,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -19666,10 +19782,12 @@
           "nhle_within_5km": 64,
           "prehistoric_within_5km": 16
         },
-        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (20 scheduled monuments within 2 km and 64 within 5 km, closest being Round cairn 790m west of Smithy Strip (NHLE #1016248, 440 m E) and Unenclosed hut circle settlement 1060m north west of Ilderton Moor (NHLE #1019930, 453 m SE)), the 1 m DTM isolates a curvilinear rampart-and-ditch enclosure (5892 m\u00b2 footprint, ~87 m span, 1.20\u00d7 elongation) rising +1.11 m above its 16 m local trend surface with weathered scarp gradients of 0.136 (7.7\u00b0), morphologically consistent with a Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement. Moderate surface roughness (nDSM 1.22 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated within a dense upland landscape, this candidate lies 440m west of a Bronze Age round cairn (NHLE #1016248) and 453m northwest of an unenclosed hut circle settlement (NHLE #1019930). The 1m LiDAR close-up reveals a smooth, continuous oval footprint with a raised yellow bank and adjacent blue hollow, supported by a +1.11m relief and a gentle 7.7-degree scarp slope. The rounded morphology and low relief suggest a possible small banjo enclosure or natural peat mound, requiring historic map analysis and fieldwalking to confirm its archaeological status.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8602,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -19762,10 +19880,12 @@
           "nhle_within_5km": 61,
           "prehistoric_within_5km": 16
         },
-        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (16 scheduled monuments within 2 km and 61 within 5 km, closest being Settlement 470m north east of Heddon Hill (NHLE #1020558, 83 m NE) and Three Romano-British farmsteads and part of a field system on Heddon Hill 900m north west of Calder (NHLE #1019934, 277 m SSE)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (6217 m\u00b2 footprint, ~89 m span, 1.42\u00d7 elongation) rising +0.74 m above its 16 m local trend surface with weathered scarp gradients of 0.159 (9.0\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 1.15 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated within a dense North Pennine upland landscape, this candidate lies 83m northeast of the Heddon Hill settlement (NHLE #1020558) and 277m south-southeast of the Romano-British farmsteads on Heddon Hill (NHLE #1019934). The 1m LiDAR close-up reveals a smooth, continuous oval earthwork, with the 16m Local Relief showing a prominent yellow raised bank enclosing a subtle blue interior hollow, corroborating the 0.159 scarp slope and 1.42x axial elongation. The rounded morphology strongly supports the model's hut-circle interpretation, though a field check is required to confirm the bank's survival and rule out a natural whin outcrop.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8518,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -24729,7 +24849,7 @@
         "lat": 51.129163,
         "lon": -1.671705,
         "os_grid_ref": "SU 23069 36705",
-        "confidence": 0.9096,
+        "confidence": 0.3184,
         "peak_prob": 0.9397,
         "mean_prob": 0.8193,
         "predicted_class_id": 1,
@@ -24747,8 +24867,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "vlm/visual_audit",
+            "subtype": "vlm_obvious_false_positive",
+            "name": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8558,
         "raw_tile_logit": 2.4199,
         "window_bbox": [
@@ -24804,10 +24933,12 @@
           "nhle_within_5km": 43,
           "prehistoric_within_5km": 38
         },
-        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (21 scheduled monuments within 2 km and 43 within 5 km, closest being Bronze Age enclosure and linear boundary earthwork on Boscombe Down East (NHLE #1017273, 549 m NNE) and Bell barrow, three bowl barrows and gas testing trenches on Idmiston Down (NHLE #1014818, 862 m W)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (11710 m\u00b2 footprint, ~122 m span, 1.22\u00d7 elongation) rising +0.31 m above its 16 m local trend surface with weathered scarp gradients of 0.062 (3.5\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 0.26 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the Wessex Chalk, this candidate lies 549 m NNE of the Bronze Age enclosure and linear boundary earthwork on Boscombe Down East (NHLE #1017273) and 862 m W of the Idmiston Down barrow cemetery (NHLE #1014818). The 1m LiDAR close-up reveals a faint, rectilinear earthwork with straight edges and right-angled corners, exhibiting a low +0.31 m relief and a gentle 3.5-degree scarp slope across an 11,710 m\u00b2 footprint. Despite the model's high confidence in a hut circle, the distinct rectilinear morphology suggests a potential sub-rectangular enclosure or a modern agricultural confounder, necessitating a review of historic tithe maps and a targeted field walkover.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "RECTILINEAR_OR_U_BUND",
         "raw_unet_confidence": 0.9096,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "OBVIOUS_FALSE_POSITIVE",
+        "vlm_downrate_reason": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund"
       }
     },
     {
@@ -33150,10 +33281,12 @@
           "nhle_within_5km": 39,
           "prehistoric_within_5km": 9
         },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (14 scheduled monuments within 2 km and 39 within 5 km, closest being Iron Age farmstead and Roman villa, 360m SSW of Brickkiln Farm (NHLE #1005827, 408 m NW) and A multiple enclosure fort known as Goosehill Camp and a prehistoric linear boundary on Bow Hill (NHLE #1008375, 896 m NW)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (8429 m\u00b2 footprint, ~104 m span, 1.45\u00d7 elongation) rising +1.57 m above its 16 m local trend surface with weathered scarp gradients of 0.114 (6.5\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 7.18 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the South Downs chalk dip-slope, this candidate lies 408m southeast of the Iron Age farmstead and Roman villa (NHLE #1005827) and 896m southeast of Goosehill Camp (NHLE #1008375). The 1m LiDAR close-up reveals a smooth, continuous yellow raised bank enclosing a subtle blue central hollow, lacking any rectilinear corners or sharp modern linear scarps. Given the 1.45x axial elongation and 1.57m relief, this likely represents a degraded prehistoric roundhouse or small pound, requiring targeted HER consultation and fieldwalking to distinguish genuine earthworks from natural chalk slumping.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.842,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -36058,7 +36191,7 @@
         "lat": 50.924916,
         "lon": -0.719467,
         "os_grid_ref": "SU 90097 14721",
-        "confidence": 0.8667,
+        "confidence": 0.728,
         "peak_prob": 0.8886,
         "mean_prob": 0.8011,
         "predicted_class_id": 1,
@@ -36132,10 +36265,12 @@
           "nhle_within_5km": 35,
           "prehistoric_within_5km": 23
         },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (6 scheduled monuments within 2 km and 35 within 5 km, closest being Neolithic causewayed enclosure and associated remains on Court Hill (NHLE #1018037, 995 m SSW) and Field system in Lamb Lea (NHLE #1005820, 1629 m ENE)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (7341 m\u00b2 footprint, ~97 m span, 1.26\u00d7 elongation) rising +1.03 m above its 16 m local trend surface with weathered scarp gradients of 0.150 (8.5\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 11.69 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the South Downs Upper Chalk dip-slope, this candidate lies 995 m SSW of the Neolithic Court Hill causewayed enclosure (NHLE #1018037) and 1629 m ENE of the Lamb Lea field system (NHLE #1005820). The 1m LiDAR close-up reveals a sub-circular footprint of 7341 m\u00b2 with a 1.26x axial elongation, where the 16m Local Relief displays a continuous yellow raised bank enclosing a blue sunken interior, corroborated by a +1.03 m bare-earth relief and an 8.5-degree scarp slope. While the morphology suggests a prehistoric hut circle or pound, the dense 11.69 m canopy necessitates a HER cross-reference and targeted fieldwalking to exclude modern forestry extraction pits or agricultural enclosures.",
+        "arch_context_source": "qwen3.8_llm",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8667,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
       }
     },
     {
@@ -39849,10 +39984,12 @@
           "nhle_within_5km": 57,
           "prehistoric_within_5km": 42
         },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (12 scheduled monuments within 2 km and 57 within 5 km, closest being Bowl barrow on Waltham Down, 320 ESE of crossroads: part of Waltham Down round barrow cemetery (NHLE #1009913, 279 m SSW) and Bowl barrow on Waltham Down, 200m east of cross roads: part of Waltham Down round barrow cemetery (NHLE #1009914, 306 m SW)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (8277 m\u00b2 footprint, ~103 m span, 1.17\u00d7 elongation) rising +0.87 m above its 16 m local trend surface with weathered scarp gradients of 0.137 (7.8\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 16.16 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the South Downs Upper Chalk dip-slope, this candidate lies within a dense prehistoric mortuary landscape, positioned 279 m SSW of a Bronze Age bowl barrow (NHLE #1009913) and 306 m SW of another (NHLE #1009914) in the Waltham Down cemetery. The 1m LiDAR close-up reveals a subtle, low-relief circular footprint (8277 m\u00b2, 1.17x elongation) with a +0.87 m maximum local relief, appearing as a faint yellowish raised ring on the 16m Local Relief panel against a heavily textured, 7.8-degree bare-earth slope. Given the low amplitude and dense 16.16 m canopy, this likely represents a heavily ploughed or woodland-obscured round barrow or hut circle rather than a modern confounder, requiring targeted HER consultation and a geophysical survey to confirm its structural integrity.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8712,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -42682,7 +42819,7 @@
         "lat": 50.89326,
         "lon": -0.6439,
         "os_grid_ref": "SU 95473 11295",
-        "confidence": 0.9213,
+        "confidence": 0.3225,
         "peak_prob": 0.954,
         "mean_prob": 0.8234,
         "predicted_class_id": 1,
@@ -42700,8 +42837,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "vlm/visual_audit",
+            "subtype": "vlm_obvious_false_positive",
+            "name": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8671,
         "raw_tile_logit": 2.5371,
         "window_bbox": [
@@ -42757,10 +42903,12 @@
           "nhle_within_5km": 44,
           "prehistoric_within_5km": 27
         },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (7 scheduled monuments within 2 km and 44 within 5 km, closest being Seven sections of Stane Street Roman road between Eartham and Bignor, a prehistoric linear boundary and two bowl barrows (NHLE #1016621, 1251 m NE) and Bowl barrow 430m north east of Gumber Farm (NHLE #1016421, 1285 m NE)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (12068 m\u00b2 footprint, ~124 m span, 1.25\u00d7 elongation) rising +0.37 m above its 16 m local trend surface with weathered scarp gradients of 0.073 (4.2\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 0.83 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the South Downs chalk dip-slope, this candidate lies 1251m south-west of the Stane Street Roman road and associated Bronze Age barrows (NHLE #1016621) and 1285m south-west of the Gumber Farm bowl barrow (NHLE #1016421). The 1m LiDAR close-up reveals a faint, linear dark scarp on the bare-earth slope corresponding to a distinct blue sunken hollow on the local relief, contradicting the model's proposed rounded hut-circle footprint. This rectilinear, ditch-like morphology suggests a modern field boundary or drainage feature rather than a prehistoric settlement, requiring immediate consultation of the West Sussex HER and tithe maps.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "RECTILINEAR_OR_U_BUND",
         "raw_unet_confidence": 0.9213,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "OBVIOUS_FALSE_POSITIVE",
+        "vlm_downrate_reason": "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund"
       }
     },
     {
@@ -42853,10 +43001,12 @@
           "nhle_within_5km": 43,
           "prehistoric_within_5km": 27
         },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (8 scheduled monuments within 2 km and 43 within 5 km, closest being Bowl barrow 430m north east of Gumber Farm (NHLE #1016421, 992 m NE) and Seven sections of Stane Street Roman road between Eartham and Bignor, a prehistoric linear boundary and two bowl barrows (NHLE #1016621, 1054 m NNE)), the 1 m DTM isolates a sub-circular stone/turf hut ring or pound compound (5923 m\u00b2 footprint, ~87 m span, 1.55\u00d7 elongation) rising +0.37 m above its 16 m local trend surface with weathered scarp gradients of 0.070 (4.0\u00b0), morphologically consistent with a Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound. Moderate surface roughness (nDSM 0.31 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the South Downs chalk dip-slope, this candidate lies 992m south-west of the Bronze Age bowl barrow at Gumber Farm (NHLE #1016421) and 1054m south of the Stane Street linear boundary complex (NHLE #1016621). The 1m LiDAR close-up reveals a faint, curvilinear earthwork footprint of 5923m\u00b2 with 1.55x axial elongation, presenting as a subtle, low-relief scarp (mean slope 4.0\u00b0) and a shallow +0.37m raised bank. Given the weak morphological definition, this may represent a degraded prehistoric enclosure or a natural chalk hollow, necessitating a Historic England Research Record (HER) review and targeted fieldwalking to rule out modern agricultural disturbance.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.8681,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
       }
     },
     {
@@ -45545,318 +45695,6 @@
         "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this detection corresponds to an unscheduled archaeological feature recorded in OpenStreetMap (Stane Street, relation/7610966(way/857758036)) outside Historic England's Scheduled Monument polygon register. The 1 m DTM resolves a curvilinear rampart-and-ditch enclosure (19 m\u00b2 footprint, ~5 m span, 1.12\u00d7 elongation) with +1.64 m local relief and 0.135 (7.7\u00b0) mean scarp slope (nDSM 0.09 m). Nearest scheduled parallels include Bowl barrow 915m WSW of Bignor Hill (NHLE #1010142, 198 m SW) and Bowl barrow 960m WSW of Bignor Hill (NHLE #1010148, 234 m WSW) (46 scheduled monuments within 5 km).",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.7473,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.628398,
-          50.918338
-        ]
-      },
-      "properties": {
-        "easting": 496511.0,
-        "northing": 114104.1,
-        "lat": 50.918338,
-        "lon": -0.628398,
-        "os_grid_ref": "SU 96511 14104",
-        "confidence": 0.8661,
-        "peak_prob": 0.8835,
-        "mean_prob": 0.8142,
-        "predicted_class_id": 2,
-        "predicted_class": "iron_age_hillfort_banjo_enclosure",
-        "target_domain": "enclosure",
-        "area_m2": 17854.0,
-        "elongation": 1.07,
-        "est_local_relief_m": 3.66,
-        "max_positive_relief_m": 3.66,
-        "centroid_local_relief_m": 0.28,
-        "patch_min_relief_m": 0.05,
-        "est_surface_prominence_m": 22.97,
-        "mean_slope_tangent": 0.237,
-        "has_lidar_tin_facet": false,
-        "is_known_monument": false,
-        "matched_monument": null,
-        "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
-        "calibrated_tile_prob": 0.855,
-        "raw_tile_logit": 2.4111,
-        "window_bbox": [
-          496384,
-          114000,
-          496640,
-          114256
-        ],
-        "region_name": "enclosure_test_landscape_E496000_N114000",
-        "diagnostic_png": "enclosure_test_landscape_E496000_N114000_unidentified_01_E496384_N114000_conf866.png",
-        "passes_fpr_0_01": true,
-        "square_id": "test_landscape_E496000_N114000",
-        "sampling_stream": "heldout_test_landscape",
-        "split": "test",
-        "nearby_nhle_monuments": [
-          {
-            "list_entry": 1010092,
-            "name": "Denture bowl barrow",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 526.0,
-            "bearing": "SW"
-          },
-          {
-            "list_entry": 1016620,
-            "name": "Cross dyke 180m north of radio masts at Glatting Beacon",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 808.0,
-            "bearing": "S"
-          },
-          {
-            "list_entry": 1011597,
-            "name": "Bowl barrow on Glatting Beacon",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 1084.0,
-            "bearing": "S"
-          },
-          {
-            "list_entry": 1005834,
-            "name": "Cross ridge dykes on Sutton Down",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 1153.0,
-            "bearing": "SW"
-          }
-        ],
-        "nhle_cluster_summary": {
-          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
-          "nhle_within_2km": 14,
-          "prehistoric_within_2km": 10,
-          "nhle_within_5km": 49,
-          "prehistoric_within_5km": 36
-        },
-        "arch_context_note": "Situated in the South Downs Upper Chalk escarpment & dip-slope (West Sussex) within an active monument landscape (14 scheduled monuments within 2 km and 49 within 5 km, closest being Denture bowl barrow (NHLE #1010092, 526 m SW) and Cross dyke 180m north of radio masts at Glatting Beacon (NHLE #1016620, 808 m S)), the 1 m DTM isolates a curvilinear rampart-and-ditch enclosure (17854 m\u00b2 footprint, ~151 m span, 1.07\u00d7 elongation) rising +3.66 m above its 16 m local trend surface with weathered scarp gradients of 0.237 (13.3\u00b0), morphologically consistent with a Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement. Moderate surface roughness (nDSM 22.97 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
-        "raw_unet_confidence": 0.8661,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.626058,
-          50.918871
-        ]
-      },
-      "properties": {
-        "easting": 496674.3,
-        "northing": 114166.5,
-        "lat": 50.918871,
-        "lon": -0.626058,
-        "os_grid_ref": "SU 96674 14166",
-        "confidence": 0.819,
-        "peak_prob": 0.8309,
-        "mean_prob": 0.7833,
-        "predicted_class_id": 2,
-        "predicted_class": "iron_age_hillfort_banjo_enclosure",
-        "target_domain": "enclosure",
-        "area_m2": 10798.0,
-        "elongation": 1.57,
-        "est_local_relief_m": 3.55,
-        "max_positive_relief_m": 3.55,
-        "centroid_local_relief_m": 0.87,
-        "patch_min_relief_m": -0.37,
-        "est_surface_prominence_m": 24.58,
-        "mean_slope_tangent": 0.307,
-        "has_lidar_tin_facet": false,
-        "is_known_monument": false,
-        "matched_monument": null,
-        "osm_archaeology_matches": [],
-        "osm_confounder_matches": [
-          {
-            "osm_id": "way/483672586",
-            "subtype": "highway=bridleway",
-            "name": null,
-            "wikidata": null,
-            "distance_m": 8.4,
-            "inside_polygon": false
-          },
-          {
-            "osm_id": "lidar/reservoir_or_bund",
-            "subtype": "covered_reservoir_or_steep_bund (relief=+3.55m, slope=0.31)",
-            "name": "Covered reservoir, steep embankment, or modern spoil bund",
-            "wikidata": null,
-            "distance_m": 0.0,
-            "inside_polygon": true
-          }
-        ],
-        "context_category": "flagged_modern_or_karst_confounder",
-        "calibrated_tile_prob": 0.7977,
-        "raw_tile_logit": 1.9141,
-        "window_bbox": [
-          496576,
-          114000,
-          496832,
-          114256
-        ],
-        "region_name": "enclosure_test_landscape_E496000_N114000",
-        "passes_fpr_0_01": false,
-        "square_id": "test_landscape_E496000_N114000",
-        "sampling_stream": "heldout_test_landscape",
-        "split": "test",
-        "nearby_nhle_monuments": [
-          {
-            "list_entry": 1010092,
-            "name": "Denture bowl barrow",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 693.0,
-            "bearing": "SW"
-          },
-          {
-            "list_entry": 1016620,
-            "name": "Cross dyke 180m north of radio masts at Glatting Beacon",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 867.0,
-            "bearing": "S"
-          },
-          {
-            "list_entry": 1011597,
-            "name": "Bowl barrow on Glatting Beacon",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 1149.0,
-            "bearing": "S"
-          },
-          {
-            "list_entry": 1005834,
-            "name": "Cross ridge dykes on Sutton Down",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 1308.0,
-            "bearing": "SW"
-          }
-        ],
-        "nhle_cluster_summary": {
-          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
-          "nhle_within_2km": 13,
-          "prehistoric_within_2km": 10,
-          "nhle_within_5km": 47,
-          "prehistoric_within_5km": 35
-        },
-        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 10798 m\u00b2 topographic anomaly (+3.55 m local relief, 0.307 / 17.1\u00b0 mean scarp slope, nDSM 24.58 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=bridleway'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Denture bowl barrow (NHLE #1010092, 693 m SW) and Cross dyke 180m north of radio masts at Glatting Beacon (NHLE #1016620, 867 m S).",
-        "arch_context_source": "nhle_grounded_synthesis",
-        "raw_unet_confidence": 0.819,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -0.628147,
-          50.931947
-        ]
-      },
-      "properties": {
-        "easting": 496500.4,
-        "northing": 115617.7,
-        "lat": 50.931947,
-        "lon": -0.628147,
-        "os_grid_ref": "SU 96500 15618",
-        "confidence": 0.7989,
-        "peak_prob": 0.8084,
-        "mean_prob": 0.7703,
-        "predicted_class_id": 2,
-        "predicted_class": "iron_age_hillfort_banjo_enclosure",
-        "target_domain": "enclosure",
-        "area_m2": 2037.0,
-        "elongation": 1.31,
-        "est_local_relief_m": 1.28,
-        "max_positive_relief_m": 1.28,
-        "centroid_local_relief_m": 0.55,
-        "patch_min_relief_m": -0.14,
-        "est_surface_prominence_m": 11.09,
-        "mean_slope_tangent": 0.201,
-        "has_lidar_tin_facet": false,
-        "is_known_monument": false,
-        "matched_monument": null,
-        "osm_archaeology_matches": [],
-        "osm_confounder_matches": [
-          {
-            "osm_id": "way/194211074",
-            "subtype": "highway=track",
-            "name": null,
-            "wikidata": null,
-            "distance_m": 17.0,
-            "inside_polygon": false
-          }
-        ],
-        "context_category": "flagged_modern_or_karst_confounder",
-        "calibrated_tile_prob": 0.7758,
-        "raw_tile_logit": 1.752,
-        "window_bbox": [
-          496384,
-          115536,
-          496640,
-          115792
-        ],
-        "region_name": "enclosure_test_landscape_E496000_N114000",
-        "passes_fpr_0_01": false,
-        "square_id": "test_landscape_E496000_N114000",
-        "sampling_stream": "heldout_test_landscape",
-        "split": "test",
-        "nearby_nhle_monuments": [
-          {
-            "list_entry": 1008749,
-            "name": "Bowl barrow on Barlavington Down",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 405.0,
-            "bearing": "WNW"
-          },
-          {
-            "list_entry": 1015962,
-            "name": "Prehistoric linear boundary on Barlavington Down, 550m north east of Dog Kennels",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 444.0,
-            "bearing": "WSW"
-          },
-          {
-            "list_entry": 1005813,
-            "name": "Romano-British settlement at Church Farm",
-            "cls_id": 4,
-            "cls_label": "Scheduled enclosure / settlement / earthwork",
-            "distance_m": 1058.0,
-            "bearing": "NNW"
-          },
-          {
-            "list_entry": 1007879,
-            "name": "Bowl barrow on Woolavington Down north-east of Stickingspit Bottom",
-            "cls_id": 3,
-            "cls_label": "Bronze Age round barrow / cairn",
-            "distance_m": 1741.0,
-            "bearing": "W"
-          }
-        ],
-        "nhle_cluster_summary": {
-          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
-          "nhle_within_2km": 6,
-          "prehistoric_within_2km": 3,
-          "nhle_within_5km": 62,
-          "prehistoric_within_5km": 49
-        },
-        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 2037 m\u00b2 topographic anomaly (+1.28 m local relief, 0.201 / 11.4\u00b0 mean scarp slope, nDSM 11.09 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bowl barrow on Barlavington Down (NHLE #1008749, 405 m WNW) and Prehistoric linear boundary on Barlavington Down, 550m north east of Dog Kennels (NHLE #1015962, 444 m WSW).",
-        "arch_context_source": "nhle_grounded_synthesis",
-        "raw_unet_confidence": 0.7989,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     }
