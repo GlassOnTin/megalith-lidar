@@ -545,18 +545,23 @@
             2. Unidentified Roman Candidates
             <span class="tab-count" id="countRoman">0</span>
           </button>
+          <button class="tab-btn" data-tab="enclosure" id="tabBtnEnclosure">
+            <span class="dot" style="background:#38bdf8"></span>
+            3. Unidentified Iron Age &amp; Settlement Candidates
+            <span class="tab-count" id="countEnclosure">0</span>
+          </button>
           <button class="tab-btn" data-tab="known" id="tabBtnKnown">
             <span class="dot" style="background:var(--green)"></span>
-            3. Rediscovered Known Monuments
+            4. Rediscovered Known Monuments
             <span class="tab-count" id="countKnown">0</span>
           </button>
           <button class="tab-btn" data-tab="confounders" id="tabBtnConf">
             <span class="dot" style="background:var(--orange)"></span>
-            4. Filtered Modern / Karst Confounders
+            5. Filtered Modern / Karst Confounders
             <span class="tab-count" id="countConf">0</span>
           </button>
           <button class="tab-btn" data-tab="stats" id="tabBtnStats">
-            5. Statistical Benchmarks &amp; Null Tests
+            6. Statistical Benchmarks &amp; Null Tests
           </button>
         </div>
 
@@ -696,16 +701,24 @@
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
 
+    map.createPane("squaresPane");
+    map.getPane("squaresPane").style.zIndex = 380;
+    map.createPane("candidatesPane");
+    map.getPane("candidatesPane").style.zIndex = 650;
+
     const squaresLayer = L.layerGroup().addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
+    const selectedHaloLayer = L.layerGroup().addTo(map);
 
     const DATA_BASE = window.location.hostname.endsWith("github.io")
       ? "https://raw.githubusercontent.com/GlassOnTin/megalith-lidar/main/"
       : "";
     let summaryData = null;
     let romanSummaryData = null;
+    let enclosureSummaryData = null;
     let geojsonFeatures = [];
     let romanFeatures = [];
+    let enclosureFeatures = [];
     let currentTab = "unidentified";
     let selectedFeatureKey = null;
     let sortCol = "confidence";
@@ -717,8 +730,10 @@
         "<strong>What this list shows:</strong> Unrecorded prehistoric monument candidates — locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric barrows, henges, or chambered mounds, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.",
       roman:
         "<strong>What this list shows:</strong> Unrecorded Roman &amp; Romano-British candidates — locations where our dedicated <strong>RomanUNet</strong> detector (trained on 2,211 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) detects candidate villa platforms, enclosures, or linear road aggers that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
+      enclosure:
+        "<strong>What this list shows:</strong> Unrecorded Iron Age enclosures, banjo enclosures, prehistoric hut circle settlements, and cross-ridge dykes — locations where our dedicated <strong>EnclosureUNet</strong> detector detects candidate stone/turf hut rings, pound/round settlements, univallate/multivallate enclosures, or coaxial field boundaries that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy upland forestry and woodland earthworks.",
       known:
-        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and recorded OpenStreetMap archaeological sites (both prehistoric and Roman) that the models independently rediscovered inside held-out test squares that were never seen during training.",
+        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and recorded OpenStreetMap archaeological sites (prehistoric, Iron Age, and Roman) that the models independently rediscovered inside held-out test squares that were never seen during training.",
       confounders:
         "<strong>What this list shows:</strong> Earthworks and depressions that resemble monuments in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check or Qwen3.8 Visual Audit as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, U-bunds, golf bunkers, embankments, or 18th-century garden temples).",
       stats:
@@ -781,6 +796,9 @@
       if (cls === "roman_villa_building") return "Roman villa / building platform";
       if (cls === "roman_road_agger_trackway") return "Roman road agger / ancient trackway";
       if (cls === "roman_fort_camp_settlement") return "Roman fort / camp / RB settlement";
+      if (cls === "hut_circle_pound_settlement") return "Hut circle / pound settlement";
+      if (cls === "iron_age_hillfort_banjo_enclosure") return "Iron Age hillfort / banjo enclosure";
+      if (cls === "cross_ridge_dyke_field_system") return "Cross-ridge dyke / prehistoric field system";
       return (cls || "").replace(/_/g, " ");
     }
 
@@ -810,11 +828,30 @@
       return false;
     }
 
-    function selectCandidate(p, zoomMap = true) {
+    function selectCandidate(p, zoomMap = true, scrollRow = false) {
       selectedFeatureKey = featureKey(p);
+      let matchedRowEl = null;
       document.querySelectorAll("tr.cand-row").forEach((tr) => {
-        tr.classList.toggle("selected-row", tr.dataset.key === selectedFeatureKey);
+        const isSel = tr.dataset.key === selectedFeatureKey;
+        tr.classList.toggle("selected-row", isSel);
+        if (isSel) matchedRowEl = tr;
       });
+      if (scrollRow && matchedRowEl) {
+        matchedRowEl.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+
+      selectedHaloLayer.clearLayers();
+      if (p.lat != null && p.lon != null) {
+        L.circleMarker([p.lat, p.lon], {
+          pane: "candidatesPane",
+          radius: 13,
+          color: "#58a6ff",
+          weight: 3,
+          fillColor: "#58a6ff",
+          fillOpacity: 0.18,
+          interactive: false
+        }).addTo(selectedHaloLayer);
+      }
 
       const card = document.getElementById("inspectorBody");
       const osmUrl = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}#map=17/${p.lat}/${p.lon}`;
@@ -973,18 +1010,30 @@
         return true;
       });
 
+      const encBaseList = enclosureFeatures.filter((f) => {
+        const p = f.properties;
+        if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
+        if (onlyDiag && !p.diagnostic_png) return false;
+        return true;
+      });
+
       const cUnid = baseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
       const cRoman = romanBaseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
+      const cEnc = encBaseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
       const cKnown = baseList.filter((f) => matchesTab(f.properties, "known")).length +
-        romanBaseList.filter((f) => matchesTab(f.properties, "known")).length;
+        romanBaseList.filter((f) => matchesTab(f.properties, "known")).length +
+        encBaseList.filter((f) => matchesTab(f.properties, "known")).length;
       const cConf = baseList.filter((f) => matchesTab(f.properties, "confounders")).length +
-        romanBaseList.filter((f) => matchesTab(f.properties, "confounders")).length;
+        romanBaseList.filter((f) => matchesTab(f.properties, "confounders")).length +
+        encBaseList.filter((f) => matchesTab(f.properties, "confounders")).length;
 
       document.getElementById("countUnid").textContent = cUnid;
       document.getElementById("countKnown").textContent = cKnown;
       document.getElementById("countConf").textContent = cConf;
       const romanEl = document.getElementById("countRoman");
       if (romanEl) romanEl.textContent = cRoman;
+      const encEl = document.getElementById("countEnclosure");
+      if (encEl) encEl.textContent = cEnc;
     }
 
     function renderActiveView(autoSelectFirst = false) {
@@ -1007,12 +1056,16 @@
 
       const sourceList = currentTab === "roman"
         ? romanFeatures
-        : (currentTab === "unidentified" ? geojsonFeatures : geojsonFeatures.concat(romanFeatures));
+        : (currentTab === "enclosure"
+          ? enclosureFeatures
+          : (currentTab === "unidentified"
+            ? geojsonFeatures
+            : geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures)));
       const filtered = sourceList.filter((f) => {
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
-        if (currentTab === "roman") {
+        if (currentTab === "roman" || currentTab === "enclosure") {
           return matchesTab(p, "unidentified");
         }
         return matchesTab(p, currentTab);
@@ -1062,13 +1115,20 @@
         const key = featureKey(p);
         const color = categoryColor(p.context_category);
         const marker = L.circleMarker([p.lat, p.lon], {
-          radius: 7,
+          pane: "candidatesPane",
+          radius: 8,
           color: "#0f1217",
           weight: 1.5,
           fillColor: color,
-          fillOpacity: 0.92
+          fillOpacity: 0.95
         });
-        marker.on("click", () => selectCandidate(p, true));
+        marker.bindTooltip(
+          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: ${p.confidence.toFixed(3)} · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m<br/><em>Click to select row &amp; view 4-panel LiDAR</em>`
+        );
+        marker.on("click", (ev) => {
+          L.DomEvent.stopPropagation(ev);
+          selectCandidate(p, true, true);
+        });
         marker.addTo(markersLayer);
 
         const rowCopyText = `${p.os_grid_ref} | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
@@ -1116,11 +1176,13 @@
 
     async function init() {
       const bust = Date.now();
-      const [sumResp, gjResp, rSumResp, rGjResp] = await Promise.all([
+      const [sumResp, gjResp, rSumResp, rGjResp, eSumResp, eGjResp] = await Promise.all([
         fetch(`${DATA_BASE}docs/survey_summary.json?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/candidates.geojson?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/roman_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
-        fetch(`${DATA_BASE}docs/roman_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null)
+        fetch(`${DATA_BASE}docs/roman_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
+        fetch(`${DATA_BASE}docs/enclosure_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
+        fetch(`${DATA_BASE}docs/enclosure_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null)
       ]);
       summaryData = await sumResp.json();
       const gj = await gjResp.json();
@@ -1131,6 +1193,13 @@
       if (rGjResp && rGjResp.ok) {
         const rgj = await rGjResp.json();
         romanFeatures = rgj.features || [];
+      }
+      if (eSumResp && eSumResp.ok) {
+        enclosureSummaryData = await eSumResp.json();
+      }
+      if (eGjResp && eGjResp.ok) {
+        const egj = await eGjResp.json();
+        enclosureFeatures = egj.features || [];
       }
 
       const qp = summaryData.queue_progress || {};
@@ -1238,9 +1307,38 @@
             } else {
               map.setView([sq.center_lat, sq.center_lon], 13);
             }
+            const op = document.getElementById("opSelect").value;
+            const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+            const sourceList = currentTab === "roman"
+              ? romanFeatures
+              : (currentTab === "enclosure"
+                ? enclosureFeatures
+                : (currentTab === "unidentified"
+                  ? geojsonFeatures
+                  : geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures)));
+            const inSq = sourceList
+              .filter((f) => {
+                const p = f.properties;
+                if (p.square_id !== sq.square_id) return false;
+                if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
+                if (onlyDiag && !p.diagnostic_png) return false;
+                if (currentTab === "roman" || currentTab === "enclosure") {
+                  return matchesTab(p, "unidentified");
+                }
+                return matchesTab(p, currentTab);
+              })
+              .sort((a, b) => {
+                const pngDiff = (b.properties.diagnostic_png ? 1 : 0) - (a.properties.diagnostic_png ? 1 : 0);
+                if (pngDiff !== 0) return pngDiff;
+                return (b.properties.confidence || 0) - (a.properties.confidence || 0);
+              });
+            if (inSq.length > 0) {
+              selectCandidate(inSq[0].properties, false, true);
+            }
           };
           if (sq.bounds_latlon && sq.bounds_latlon.length === 2) {
             L.rectangle(sq.bounds_latlon, {
+              pane: "squaresPane",
               color: color,
               weight: 2,
               fillColor: color,
@@ -1248,6 +1346,7 @@
             }).bindTooltip(tip).on("click", zoomToSq).addTo(squaresLayer);
           }
           L.circleMarker([sq.center_lat, sq.center_lon], {
+            pane: "squaresPane",
             radius: 6,
             color: color,
             weight: 1.5,
