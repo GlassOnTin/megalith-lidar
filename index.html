@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UK LiDAR Prehistoric Monument Survey — Calibrated Out-of-Sample Results</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    :root {
+      --bg: #0f1217;
+      --panel: #171b22;
+      --panel-alt: #1e242d;
+      --border: #2b3340;
+      --text: #e6edf3;
+      --muted: #9aa6b5;
+      --gold: #ffd600;
+      --green: #00e676;
+      --cyan: #00d2ff;
+      --orange: #ff6e40;
+      --accent: #58a6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    header {
+      padding: 14px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    header .sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    header a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    header a:hover { text-decoration: underline; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+      padding: 14px;
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .card h2 {
+      margin: 0 0 10px 0;
+      font-size: 15px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    #map {
+      width: 100%;
+      height: 540px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .controls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    select {
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .stat-box {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+    .stat-box .label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .stat-box .val {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-box .ci {
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: var(--panel-alt);
+      position: sticky;
+      top: 0;
+    }
+    tr.cand-row { cursor: pointer; }
+    tr.cand-row:hover { background: var(--panel-alt); }
+    .table-scroll {
+      max-height: 330px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-unid { background: rgba(255, 214, 0, 0.16); color: var(--gold); border: 1px solid rgba(255, 214, 0, 0.4); }
+    .badge-nhle { background: rgba(0, 230, 118, 0.16); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.4); }
+    .badge-osm  { background: rgba(0, 210, 255, 0.16); color: var(--cyan); border: 1px solid rgba(0, 210, 255, 0.4); }
+    .badge-conf { background: rgba(255, 110, 64, 0.16); color: var(--orange); border: 1px solid rgba(255, 110, 64, 0.4); }
+    .diag-img {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin-top: 8px;
+      background: #090b0e;
+    }
+    .diag-caption {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .muted { color: var(--muted); }
+    footer {
+      padding: 12px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>UK 1 m LiDAR Prehistoric Monument Survey</h1>
+      <div class="sub">
+        Isotropic scale-space U-Net (D<sub>4</sub>-equivariant) · Validation Platt calibration · Held-out 20 km block test evaluation · NHLE + OpenStreetMap spatial cross-check
+      </div>
+    </div>
+    <div class="sub">
+      <a href="https://github.com/GlassOnTin/megalith-lidar">GitHub Repository (AGPL-3.0)</a> ·
+      <a href="docs/survey_summary.json">survey_summary.json</a> ·
+      <a href="docs/candidates.geojson">candidates.geojson</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="card">
+        <h2>Interactive Out-of-Sample Survey Map (England 1 m LiDAR)</h2>
+        <div class="controls">
+          <label>
+            Operating point:
+            <select id="opSelect">
+              <option value="fpr_0.05">Validation 5% FPR (tile p ≥ 0.8343, LR+ = 15.5×)</option>
+              <option value="fpr_0.01">Validation 1% FPR (tile p ≥ 0.9428, LR+ = 47.2×)</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="chkUnid" checked /> <span class="dot" style="background:var(--gold)"></span> Unidentified candidate</label>
+          <label><input type="checkbox" id="chkOsm" checked /> <span class="dot" style="background:var(--cyan)"></span> OSM unscheduled archaeology</label>
+          <label><input type="checkbox" id="chkNhle" checked /> <span class="dot" style="background:var(--green)"></span> NHLE Scheduled Monument</label>
+          <label><input type="checkbox" id="chkConf" checked /> <span class="dot" style="background:var(--orange)"></span> Flagged OSM confounder</label>
+        </div>
+        <div id="map"></div>
+      </div>
+
+      <div class="card" id="inspectorCard">
+        <h2>Candidate Diagnostic Inspector</h2>
+        <div id="inspectorBody" class="muted">
+          Click any marker on the map or any row in the candidate table to inspect its coordinates, calibrated probability, physical terrain observables, OpenStreetMap cross-check, and 4-panel 1 m LiDAR diagnostic render.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Held-Out Test Split Statistical Evaluation (n = 263 tiles, 20 km BNG blocks)</h2>
+        <div class="stat-grid" id="evalStatsGrid"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Negative Null Distribution</th>
+              <th>Test ROC-AUC</th>
+              <th>95% Bootstrap CI</th>
+              <th>Test FPR @ Val 1% Op</th>
+              <th>Test FPR @ Val 5% Op</th>
+            </tr>
+          </thead>
+          <tbody id="nullTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Scheduled 2 km × 2 km Out-of-Sample Survey Streams</h2>
+        <div class="sub muted" style="margin-bottom:8px" id="surveyUpdatedText"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Sampling Stream</th>
+              <th>Squares (Area)</th>
+              <th>NHLE Scheduled</th>
+              <th>OSM Archaeology</th>
+              <th>OSM Confounders</th>
+              <th>Unidentified (5% / 1% Op)</th>
+            </tr>
+          </thead>
+          <tbody id="streamTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Detected Features in Scanned Test Squares</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>OS Grid Ref</th>
+                <th>Category</th>
+                <th>Class</th>
+                <th>Conf</th>
+                <th>Relief</th>
+                <th>Area</th>
+                <th>Context / Notes</th>
+              </tr>
+            </thead>
+            <tbody id="candTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Licensed under GNU AGPL v3.0. Contains Environment Agency Open LiDAR data (OGL v3.0), Historic England National Heritage List for England (OGL v3.0), and OpenStreetMap contributors (ODbL).
+  </footer>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script>
+    const map = L.map("map").setView([53.2, -1.8], 6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const squaresLayer = L.layerGroup().addTo(map);
+    const markersLayer = L.layerGroup().addTo(map);
+
+    let summaryData = null;
+    let geojsonFeatures = [];
+
+    function categoryColor(cat) {
+      if (cat === "rediscovered_nhle_scheduled") return "#00e676";
+      if (cat === "rediscovered_osm_archaeology") return "#00d2ff";
+      if (cat === "flagged_modern_or_karst_confounder") return "#ff6e40";
+      return "#ffd600";
+    }
+
+    function categoryBadge(cat) {
+      if (cat === "rediscovered_nhle_scheduled") return '<span class="badge badge-nhle">NHLE Scheduled</span>';
+      if (cat === "rediscovered_osm_archaeology") return '<span class="badge badge-osm">OSM Archaeology</span>';
+      if (cat === "flagged_modern_or_karst_confounder") return '<span class="badge badge-conf">OSM Confounder</span>';
+      return '<span class="badge badge-unid">Unidentified</span>';
+    }
+
+    function contextNote(p) {
+      if (p.matched_monument) {
+        return `${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry}, ${p.matched_monument.distance_m} m)`;
+      }
+      if (p.osm_archaeology_matches && p.osm_archaeology_matches.length > 0) {
+        const m = p.osm_archaeology_matches[0];
+        return `${m.name || m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
+      }
+      if (p.osm_confounder_matches && p.osm_confounder_matches.length > 0) {
+        const m = p.osm_confounder_matches[0];
+        return `${m.name ? m.name + ": " : ""}${m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
+      }
+      return "Outside NHLE & mapped OSM features";
+    }
+
+    function selectCandidate(p) {
+      const card = document.getElementById("inspectorBody");
+      const osmUrl = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}#map=17/${p.lat}/${p.lon}`;
+      let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong>${p.os_grid_ref}</strong> · ${categoryBadge(p.context_category)}
+            <span class="muted" style="margin-left:6px;">(${p.sampling_stream || "test"}, square ${p.square_id || ""})</span>
+          </div>
+          <div>
+            <a href="${osmUrl}" target="_blank" rel="noopener" style="color:var(--accent)">Open in OpenStreetMap ↗</a>
+          </div>
+        </div>
+        <div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px;font-size:12.5px;">
+          <div><span class="muted">Coordinates:</span> ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)} (E ${p.easting}, N ${p.northing})</div>
+          <div><span class="muted">Confidence (Cal Tile p):</span> <strong>${p.confidence.toFixed(3)}</strong> (${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
+          <div><span class="muted">Morphological Class:</span> ${p.predicted_class}</div>
+          <div><span class="muted">Footprint & Elongation:</span> ${p.area_m2} m² (elongation ${p.elongation}×)</div>
+          <div><span class="muted">16 m Local Relief:</span> ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</div>
+          <div><span class="muted">Context Cross-Check:</span> ${contextNote(p)}</div>
+        </div>
+      `;
+      if (p.diagnostic_png) {
+        html += `
+          <img class="diag-img" src="docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
+          <div class="diag-caption">
+            4-panel 256 m × 256 m (1 m/px) diagnostic: [1] Inverted isotropic slope |∇z| · [2] 16 m local relief (z − G₁₆(z)) · [3] Log nDSM surface prominence · [4] D₄-averaged segmentation posterior probability. Green = NHLE Scheduled, Cyan = OSM Archaeology, Orange = OSM Confounder, Gold = Unidentified candidate.
+          </div>
+        `;
+      }
+      card.innerHTML = html;
+      map.panTo([p.lat, p.lon]);
+    }
+
+    function renderFilter() {
+      const op = document.getElementById("opSelect").value;
+      const showUnid = document.getElementById("chkUnid").checked;
+      const showOsm = document.getElementById("chkOsm").checked;
+      const showNhle = document.getElementById("chkNhle").checked;
+      const showConf = document.getElementById("chkConf").checked;
+
+      markersLayer.clearLayers();
+      const tbody = document.getElementById("candTableBody");
+      tbody.innerHTML = "";
+
+      const filtered = geojsonFeatures.filter((f) => {
+        const p = f.properties;
+        if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
+        const cat = p.context_category;
+        if (cat === "unidentified_candidate" && !showUnid) return false;
+        if (cat === "rediscovered_osm_archaeology" && !showOsm) return false;
+        if (cat === "rediscovered_nhle_scheduled" && !showNhle) return false;
+        if (cat === "flagged_modern_or_karst_confounder" && !showConf) return false;
+        return true;
+      });
+
+      filtered.sort((a, b) => b.properties.confidence - a.properties.confidence);
+
+      filtered.forEach((f) => {
+        const p = f.properties;
+        const color = categoryColor(p.context_category);
+        const marker = L.circleMarker([p.lat, p.lon], {
+          radius: 7,
+          color: "#0f1217",
+          weight: 1.5,
+          fillColor: color,
+          fillOpacity: 0.9
+        });
+        marker.on("click", () => selectCandidate(p));
+        marker.addTo(markersLayer);
+
+        const tr = document.createElement("tr");
+        tr.className = "cand-row";
+        tr.innerHTML = `
+          <td><strong>${p.os_grid_ref}</strong></td>
+          <td>${categoryBadge(p.context_category)}</td>
+          <td>${p.predicted_class.replace(/_/g, " ")}</td>
+          <td>${p.confidence.toFixed(3)}</td>
+          <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
+          <td>${p.area_m2} m²</td>
+          <td class="muted">${contextNote(p)}</td>
+        `;
+        tr.addEventListener("click", () => selectCandidate(p));
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function init() {
+      const [sumResp, gjResp] = await Promise.all([
+        fetch("docs/survey_summary.json"),
+        fetch("docs/candidates.geojson")
+      ]);
+      summaryData = await sumResp.json();
+      const gj = await gjResp.json();
+      geojsonFeatures = gj.features || [];
+
+      const tm = summaryData.heldout_test_evaluation || {};
+      const base = summaryData.scalar_baseline_test || {};
+      const sub = summaryData.subgroup_and_confounding_analysis || {};
+      const rocCi = tm.roc_auc_ci95 || [0, 0];
+      const baseCi = base.roc_auc_ci95 || [0, 0];
+      const op01 = (tm.operating_points || {})["fpr_0.01"] || {};
+      const op05 = (tm.operating_points || {})["fpr_0.05"] || {};
+
+      document.getElementById("evalStatsGrid").innerHTML = `
+        <div class="stat-box">
+          <div class="label">Test ROC-AUC (All Nulls)</div>
+          <div class="val">${(tm.roc_auc || 0).toFixed(4)}</div>
+          <div class="ci">95% CI: [${rocCi[0].toFixed(4)}, ${rocCi[1].toFixed(4)}]</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Scalar Relief Baseline</div>
+          <div class="val">${(base.roc_auc || 0).toFixed(4)}</div>
+          <div class="ci">95% CI: [${baseCi[0].toFixed(4)}, ${baseCi[1].toFixed(4)}]</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Test @ Val 1% FPR Op</div>
+          <div class="val">FPR ${((op01.fpr_false_positive_rate || 0) * 100).toFixed(2)}%</div>
+          <div class="ci">TPR ${((op01.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op01.likelihood_ratio_pos || 0).toFixed(1)}×</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Test @ Val 5% FPR Op</div>
+          <div class="val">FPR ${((op05.fpr_false_positive_rate || 0) * 100).toFixed(2)}%</div>
+          <div class="ci">TPR ${((op05.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op05.likelihood_ratio_pos || 0).toFixed(1)}×</div>
+        </div>
+      `;
+
+      const subNulls = sub.discrimination_by_negative_null || {};
+      const opBreak = sub.operating_point_breakdowns || {};
+      const null01 = ((opBreak["fpr_0.01"] || {}).fpr_by_negative_null) || {};
+      const null05 = ((opBreak["fpr_0.05"] || {}).fpr_by_negative_null) || {};
+      const nullLabels = {
+        random_national: "Uniform National Null (England 20 km land blocks)",
+        matched_environment: "Matched-Environment Null (400–1600 m from monuments)",
+        anthropogenic_non_target: "Anthropogenic Non-Target Null (medieval/industrial)"
+      };
+      const nullBody = document.getElementById("nullTableBody");
+      Object.keys(nullLabels).forEach((k) => {
+        const sn = subNulls[k];
+        if (!sn) return;
+        const ci = sn.ci95 || [0, 0];
+        const fpr01 = (null01[k] || 0) * 100;
+        const fpr05 = (null05[k] || 0) * 100;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${nullLabels[k]} (n=${sn.n_negatives})</td>
+          <td><strong>${sn.roc_auc.toFixed(4)}</strong></td>
+          <td class="muted">[${ci[0].toFixed(4)}, ${ci[1].toFixed(4)}]</td>
+          <td>${fpr01.toFixed(2)}%</td>
+          <td>${fpr05.toFixed(2)}%</td>
+        `;
+        nullBody.appendChild(tr);
+      });
+
+      const qp = summaryData.queue_progress || {};
+      document.getElementById("surveyUpdatedText").textContent =
+        `Last batch updated: ${summaryData.updated_at_utc} · Scanned ${qp.completed_squares} test squares (${qp.total_scanned_area_km2} km²) out of ${qp.total_queued_test_squares} queued out-of-sample squares.`;
+
+      const sb = summaryData.stream_breakdown || {};
+      const streamBody = document.getElementById("streamTableBody");
+      [
+        ["uniform_national_null", "Uniform National Null (Test Split)"],
+        ["heldout_test_landscape", "Held-Out Monument Landscapes (Test Split)"]
+      ].forEach(([key, label]) => {
+        const st = sb[key];
+        if (!st) return;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${label}</strong></td>
+          <td>${st.squares_scanned} (${st.area_km2} km²)</td>
+          <td>${st.rediscovered_nhle_scheduled}</td>
+          <td>${st.rediscovered_osm_archaeology}</td>
+          <td>${st.flagged_modern_or_karst_confounders}</td>
+          <td><strong>${st.unidentified_candidates}</strong> (${st.unidentified_density_per_km2_fpr_0_05}/km²) / <strong>${st.unidentified_candidates_fpr_0_01}</strong> (${st.unidentified_density_per_km2_fpr_0_01}/km²)</td>
+        `;
+        streamBody.appendChild(tr);
+      });
+
+      (summaryData.scanned_squares || []).forEach((sq) => {
+        const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
+        const c = L.circleMarker([sq.center_lat, sq.center_lon], {
+          radius: 12,
+          color: color,
+          weight: 1.5,
+          dashArray: "3,3",
+          fillOpacity: 0.08
+        }).bindTooltip(
+          `${sq.square_id} (${sq.os_grid_ref})<br/>Stream: ${sq.sampling_stream}<br/>NHLE: ${sq.rediscovered_nhle_scheduled_count}, OSM Arch: ${sq.rediscovered_osm_archaeology_count}, Confounders: ${sq.flagged_modern_or_karst_confounders_count}, Unidentified: ${sq.unidentified_candidates_count}`
+        );
+        c.addTo(squaresLayer);
+      });
+
+      ["opSelect", "chkUnid", "chkOsm", "chkNhle", "chkConf"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", renderFilter);
+      });
+
+      renderFilter();
+      if (geojsonFeatures.length > 0) {
+        selectCandidate(geojsonFeatures[0].properties);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[Unit]
+Description=UK LiDAR Megalith Survey — Scheduled Out-of-Sample Batch Scanner
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ian/Code/megalith-lidar
+Environment="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+Environment="PYTHONPATH=/home/ian/Code/megalith-lidar"
+ExecStart=/home/ian/Code/megalith-lidar/.venv/bin/python /home/ian/Code/megalith-lidar/scripts/run_national_batch.py --max-squares 4 --device cuda:1 --git-push
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
