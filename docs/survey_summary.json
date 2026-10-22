@@ -1,37 +1,37 @@
 {
-  "updated_at_utc": "2026-10-22T14:23:21Z",
+  "updated_at_utc": "2026-10-22T14:30:58Z",
   "license": "AGPL-3.0-or-later",
   "data_attribution": "Contains Environment Agency Open LiDAR data (OGL v3.0), Historic England National Heritage List for England (OGL v3.0), and OpenStreetMap contributors (ODbL).",
   "queue_progress": {
     "total_queued_test_squares": 514,
-    "completed_squares": 102,
-    "no_lidar_coverage_squares": 8,
-    "pending_squares": 404,
-    "total_scanned_area_km2": 408.0,
-    "total_detections": 414
+    "completed_squares": 106,
+    "no_lidar_coverage_squares": 9,
+    "pending_squares": 399,
+    "total_scanned_area_km2": 424.0,
+    "total_detections": 424
   },
   "stream_breakdown": {
     "uniform_national_null": {
-      "squares_scanned": 47,
-      "area_km2": 188.0,
+      "squares_scanned": 49,
+      "area_km2": 196.0,
       "rediscovered_nhle_scheduled": 1,
       "rediscovered_osm_archaeology": 0,
-      "flagged_modern_or_karst_confounders": 76,
-      "unidentified_candidates": 37,
+      "flagged_modern_or_karst_confounders": 77,
+      "unidentified_candidates": 38,
       "unidentified_candidates_fpr_0_01": 4,
-      "unidentified_density_per_km2_fpr_0_05": 0.197,
-      "unidentified_density_per_km2_fpr_0_01": 0.021
+      "unidentified_density_per_km2_fpr_0_05": 0.194,
+      "unidentified_density_per_km2_fpr_0_01": 0.02
     },
     "heldout_test_landscape": {
-      "squares_scanned": 55,
-      "area_km2": 220.0,
-      "rediscovered_nhle_scheduled": 81,
+      "squares_scanned": 57,
+      "area_km2": 228.0,
+      "rediscovered_nhle_scheduled": 84,
       "rediscovered_osm_archaeology": 3,
-      "flagged_modern_or_karst_confounders": 123,
-      "unidentified_candidates": 93,
+      "flagged_modern_or_karst_confounders": 125,
+      "unidentified_candidates": 96,
       "unidentified_candidates_fpr_0_01": 20,
-      "unidentified_density_per_km2_fpr_0_05": 0.423,
-      "unidentified_density_per_km2_fpr_0_01": 0.091
+      "unidentified_density_per_km2_fpr_0_05": 0.421,
+      "unidentified_density_per_km2_fpr_0_01": 0.088
     }
   },
   "heldout_test_evaluation": {
@@ -3767,6 +3767,138 @@
       "unidentified_candidates_count": 7,
       "unidentified_candidates_fpr_0_01_count": 2,
       "scanned_at_utc": "2026-10-22T13:35:02Z"
+    },
+    {
+      "square_id": "null_test_E432000_N454000",
+      "sampling_stream": "uniform_national_null",
+      "split": "test",
+      "os_grid_ref": "SE 33000 55000",
+      "bbox_epsg27700": [
+        432000,
+        454000,
+        434000,
+        456000
+      ],
+      "bounds_latlon": [
+        [
+          53.98107,
+          -1.51354
+        ],
+        [
+          53.99892,
+          -1.48282
+        ]
+      ],
+      "center_lat": 53.99,
+      "center_lon": -1.49819,
+      "area_km2": 4.0,
+      "windows_with_valid_1m_lidar": 121,
+      "windows_above_tile_threshold": 0,
+      "rediscovered_nhle_scheduled_count": 0,
+      "rediscovered_osm_archaeology_count": 0,
+      "flagged_modern_or_karst_confounders_count": 0,
+      "unidentified_candidates_count": 0,
+      "unidentified_candidates_fpr_0_01_count": 0,
+      "scanned_at_utc": "2026-10-22T14:26:41Z"
+    },
+    {
+      "square_id": "test_landscape_E408000_N130000",
+      "sampling_stream": "heldout_test_landscape",
+      "split": "test",
+      "os_grid_ref": "SU 09000 31000",
+      "bbox_epsg27700": [
+        408000,
+        130000,
+        410000,
+        132000
+      ],
+      "bounds_latlon": [
+        [
+          51.06928,
+          -1.8872
+        ],
+        [
+          51.08723,
+          -1.8586
+        ]
+      ],
+      "center_lat": 51.07825,
+      "center_lon": -1.8729,
+      "area_km2": 4.0,
+      "windows_with_valid_1m_lidar": 118,
+      "windows_above_tile_threshold": 6,
+      "rediscovered_nhle_scheduled_count": 0,
+      "rediscovered_osm_archaeology_count": 0,
+      "flagged_modern_or_karst_confounders_count": 1,
+      "unidentified_candidates_count": 3,
+      "unidentified_candidates_fpr_0_01_count": 0,
+      "scanned_at_utc": "2026-10-22T14:27:59Z"
+    },
+    {
+      "square_id": "test_landscape_E412000_N226000",
+      "sampling_stream": "heldout_test_landscape",
+      "split": "test",
+      "os_grid_ref": "SP 13000 27000",
+      "bbox_epsg27700": [
+        412000,
+        226000,
+        414000,
+        228000
+      ],
+      "bounds_latlon": [
+        [
+          51.93238,
+          -1.82688
+        ],
+        [
+          51.95032,
+          -1.79771
+        ]
+      ],
+      "center_lat": 51.94135,
+      "center_lon": -1.8123,
+      "area_km2": 4.0,
+      "windows_with_valid_1m_lidar": 117,
+      "windows_above_tile_threshold": 4,
+      "rediscovered_nhle_scheduled_count": 3,
+      "rediscovered_osm_archaeology_count": 0,
+      "flagged_modern_or_karst_confounders_count": 1,
+      "unidentified_candidates_count": 0,
+      "unidentified_candidates_fpr_0_01_count": 0,
+      "scanned_at_utc": "2026-10-22T14:29:44Z"
+    },
+    {
+      "square_id": "null_test_E556000_N272000",
+      "sampling_stream": "uniform_national_null",
+      "split": "test",
+      "os_grid_ref": "TL 57000 73000",
+      "bbox_epsg27700": [
+        556000,
+        272000,
+        558000,
+        274000
+      ],
+      "bounds_latlon": [
+        [
+          52.32393,
+          0.2876
+        ],
+        [
+          52.34132,
+          0.31786
+        ]
+      ],
+      "center_lat": 52.33263,
+      "center_lon": 0.30273,
+      "area_km2": 4.0,
+      "windows_with_valid_1m_lidar": 117,
+      "windows_above_tile_threshold": 2,
+      "rediscovered_nhle_scheduled_count": 0,
+      "rediscovered_osm_archaeology_count": 0,
+      "flagged_modern_or_karst_confounders_count": 1,
+      "unidentified_candidates_count": 1,
+      "unidentified_candidates_fpr_0_01_count": 0,
+      "scanned_at_utc": "2026-10-22T14:30:52Z"
     }
   ]
 }
