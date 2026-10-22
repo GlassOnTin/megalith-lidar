@@ -25,8 +25,12 @@
       --accent: #58a6ff;
     }
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -86,14 +90,18 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
       gap: 14px;
       padding: 12px 14px 16px 14px;
       max-width: 1800px;
       margin: 0 auto;
     }
+    .layout > div {
+      min-width: 0;
+      max-width: 100%;
+    }
     @media (max-width: 1120px) {
-      .layout { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: minmax(0, 1fr); }
     }
     .card {
       background: var(--panel);
@@ -101,6 +109,8 @@
       border-radius: 6px;
       padding: 14px;
       margin-bottom: 14px;
+      min-width: 0;
+      max-width: 100%;
     }
     .card-header {
       display: flex;
@@ -343,12 +353,22 @@
         display: none;
       }
       .layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        max-width: 100vw;
         gap: 10px;
         padding: 8px 8px 16px 8px;
       }
+      .layout > div {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+      }
       .card {
-        padding: 12px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 10px;
         margin-bottom: 10px;
         overflow-x: hidden;
       }
@@ -358,6 +378,9 @@
       .tabs {
         display: flex;
         flex-wrap: nowrap;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
@@ -386,10 +409,28 @@
       .controls {
         font-size: 13.5px;
         gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .controls > div {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .controls label {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
       }
       select {
         font-size: 13.5px;
+        width: 100%;
         max-width: 100%;
+        min-width: 0;
+        text-overflow: ellipsis;
         padding: 6px 8px;
       }
       .btn-link {
@@ -397,6 +438,9 @@
         padding: 6px 10px;
       }
       .table-scroll {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         max-height: 36vh;
         overflow-x: auto;
         overflow-y: auto;
@@ -690,36 +734,40 @@
           <div class="stat-grid" id="evalStatsGrid"></div>
 
           <h3 style="font-size:13.5px;margin:14px 0 6px 0;">Table A — Can the Model Distinguish Monuments from Background Terrain? (Held-Out Test Split)</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Negative Null Distribution Compared Against Positives (n=143)</th>
-                <th>Test ROC-AUC</th>
-                <th>95% Bootstrap CI</th>
-                <th>False Positive Rate @ Strict (1% Op)</th>
-                <th>False Positive Rate @ Standard (5% Op)</th>
-              </tr>
-            </thead>
-            <tbody id="nullTableBody"></tbody>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Negative Null Distribution Compared Against Positives (n=143)</th>
+                  <th>Test ROC-AUC</th>
+                  <th>95% Bootstrap CI</th>
+                  <th>False Positive Rate @ Strict (1% Op)</th>
+                  <th>False Positive Rate @ Standard (5% Op)</th>
+                </tr>
+              </thead>
+              <tbody id="nullTableBody"></tbody>
+            </table>
+          </div>
 
           <h3 style="font-size:13.5px;margin:16px 0 6px 0;">Table B — Live 2 km × 2 km Survey Streams Scanned So Far</h3>
           <p class="muted" style="margin:0 0 6px 0;font-size:12px;">
             The scheduled scanner alternates between randomly chosen English land squares (<em>Uniform National Null</em>) and held-out test squares in monument-bearing landscapes (<em>Held-Out Monument Landscapes</em>).
           </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Sampling Stream (Out-of-Sample Test Squares)</th>
-                <th>Squares Scanned</th>
-                <th>Rediscovered NHLE</th>
-                <th>Flagged OSM Confounders</th>
-                <th>Unidentified @ Strict 1% Op</th>
-                <th>Unidentified @ Standard 5% Op</th>
-              </tr>
-            </thead>
-            <tbody id="streamTableBody"></tbody>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sampling Stream (Out-of-Sample Test Squares)</th>
+                  <th>Squares Scanned</th>
+                  <th>Rediscovered NHLE</th>
+                  <th>Flagged OSM Confounders</th>
+                  <th>Unidentified @ Strict 1% Op</th>
+                  <th>Unidentified @ Standard 5% Op</th>
+                </tr>
+              </thead>
+              <tbody id="streamTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
