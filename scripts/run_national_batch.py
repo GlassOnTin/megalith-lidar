@@ -192,6 +192,121 @@ def build_deterministic_national_queue(
     return interleaved
 
 
+HELDOUT_SEED_REGIONS = [
+    ("Ure Valley / Masham (North of Thornborough)", 422000, 488000, 420000, 480000),
+    ("Cotswolds (Bourton / Windrush)", 414000, 224000, 400000, 220000),
+    ("Wessex / Wylye & Avon Valleys", 414000, 132000, 400000, 120000),
+    ("Bodmin Moor / Rough Tor Fringe", 214000, 88000, 200000, 80000),
+    ("South Downs (Chichester / Bignor)", 490000, 112000, 480000, 100000),
+]
+
+
+def prioritize_contiguous_seed_regions_in_queue(
+    queue_state: Dict,
+    catalog: MonumentCatalog,
+    square_size_m: int = 2000,
+) -> bool:
+    """
+    Ensure that contiguous 12 km x 12 km (6x6 squares) patches around each of the 5 held-out
+    test seed regions are present in the queue and ordered in concentric outward spirals at
+    the front of the pending queue (round-robin across the 5 seed landscapes).
+    """
+    if queue_state.get("contiguous_seed_regions_prioritized"):
+        return False
+
+    prehistoric_classes = {
+        CLASS_MEGALITHIC_TOMB_LONG_BARROW,
+        CLASS_CIRCLE_HENGE_STONE,
+        CLASS_BARROW_CAIRN,
+    }
+    prehistoric_squares_2k: Dict[Tuple[int, int], int] = {}
+    for rec in catalog.records:
+        if rec.cls in prehistoric_classes:
+            sx = int(rec.easting // square_size_m) * square_size_m
+            sy = int(rec.northing // square_size_m) * square_size_m
+            prehistoric_squares_2k[(sx, sy)] = prehistoric_squares_2k.get((sx, sy), 0) + 1
+
+    existing_by_coord: Dict[Tuple[int, int], Dict] = {}
+    for item in queue_state["queue"]:
+        existing_by_coord[(int(item["e_min"]), int(item["n_min"]))] = item
+
+    seed_spirals: List[List[Dict]] = []
+    prioritized_coords: Set[Tuple[int, int]] = set()
+
+    for _region_name, seed_e, seed_n, block_e, block_n in HELDOUT_SEED_REGIONS:
+        spiral_coords: List[Tuple[float, int, int]] = []
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                sx = seed_e + dx * square_size_m
+                sy = seed_n + dy * square_size_m
+                if not (block_e <= sx < block_e + 20000 and block_n <= sy < block_n + 20000):
+                    continue
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                if assign_spatial_split(ce, cn) != "test":
+                    continue
+                dist2 = float(dx * dx + dy * dy)
+                spiral_coords.append((dist2, sx, sy))
+        spiral_coords.sort(key=lambda t: (t[0], t[1], t[2]))
+
+        region_pending: List[Dict] = []
+        for _d2, sx, sy in spiral_coords:
+            if (sx, sy) in prioritized_coords:
+                continue
+            item = existing_by_coord.get((sx, sy))
+            if item is not None:
+                if item.get("status") == "pending":
+                    region_pending.append(item)
+                    prioritized_coords.add((sx, sy))
+            else:
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                lat, lon = bng_to_latlon(ce, cn)
+                count = prehistoric_squares_2k.get((sx, sy), 0)
+                new_item = {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": "test",
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": count,
+                    "status": "pending",
+                }
+                existing_by_coord[(sx, sy)] = new_item
+                region_pending.append(new_item)
+                prioritized_coords.add((sx, sy))
+        seed_spirals.append(region_pending)
+
+    # Interleave round-robin across the 5 seed regions so all 5 grow outward together,
+    # starting with two extra rings in the Ure Valley block immediately north of Thornborough.
+    front_pending: List[Dict] = []
+    ure_spiral = seed_spirals[0] if seed_spirals else []
+    for item in ure_spiral[:8]:
+        front_pending.append(item)
+    seed_spirals[0] = ure_spiral[8:]
+
+    max_len = max((len(s) for s in seed_spirals), default=0)
+    for i in range(max_len):
+        for s in seed_spirals:
+            if i < len(s):
+                front_pending.append(s[i])
+
+    done_or_skipped = [q for q in queue_state["queue"] if q.get("status") != "pending"]
+    remaining_pending = [
+        q
+        for q in queue_state["queue"]
+        if q.get("status") == "pending" and (int(q["e_min"]), int(q["n_min"])) not in prioritized_coords
+    ]
+    queue_state["queue"] = done_or_skipped + front_pending + remaining_pending
+    queue_state["contiguous_seed_regions_prioritized"] = True
+    return True
+
+
 def export_public_docs(
     queue_state: Dict,
     survey_dir: Path,
@@ -408,6 +523,7 @@ def main() -> None:
             "square_size_m": 2000,
             "queue": queue_items,
         }
+    if prioritize_contiguous_seed_regions_in_queue(queue_state, catalog):
         queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")

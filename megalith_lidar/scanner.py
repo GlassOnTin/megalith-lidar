@@ -17,7 +17,7 @@ from megalith_lidar.catalog import (
     bng_to_latlon,
     bng_to_os_grid_ref,
 )
-from megalith_lidar.lidar_wcs import fetch_or_load_paired_tile
+from megalith_lidar.lidar_wcs import fetch_or_load_paired_tile, fetch_or_load_region_windows
 from megalith_lidar.model import MegalithUNet
 from megalith_lidar.osm_context import (
     annotate_candidates_with_spatial_context,
@@ -353,17 +353,14 @@ def scan_region(
 
     coords = [(e0, e0 + window_size, n0, n0 + window_size) for n0 in ns for e0 in es]
 
-    loaded_tiles: Dict[Tuple[int, int, int, int], Tuple[np.ndarray, np.ndarray]] = {}
-    with ThreadPoolExecutor(max_workers=6) as pool:
-        fut_map = {
-            pool.submit(fetch_or_load_paired_tile, e0, e1, n0, n1, tile_cache_dir): (e0, e1, n0, n1)
-            for (e0, e1, n0, n1) in coords
-        }
-        for fut in as_completed(fut_map):
-            key = fut_map[fut]
-            res = fut.result()
-            if res is not None:
-                loaded_tiles[key] = res
+    loaded_tiles = fetch_or_load_region_windows(
+        e_min=e_min,
+        e_max=e_max,
+        n_min=n_min,
+        n_max=n_max,
+        coords=coords,
+        cache_dir=tile_cache_dir,
+    )
 
     raw_candidates: List[Dict] = []
     window_records: Dict[Tuple[int, int, int, int], Tuple[np.ndarray, np.ndarray, List[Dict]]] = {}
