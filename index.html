@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UK LiDAR Prehistoric Monument Survey — Calibrated Out-of-Sample Results</title>
+  <title>UK LiDAR Prehistoric Monument Survey</title>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -50,23 +50,49 @@
     }
     header .sub {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 12.5px;
       margin-top: 2px;
     }
-    header a {
+    a {
       color: var(--accent);
       text-decoration: none;
     }
-    header a:hover { text-decoration: underline; }
+    a:hover { text-decoration: underline; }
+
+    /* Start-here onboarding bar */
+    .guide-bar {
+      max-width: 1800px;
+      margin: 12px auto 0 auto;
+      padding: 0 14px;
+    }
+    .guide-inner {
+      background: rgba(88, 166, 255, 0.07);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      font-size: 13px;
+    }
+    .guide-step strong {
+      color: #fff;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .guide-step span {
+      color: var(--muted);
+    }
+
     .layout {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns: 1.05fr 0.95fr;
       gap: 14px;
-      padding: 14px;
+      padding: 12px 14px 16px 14px;
       max-width: 1800px;
       margin: 0 auto;
     }
-    @media (max-width: 1100px) {
+    @media (max-width: 1120px) {
       .layout { grid-template-columns: 1fr; }
     }
     .card {
@@ -76,32 +102,103 @@
       padding: 14px;
       margin-bottom: 14px;
     }
-    .card h2 {
-      margin: 0 0 10px 0;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .card-header h2 {
+      margin: 0;
       font-size: 15px;
       font-weight: 600;
+    }
+    .step-pill {
+      display: inline-block;
+      background: var(--accent);
+      color: #090d12;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-right: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
+      padding-bottom: 10px;
     }
-    #map {
-      width: 100%;
-      height: 540px;
-      border-radius: 4px;
+    .tab-btn {
+      background: var(--panel-alt);
+      color: var(--muted);
       border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.12s ease;
     }
+    .tab-btn:hover {
+      color: var(--text);
+      border-color: #445063;
+    }
+    .tab-btn.active {
+      background: rgba(88, 166, 255, 0.14);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .tab-count {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    .tab-explainer {
+      background: var(--panel-alt);
+      border-left: 3px solid var(--accent);
+      padding: 8px 11px;
+      border-radius: 0 4px 4px 0;
+      font-size: 12.5px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
     .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
       margin-bottom: 10px;
-      font-size: 13px;
+      font-size: 12.5px;
     }
     .controls label {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       cursor: pointer;
+    }
+    select {
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
     }
     .dot {
       width: 10px;
@@ -109,19 +206,87 @@
       border-radius: 50%;
       display: inline-block;
     }
-    select {
-      background: var(--panel-alt);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 4px 8px;
+
+    #map {
+      width: 100%;
+      height: 430px;
       border-radius: 4px;
-      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    th, td {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: var(--panel-alt);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr.cand-row { cursor: pointer; }
+    tr.cand-row:hover { background: var(--panel-alt); }
+    tr.cand-row.selected-row {
+      background: rgba(255, 214, 0, 0.14);
+      outline: 1px solid rgba(255, 214, 0, 0.45);
+    }
+    .table-scroll {
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-unid { background: rgba(255, 214, 0, 0.16); color: var(--gold); border: 1px solid rgba(255, 214, 0, 0.4); }
+    .badge-nhle { background: rgba(0, 230, 118, 0.16); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.4); }
+    .badge-osm  { background: rgba(0, 210, 255, 0.16); color: var(--cyan); border: 1px solid rgba(0, 210, 255, 0.4); }
+    .badge-conf { background: rgba(255, 110, 64, 0.16); color: var(--orange); border: 1px solid rgba(255, 110, 64, 0.4); }
+
+    .diag-img {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+      background: #090b0e;
+    }
+    .panel-legend {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 11.5px;
+    }
+    .panel-legend div {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 7px;
+    }
+    .panel-legend strong {
+      display: block;
+      color: var(--text);
     }
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .stat-box {
       background: var(--panel-alt);
@@ -136,7 +301,7 @@
       letter-spacing: 0.03em;
     }
     .stat-box .val {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 600;
       margin-top: 2px;
       font-variant-numeric: tabular-nums;
@@ -146,56 +311,22 @@
       font-size: 11px;
       font-variant-numeric: tabular-nums;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12.5px;
-      font-variant-numeric: tabular-nums;
-    }
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-    th {
-      color: var(--muted);
-      font-weight: 600;
-      background: var(--panel-alt);
-      position: sticky;
-      top: 0;
-    }
-    tr.cand-row { cursor: pointer; }
-    tr.cand-row:hover { background: var(--panel-alt); }
-    .table-scroll {
-      max-height: 330px;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-    }
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .badge-unid { background: rgba(255, 214, 0, 0.16); color: var(--gold); border: 1px solid rgba(255, 214, 0, 0.4); }
-    .badge-nhle { background: rgba(0, 230, 118, 0.16); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.4); }
-    .badge-osm  { background: rgba(0, 210, 255, 0.16); color: var(--cyan); border: 1px solid rgba(0, 210, 255, 0.4); }
-    .badge-conf { background: rgba(255, 110, 64, 0.16); color: var(--orange); border: 1px solid rgba(255, 110, 64, 0.4); }
-    .diag-img {
-      width: 100%;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      margin-top: 8px;
-      background: #090b0e;
-    }
-    .diag-caption {
-      font-size: 11.5px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
     .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+    .btn-link {
+      display: inline-block;
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid rgba(88, 166, 255, 0.45);
+      color: var(--accent);
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-link:hover {
+      background: rgba(88, 166, 255, 0.25);
+      text-decoration: none;
+    }
     footer {
       padding: 12px 20px;
       color: var(--muted);
@@ -210,99 +341,159 @@
     <div>
       <h1>UK 1 m LiDAR Prehistoric Monument Survey</h1>
       <div class="sub">
-        Isotropic scale-space U-Net (D<sub>4</sub>-equivariant) · Validation Platt calibration · Held-out 20 km block test evaluation · NHLE + OpenStreetMap spatial cross-check
+        Automated terrain screening for unrecorded barrows, henges, and megalithic earthworks in Environment Agency 1 m LiDAR
       </div>
     </div>
     <div class="sub">
       Inspired by <a href="https://youtu.be/D_R0bgNgY2o" target="_blank" rel="noopener">Adam Morgan Ibbotson's LiDAR survey video</a> ·
       <a href="https://github.com/GlassOnTin/megalith-lidar">GitHub Repository (AGPL-3.0)</a> ·
-      <a href="docs/survey_summary.json">survey_summary.json</a> ·
-      <a href="docs/candidates.geojson">candidates.geojson</a>
+      <a href="docs/candidates.geojson">Download GeoJSON</a> ·
+      <a href="docs/survey_summary.json">Raw Summary JSON</a>
     </div>
   </header>
 
-  <div class="layout">
-    <div>
-      <div class="card">
-        <h2>Interactive Out-of-Sample Survey Map (England 1 m LiDAR)</h2>
-        <div class="controls">
-          <label>
-            Operating point:
-            <select id="opSelect">
-              <option value="fpr_0.05">Validation 5% FPR (tile p ≥ 0.8343, LR+ = 15.5×)</option>
-              <option value="fpr_0.01">Validation 1% FPR (tile p ≥ 0.9428, LR+ = 47.2×)</option>
-            </select>
-          </label>
-          <label><input type="checkbox" id="chkUnid" checked /> <span class="dot" style="background:var(--gold)"></span> Unidentified candidate</label>
-          <label><input type="checkbox" id="chkOsm" checked /> <span class="dot" style="background:var(--cyan)"></span> OSM unscheduled archaeology</label>
-          <label><input type="checkbox" id="chkNhle" checked /> <span class="dot" style="background:var(--green)"></span> NHLE Scheduled Monument</label>
-          <label><input type="checkbox" id="chkConf" checked /> <span class="dot" style="background:var(--orange)"></span> Flagged OSM confounder</label>
-        </div>
-        <div id="map"></div>
+  <div class="guide-bar">
+    <div class="guide-inner">
+      <div class="guide-step">
+        <strong>1. Start with "Unidentified Candidates" (Left Panel)</strong>
+        <span>The default tab lists terrain anomalies that match prehistoric earthwork geometry in 1 m LiDAR and are <em>not</em> listed in Historic England's Scheduled Monument register or mapped as modern features in OpenStreetMap.</span>
       </div>
-
-      <div class="card" id="inspectorCard">
-        <h2>Candidate Diagnostic Inspector</h2>
-        <div id="inspectorBody" class="muted">
-          Click any marker on the map or any row in the candidate table to inspect its coordinates, calibrated probability, physical terrain observables, OpenStreetMap cross-check, and 4-panel 1 m LiDAR diagnostic render.
-        </div>
+      <div class="guide-step">
+        <strong>2. Click Any Row or Map Pin to Inspect (Right Panel)</strong>
+        <span>Selecting a site zooms the map to its British National Grid coordinates and displays its 4-panel 1 m LiDAR elevation breakdown on the right, with a direct link to inspect it on OpenStreetMap.</span>
+      </div>
+      <div class="guide-step">
+        <strong>3. Switch Tabs for Known Sites or Model Statistics</strong>
+        <span>Use the tabs above the list if you want to see already-known Scheduled Monuments rediscovered during blind testing, modern quarries/sinkholes filtered out via OpenStreetMap, or ROC-AUC statistical benchmarks.</span>
       </div>
     </div>
+  </div>
 
+  <div class="layout">
+    <!-- LEFT COLUMN: TABS + SINGLE FOCUSED LIST -->
     <div>
       <div class="card">
-        <h2>Held-Out Test Split Statistical Evaluation (n = 263 tiles, 20 km BNG blocks)</h2>
-        <div class="stat-grid" id="evalStatsGrid"></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Negative Null Distribution</th>
-              <th>Test ROC-AUC</th>
-              <th>95% Bootstrap CI</th>
-              <th>Test FPR @ Val 1% Op</th>
-              <th>Test FPR @ Val 5% Op</th>
-            </tr>
-          </thead>
-          <tbody id="nullTableBody"></tbody>
-        </table>
-      </div>
+        <div class="card-header">
+          <h2><span class="step-pill">Start Here</span> Browse Survey Detections &amp; Benchmarks</h2>
+          <div class="sub muted" id="surveyProgressBadge">Loading survey progress...</div>
+        </div>
 
-      <div class="card">
-        <h2>Scheduled 2 km × 2 km Out-of-Sample Survey Streams</h2>
-        <div class="sub muted" style="margin-bottom:8px" id="surveyUpdatedText"></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Sampling Stream</th>
-              <th>Squares (Area)</th>
-              <th>NHLE Scheduled</th>
-              <th>OSM Archaeology</th>
-              <th>OSM Confounders</th>
-              <th>Unidentified (5% / 1% Op)</th>
-            </tr>
-          </thead>
-          <tbody id="streamTableBody"></tbody>
-        </table>
-      </div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="unidentified" id="tabBtnUnid">
+            <span class="dot" style="background:var(--gold)"></span>
+            1. Unidentified Candidates
+            <span class="tab-count" id="countUnid">0</span>
+          </button>
+          <button class="tab-btn" data-tab="known" id="tabBtnKnown">
+            <span class="dot" style="background:var(--green)"></span>
+            2. Rediscovered Known Monuments
+            <span class="tab-count" id="countKnown">0</span>
+          </button>
+          <button class="tab-btn" data-tab="confounders" id="tabBtnConf">
+            <span class="dot" style="background:var(--orange)"></span>
+            3. Filtered Modern / Karst Confounders
+            <span class="tab-count" id="countConf">0</span>
+          </button>
+          <button class="tab-btn" data-tab="stats" id="tabBtnStats">
+            4. Statistical Benchmarks &amp; Null Tests
+          </button>
+        </div>
 
-      <div class="card">
-        <h2>Detected Features in Scanned Test Squares</h2>
-        <div class="table-scroll">
+        <div class="tab-explainer" id="tabExplainer"></div>
+
+        <!-- Filter controls for tabs 1-3 -->
+        <div class="controls" id="listControls">
+          <label>
+            Confidence threshold:
+            <select id="opSelect">
+              <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 47.2×)</option>
+              <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 15.5×)</option>
+            </select>
+          </label>
+          <label>
+            <input type="checkbox" id="chkOnlyDiag" />
+            Only show sites with 4-panel LiDAR image rendered
+          </label>
+        </div>
+
+        <!-- Candidate table (shown for tabs 1, 2, 3) -->
+        <div class="table-scroll" id="candidateListContainer">
           <table>
             <thead>
               <tr>
                 <th>OS Grid Ref</th>
-                <th>Category</th>
-                <th>Class</th>
-                <th>Conf</th>
-                <th>Relief</th>
-                <th>Area</th>
-                <th>Context / Notes</th>
+                <th>Predicted Form</th>
+                <th>Score</th>
+                <th>16 m Relief</th>
+                <th>Footprint</th>
+                <th>LiDAR Image</th>
+                <th>Spatial Cross-Check Note</th>
               </tr>
             </thead>
             <tbody id="candTableBody"></tbody>
           </table>
         </div>
+
+        <!-- Statistical benchmark view (hidden unless tab 4 is clicked) -->
+        <div id="statsContainer" class="hidden">
+          <p class="muted" style="margin-top:0;font-size:12.5px;">
+            Before scanning new areas, the model was evaluated on <strong>263 held-out test tiles</strong> inside 20 km × 20 km British National Grid blocks that were never used during training or threshold calibration.
+          </p>
+          <div class="stat-grid" id="evalStatsGrid"></div>
+
+          <h3 style="font-size:13.5px;margin:14px 0 6px 0;">Table A — Can the Model Distinguish Monuments from Background Terrain? (Held-Out Test Split)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Negative Null Distribution Compared Against Positives (n=143)</th>
+                <th>Test ROC-AUC</th>
+                <th>95% Bootstrap CI</th>
+                <th>False Positive Rate @ Strict (1% Op)</th>
+                <th>False Positive Rate @ Standard (5% Op)</th>
+              </tr>
+            </thead>
+            <tbody id="nullTableBody"></tbody>
+          </table>
+
+          <h3 style="font-size:13.5px;margin:16px 0 6px 0;">Table B — Live 2 km × 2 km Survey Streams Scanned So Far</h3>
+          <p class="muted" style="margin:0 0 6px 0;font-size:12px;">
+            The scheduled scanner alternates between randomly chosen English land squares (<em>Uniform National Null</em>) and held-out test squares in monument-bearing landscapes (<em>Held-Out Monument Landscapes</em>).
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Sampling Stream (Out-of-Sample Test Squares)</th>
+                <th>Squares Scanned</th>
+                <th>Rediscovered NHLE</th>
+                <th>Flagged OSM Confounders</th>
+                <th>Unidentified @ Strict 1% Op</th>
+                <th>Unidentified @ Standard 5% Op</th>
+              </tr>
+            </thead>
+            <tbody id="streamTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: SELECTED SITE INSPECTOR + INTERACTIVE MAP -->
+    <div>
+      <div class="card" id="inspectorCard">
+        <div class="card-header">
+          <h2><span class="step-pill">Step 2</span> Selected Site LiDAR &amp; Context Inspector</h2>
+          <div class="sub muted">Click any row on the left or marker below</div>
+        </div>
+        <div id="inspectorBody" class="muted">
+          Loading top unidentified candidate...
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Interactive UK Survey Map (Showing Current Tab &amp; Threshold)</h2>
+          <div class="sub muted">Dashed circles = scanned 2 km × 2 km squares · Solid dots = detections in active tab</div>
+        </div>
+        <div id="map"></div>
       </div>
     </div>
   </div>
@@ -317,7 +508,7 @@
     crossorigin=""
   ></script>
   <script>
-    const map = L.map("map").setView([53.2, -1.8], 6);
+    const map = L.map("map").setView([52.8, -1.7], 6);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap contributors"
@@ -328,6 +519,23 @@
 
     let summaryData = null;
     let geojsonFeatures = [];
+    let currentTab = "unidentified";
+    let selectedFeatureKey = null;
+
+    const TAB_EXPLAINERS = {
+      unidentified:
+        "<strong>What this list shows:</strong> Locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric monuments, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. These are the primary candidates for archaeological or Historic Environment Record (HER) review.",
+      known:
+        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and unscheduled OpenStreetMap cairns/barrows that the model independently rediscovered inside held-out test squares that were never seen during training.",
+      confounders:
+        "<strong>What this list shows:</strong> Earthworks and depressions that look like barrows or henges in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, golf bunkers, embankments, or 18th-century garden temples).",
+      stats:
+        "<strong>What this tab shows:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across three distinct negative null distributions, plus regional density comparisons from the scheduled 2 km × 2 km batch scanner."
+    };
+
+    function featureKey(p) {
+      return `${p.os_grid_ref}_${p.easting}_${p.northing}`;
+    }
 
     function categoryColor(cat) {
       if (cat === "rediscovered_nhle_scheduled") return "#00e676";
@@ -337,10 +545,17 @@
     }
 
     function categoryBadge(cat) {
-      if (cat === "rediscovered_nhle_scheduled") return '<span class="badge badge-nhle">NHLE Scheduled</span>';
-      if (cat === "rediscovered_osm_archaeology") return '<span class="badge badge-osm">OSM Archaeology</span>';
-      if (cat === "flagged_modern_or_karst_confounder") return '<span class="badge badge-conf">OSM Confounder</span>';
-      return '<span class="badge badge-unid">Unidentified</span>';
+      if (cat === "rediscovered_nhle_scheduled") return '<span class="badge badge-nhle">NHLE Scheduled Monument</span>';
+      if (cat === "rediscovered_osm_archaeology") return '<span class="badge badge-osm">OSM Recorded Archaeology</span>';
+      if (cat === "flagged_modern_or_karst_confounder") return '<span class="badge badge-conf">Flagged OSM Confounder</span>';
+      return '<span class="badge badge-unid">Unidentified Candidate</span>';
+    }
+
+    function formatClass(cls) {
+      if (cls === "megalithic_tomb_long_barrow") return "Long barrow / chambered mound";
+      if (cls === "stone_circle_henge_alignment") return "Henge / banked circle / alignment";
+      if (cls === "round_barrow_cairn") return "Round barrow / cairn mound";
+      return (cls || "").replace(/_/g, " ");
     }
 
     function contextNote(p) {
@@ -355,49 +570,112 @@
         const m = p.osm_confounder_matches[0];
         return `${m.name ? m.name + ": " : ""}${m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
       }
-      return "Outside NHLE & mapped OSM features";
+      return "Unrecorded in NHLE & OpenStreetMap";
     }
 
-    function selectCandidate(p) {
+    function matchesTab(p, tab) {
+      const cat = p.context_category;
+      if (tab === "unidentified") return cat === "unidentified_candidate";
+      if (tab === "known") return cat === "rediscovered_nhle_scheduled" || cat === "rediscovered_osm_archaeology";
+      if (tab === "confounders") return cat === "flagged_modern_or_karst_confounder";
+      return false;
+    }
+
+    function selectCandidate(p, zoomMap = true) {
+      selectedFeatureKey = featureKey(p);
+      document.querySelectorAll("tr.cand-row").forEach((tr) => {
+        tr.classList.toggle("selected-row", tr.dataset.key === selectedFeatureKey);
+      });
+
       const card = document.getElementById("inspectorBody");
       const osmUrl = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}#map=17/${p.lat}/${p.lon}`;
+      const gmapsUrl = `https://www.google.com/maps/@${p.lat},${p.lon},350m/data=!3m1!1e3`;
       let html = `
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div>
-            <strong>${p.os_grid_ref}</strong> · ${categoryBadge(p.context_category)}
-            <span class="muted" style="margin-left:6px;">(${p.sampling_stream || "test"}, square ${p.square_id || ""})</span>
+            <strong style="font-size:15px;">${p.os_grid_ref}</strong> · ${categoryBadge(p.context_category)}
           </div>
-          <div>
-            <a href="${osmUrl}" target="_blank" rel="noopener" style="color:var(--accent)">Open in OpenStreetMap ↗</a>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a class="btn-link" href="${osmUrl}" target="_blank" rel="noopener">Open in OpenStreetMap ↗</a>
+            <a class="btn-link" href="${gmapsUrl}" target="_blank" rel="noopener">Aerial Satellite View ↗</a>
           </div>
         </div>
-        <div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px;font-size:12.5px;">
-          <div><span class="muted">Coordinates:</span> ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)} (E ${p.easting}, N ${p.northing})</div>
-          <div><span class="muted">Confidence (Cal Tile p):</span> <strong>${p.confidence.toFixed(3)}</strong> (${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
-          <div><span class="muted">Morphological Class:</span> ${p.predicted_class}</div>
-          <div><span class="muted">Footprint & Elongation:</span> ${p.area_m2} m² (elongation ${p.elongation}×)</div>
-          <div><span class="muted">16 m Local Relief:</span> ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</div>
-          <div><span class="muted">Context Cross-Check:</span> ${contextNote(p)}</div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;font-size:12.5px;background:var(--panel-alt);padding:10px;border-radius:4px;border:1px solid var(--border);">
+          <div><span class="muted">Nearest Form Class:</span><br/><strong>${formatClass(p.predicted_class)}</strong></div>
+          <div><span class="muted">Candidate Score (Tile Prob):</span><br/><strong>${p.confidence.toFixed(3)}</strong> (calibrated tile p = ${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
+          <div><span class="muted">16 m Bare-Earth Relief:</span><br/><strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m² footprint, ${p.elongation}× elongation)</div>
+          <div><span class="muted">Grid Coordinates:</span><br/>E ${p.easting}, N ${p.northing} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)})</div>
+          <div style="grid-column:1 / -1;"><span class="muted">NHLE &amp; OpenStreetMap Check:</span> <strong>${contextNote(p)}</strong></div>
         </div>
       `;
       if (p.diagnostic_png) {
         html += `
           <img class="diag-img" src="docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
-          <div class="diag-caption">
-            4-panel 256 m × 256 m (1 m/px) diagnostic: [1] Inverted isotropic slope |∇z| · [2] 16 m local relief (z − G₁₆(z)) · [3] Log nDSM surface prominence · [4] D₄-averaged segmentation posterior probability. Green = NHLE Scheduled, Cyan = OSM Archaeology, Orange = OSM Confounder, Gold = Unidentified candidate.
+          <div class="panel-legend">
+            <div>
+              <strong>Panel 1 (Left): Bare-Earth Slope</strong>
+              Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
+            </div>
+            <div>
+              <strong>Panel 2: 16 m Local Relief</strong>
+              Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
+            </div>
+            <div>
+              <strong>Panel 3: Surface Canopy (nDSM)</strong>
+              Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
+            </div>
+            <div>
+              <strong>Panel 4 (Right): Model Probability</strong>
+              Pink/red highlight shows where the neural network detects monument geometry.
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div style="margin-top:10px;padding:10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:12.5px;" class="muted">
+            No 4-panel PNG was cached for this lower-ranked window in the square (the scanner saves diagnostic PNGs for the top-scoring windows per 2 km × 2 km square to keep repository size small). Use the OpenStreetMap or Aerial Satellite buttons above to inspect this location, or check "Only show sites with 4-panel LiDAR image rendered" on the left.
           </div>
         `;
       }
       card.innerHTML = html;
-      map.panTo([p.lat, p.lon]);
+      if (zoomMap) {
+        map.setView([p.lat, p.lon], Math.max(map.getZoom(), 11));
+      }
     }
 
-    function renderFilter() {
+    function updateTabCounts() {
       const op = document.getElementById("opSelect").value;
-      const showUnid = document.getElementById("chkUnid").checked;
-      const showOsm = document.getElementById("chkOsm").checked;
-      const showNhle = document.getElementById("chkNhle").checked;
-      const showConf = document.getElementById("chkConf").checked;
+      const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+
+      const baseList = geojsonFeatures.filter((f) => {
+        const p = f.properties;
+        if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
+        if (onlyDiag && !p.diagnostic_png) return false;
+        return true;
+      });
+
+      const cUnid = baseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
+      const cKnown = baseList.filter((f) => matchesTab(f.properties, "known")).length;
+      const cConf = baseList.filter((f) => matchesTab(f.properties, "confounders")).length;
+
+      document.getElementById("countUnid").textContent = cUnid;
+      document.getElementById("countKnown").textContent = cKnown;
+      document.getElementById("countConf").textContent = cConf;
+    }
+
+    function renderActiveView(autoSelectFirst = false) {
+      updateTabCounts();
+      document.getElementById("tabExplainer").innerHTML = TAB_EXPLAINERS[currentTab] || "";
+
+      const isStats = currentTab === "stats";
+      document.getElementById("listControls").classList.toggle("hidden", isStats);
+      document.getElementById("candidateListContainer").classList.toggle("hidden", isStats);
+      document.getElementById("statsContainer").classList.toggle("hidden", !isStats);
+
+      if (isStats) return;
+
+      const op = document.getElementById("opSelect").value;
+      const onlyDiag = document.getElementById("chkOnlyDiag").checked;
 
       markersLayer.clearLayers();
       const tbody = document.getElementById("candTableBody");
@@ -406,43 +684,51 @@
       const filtered = geojsonFeatures.filter((f) => {
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
-        const cat = p.context_category;
-        if (cat === "unidentified_candidate" && !showUnid) return false;
-        if (cat === "rediscovered_osm_archaeology" && !showOsm) return false;
-        if (cat === "rediscovered_nhle_scheduled" && !showNhle) return false;
-        if (cat === "flagged_modern_or_karst_confounder" && !showConf) return false;
-        return true;
+        if (onlyDiag && !p.diagnostic_png) return false;
+        return matchesTab(p, currentTab);
       });
 
-      filtered.sort((a, b) => b.properties.confidence - a.properties.confidence);
+      // Sort sites with diagnostic images first when scores are tied, sorted by confidence descending
+      filtered.sort((a, b) => {
+        const diff = b.properties.confidence - a.properties.confidence;
+        if (Math.abs(diff) > 1e-4) return diff;
+        return (b.properties.diagnostic_png ? 1 : 0) - (a.properties.diagnostic_png ? 1 : 0);
+      });
 
       filtered.forEach((f) => {
         const p = f.properties;
+        const key = featureKey(p);
         const color = categoryColor(p.context_category);
         const marker = L.circleMarker([p.lat, p.lon], {
           radius: 7,
           color: "#0f1217",
           weight: 1.5,
           fillColor: color,
-          fillOpacity: 0.9
+          fillOpacity: 0.92
         });
-        marker.on("click", () => selectCandidate(p));
+        marker.on("click", () => selectCandidate(p, true));
         marker.addTo(markersLayer);
 
         const tr = document.createElement("tr");
-        tr.className = "cand-row";
+        tr.className = "cand-row" + (key === selectedFeatureKey ? " selected-row" : "");
+        tr.dataset.key = key;
         tr.innerHTML = `
           <td><strong>${p.os_grid_ref}</strong></td>
-          <td>${categoryBadge(p.context_category)}</td>
-          <td>${p.predicted_class.replace(/_/g, " ")}</td>
-          <td>${p.confidence.toFixed(3)}</td>
+          <td>${formatClass(p.predicted_class)}</td>
+          <td><strong>${p.confidence.toFixed(3)}</strong></td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
+          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}</td>
           <td class="muted">${contextNote(p)}</td>
         `;
-        tr.addEventListener("click", () => selectCandidate(p));
+        tr.addEventListener("click", () => selectCandidate(p, true));
         tbody.appendChild(tr);
       });
+
+      if (autoSelectFirst && filtered.length > 0) {
+        const withPng = filtered.find((f) => f.properties.diagnostic_png) || filtered[0];
+        selectCandidate(withPng.properties, false);
+      }
     }
 
     async function init() {
@@ -453,6 +739,10 @@
       summaryData = await sumResp.json();
       const gj = await gjResp.json();
       geojsonFeatures = gj.features || [];
+
+      const qp = summaryData.queue_progress || {};
+      document.getElementById("surveyProgressBadge").textContent =
+        `${qp.completed_squares} squares scanned (${qp.total_scanned_area_km2} km²) · Updated ${summaryData.updated_at_utc}`;
 
       const tm = summaryData.heldout_test_evaluation || {};
       const base = summaryData.scalar_baseline_test || {};
@@ -474,14 +764,14 @@
           <div class="ci">95% CI: [${baseCi[0].toFixed(4)}, ${baseCi[1].toFixed(4)}]</div>
         </div>
         <div class="stat-box">
-          <div class="label">Test @ Val 1% FPR Op</div>
+          <div class="label">Test @ Strict 1% FPR Op</div>
           <div class="val">FPR ${((op01.fpr_false_positive_rate || 0) * 100).toFixed(2)}%</div>
-          <div class="ci">TPR ${((op01.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op01.likelihood_ratio_pos || 0).toFixed(1)}×</div>
+          <div class="ci">Recall ${((op01.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op01.likelihood_ratio_pos || 0).toFixed(1)}×</div>
         </div>
         <div class="stat-box">
-          <div class="label">Test @ Val 5% FPR Op</div>
+          <div class="label">Test @ Standard 5% FPR Op</div>
           <div class="val">FPR ${((op05.fpr_false_positive_rate || 0) * 100).toFixed(2)}%</div>
-          <div class="ci">TPR ${((op05.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op05.likelihood_ratio_pos || 0).toFixed(1)}×</div>
+          <div class="ci">Recall ${((op05.tpr_recall || 0) * 100).toFixed(1)}% · LR+ ${(op05.likelihood_ratio_pos || 0).toFixed(1)}×</div>
         </div>
       `;
 
@@ -490,9 +780,9 @@
       const null01 = ((opBreak["fpr_0.01"] || {}).fpr_by_negative_null) || {};
       const null05 = ((opBreak["fpr_0.05"] || {}).fpr_by_negative_null) || {};
       const nullLabels = {
-        random_national: "Uniform National Null (England 20 km land blocks)",
+        random_national: "Uniform National Null (random England 20 km land blocks)",
         matched_environment: "Matched-Environment Null (400–1600 m from monuments)",
-        anthropogenic_non_target: "Anthropogenic Non-Target Null (medieval/industrial)"
+        anthropogenic_non_target: "Anthropogenic Non-Target Null (medieval/industrial earthworks)"
       };
       const nullBody = document.getElementById("nullTableBody");
       Object.keys(nullLabels).forEach((k) => {
@@ -512,15 +802,11 @@
         nullBody.appendChild(tr);
       });
 
-      const qp = summaryData.queue_progress || {};
-      document.getElementById("surveyUpdatedText").textContent =
-        `Last batch updated: ${summaryData.updated_at_utc} · Scanned ${qp.completed_squares} test squares (${qp.total_scanned_area_km2} km²) out of ${qp.total_queued_test_squares} queued out-of-sample squares.`;
-
       const sb = summaryData.stream_breakdown || {};
       const streamBody = document.getElementById("streamTableBody");
       [
-        ["uniform_national_null", "Uniform National Null (Test Split)"],
-        ["heldout_test_landscape", "Held-Out Monument Landscapes (Test Split)"]
+        ["uniform_national_null", "Uniform National Null (random test blocks)"],
+        ["heldout_test_landscape", "Held-Out Monument Landscapes (test blocks)"]
       ].forEach(([key, label]) => {
         const st = sb[key];
         if (!st) return;
@@ -529,9 +815,9 @@
           <td><strong>${label}</strong></td>
           <td>${st.squares_scanned} (${st.area_km2} km²)</td>
           <td>${st.rediscovered_nhle_scheduled}</td>
-          <td>${st.rediscovered_osm_archaeology}</td>
           <td>${st.flagged_modern_or_karst_confounders}</td>
-          <td><strong>${st.unidentified_candidates}</strong> (${st.unidentified_density_per_km2_fpr_0_05}/km²) / <strong>${st.unidentified_candidates_fpr_0_01}</strong> (${st.unidentified_density_per_km2_fpr_0_01}/km²)</td>
+          <td><strong>${st.unidentified_candidates_fpr_0_01}</strong> (${st.unidentified_density_per_km2_fpr_0_01}/km²)</td>
+          <td><strong>${st.unidentified_candidates}</strong> (${st.unidentified_density_per_km2_fpr_0_05}/km²)</td>
         `;
         streamBody.appendChild(tr);
       });
@@ -539,25 +825,30 @@
       (summaryData.scanned_squares || []).forEach((sq) => {
         const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
         const c = L.circleMarker([sq.center_lat, sq.center_lon], {
-          radius: 12,
+          radius: 10,
           color: color,
-          weight: 1.5,
+          weight: 1.2,
           dashArray: "3,3",
-          fillOpacity: 0.08
+          fillOpacity: 0.05
         }).bindTooltip(
-          `${sq.square_id} (${sq.os_grid_ref})<br/>Stream: ${sq.sampling_stream}<br/>NHLE: ${sq.rediscovered_nhle_scheduled_count}, OSM Arch: ${sq.rediscovered_osm_archaeology_count}, Confounders: ${sq.flagged_modern_or_karst_confounders_count}, Unidentified: ${sq.unidentified_candidates_count}`
+          `Scanned 2 km × 2 km square: ${sq.os_grid_ref}<br/>Stream: ${sq.sampling_stream}<br/>NHLE: ${sq.rediscovered_nhle_scheduled_count}, Confounders: ${sq.flagged_modern_or_karst_confounders_count}, Unidentified: ${sq.unidentified_candidates_count}`
         );
         c.addTo(squaresLayer);
       });
 
-      ["opSelect", "chkUnid", "chkOsm", "chkNhle", "chkConf"].forEach((id) => {
-        document.getElementById(id).addEventListener("change", renderFilter);
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentTab = btn.dataset.tab;
+          renderActiveView(true);
+        });
       });
 
-      renderFilter();
-      if (geojsonFeatures.length > 0) {
-        selectCandidate(geojsonFeatures[0].properties);
-      }
+      document.getElementById("opSelect").addEventListener("change", () => renderActiveView(true));
+      document.getElementById("chkOnlyDiag").addEventListener("change", () => renderActiveView(true));
+
+      renderActiveView(true);
     }
 
     init();
