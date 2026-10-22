@@ -524,6 +524,7 @@ def main() -> None:
                 cwd=repo_root,
                 check=False,
             )
+            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=repo_root, check=False)
             subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=False)
 
 
