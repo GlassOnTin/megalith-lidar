@@ -441,6 +441,53 @@ def export_public_docs(
             }
         )
 
+    if catalog is not None and all_features:
+        extractor = NHLESpatialContextExtractor(catalog)
+        cand_props = [f["properties"] for f in all_features]
+        arch_cache_path = survey_dir.parent / "arch_context_cache.json"
+        enrich_candidates_with_archaeological_context(
+            candidates=cand_props,
+            extractor=extractor,
+            cache_path=arch_cache_path,
+            docs_diag_dir=docs_diag_dir,
+            max_vlm_calls=80,
+        )
+        # Recompute stream_stats and square_summaries counts after VLM rectilinear-bund filtering
+        for st in stream_stats.values():
+            st["rediscovered_nhle_scheduled"] = 0
+            st["rediscovered_osm_archaeology"] = 0
+            st["flagged_modern_or_karst_confounders"] = 0
+            st["unidentified_candidates"] = 0
+            st["unidentified_candidates_fpr_0_01"] = 0
+        sq_map = {s["square_id"]: s for s in square_summaries}
+        for s in square_summaries:
+            s["flagged_modern_or_karst_confounders_count"] = 0
+            s["unidentified_candidates_count"] = 0
+            s["unidentified_candidates_fpr_0_01_count"] = 0
+        for feat in all_features:
+            p = feat["properties"]
+            st = stream_stats.get(p.get("sampling_stream", ""))
+            sq_s = sq_map.get(p.get("square_id", ""))
+            cat = p.get("context_category")
+            if st is not None:
+                if cat == "rediscovered_nhle_scheduled":
+                    st["rediscovered_nhle_scheduled"] += 1
+                elif cat == "rediscovered_osm_archaeology":
+                    st["rediscovered_osm_archaeology"] += 1
+                elif cat == "flagged_modern_or_karst_confounder":
+                    st["flagged_modern_or_karst_confounders"] += 1
+                elif cat == "unidentified_candidate":
+                    st["unidentified_candidates"] += 1
+                    if p.get("passes_fpr_0_01"):
+                        st["unidentified_candidates_fpr_0_01"] += 1
+            if sq_s is not None:
+                if cat == "flagged_modern_or_karst_confounder":
+                    sq_s["flagged_modern_or_karst_confounders_count"] += 1
+                elif cat == "unidentified_candidate":
+                    sq_s["unidentified_candidates_count"] += 1
+                    if p.get("passes_fpr_0_01"):
+                        sq_s["unidentified_candidates_fpr_0_01_count"] += 1
+
     for stream, st in stream_stats.items():
         area = max(st["area_km2"], 1e-6)
         st["unidentified_density_per_km2_fpr_0_05"] = round(st["unidentified_candidates"] / area, 3)
@@ -473,18 +520,6 @@ def export_public_docs(
         "calibration_parameters": eval_metrics.get("platt_calibrator", {}),
         "scanned_squares": square_summaries,
     }
-
-    if catalog is not None and all_features:
-        extractor = NHLESpatialContextExtractor(catalog)
-        cand_props = [f["properties"] for f in all_features]
-        arch_cache_path = survey_dir.parent / "arch_context_cache.json"
-        enrich_candidates_with_archaeological_context(
-            candidates=cand_props,
-            extractor=extractor,
-            cache_path=arch_cache_path,
-            docs_diag_dir=docs_diag_dir,
-            max_vlm_calls=60,
-        )
 
     (docs_dir / "survey_summary.json").write_text(
         json.dumps(public_summary, indent=2),

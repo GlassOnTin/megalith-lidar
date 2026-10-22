@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import io
 import json
 import math
 import urllib.request
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+from PIL import Image
 
 from megalith_lidar.catalog import (
     CLASS_BARROW_CAIRN,
@@ -220,26 +222,62 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     )
 
 
+def make_zoomed_crop_b64(png_path: Path) -> str:
+    """
+    Create a 3x-magnified 80m x 80m close-up crop of [Panel 1: Bare-Earth Slope | Panel 2: 16m Local Relief]
+    centered on the detection circle so the VLM can clearly inspect corners, scarps, and interior hollows.
+    """
+    im = Image.open(png_path)
+    arr = np.array(im)[:, :256, :]
+    yellow = (arr[:, :, 0] > 230) & (arr[:, :, 1] > 190) & (arr[:, :, 2] < 30)
+    green = (arr[:, :, 0] < 30) & (arr[:, :, 1] > 200) & (arr[:, :, 2] > 90)
+    ys, xs = np.where(yellow | green)
+    if len(xs) > 0:
+        cx, cy = int(np.mean(xs)), int(np.mean(ys))
+    else:
+        cx, cy = 128, 128
+    r = 40
+    x0, x1 = max(0, min(256 - 2 * r, cx - r)), min(256, max(2 * r, cx + r))
+    y0, y1 = max(0, min(256 - 2 * r, cy - r)), min(256, max(2 * r, cy + r))
+    p1_crop = im.crop((x0, y0, x1, y1)).resize((256, 256), Image.Resampling.NEAREST)
+    p2_crop = im.crop((260 + x0, y0, 260 + x1, y1)).resize((256, 256), Image.Resampling.NEAREST)
+    out = Image.new("RGB", (516, 256), (20, 20, 24))
+    out.paste(p1_crop, (0, 0))
+    out.paste(p2_crop, (260, 0))
+    buf = io.BytesIO()
+    out.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode("ascii")
+
+
 def query_local_vlm_academic_context(
     cand: Dict,
     nearby_nhle: List[Dict],
     cluster: Dict,
     diag_png_path: Optional[Path] = None,
     endpoint: str = "http://localhost:8090/v1/chat/completions",
-    timeout: float = 18.0,
-) -> Optional[str]:
+    timeout: float = 25.0,
+) -> Optional[Tuple[str, str]]:
     """
     Query the local Qwen3.8-Flash-Next vision-language server (`localhost:8090`) with the exact
-    NHLE spatial fact sheet + 4-panel 1m LiDAR PNG to produce a 3-sentence academic assessment.
+    NHLE spatial fact sheet + 3x-magnified 80m x 80m 1m LiDAR close-up to produce both a shape
+    verdict ('RECTILINEAR_OR_U_BUND' vs 'ROUNDED_MOUND_OR_RING') and a 3-sentence academic assessment.
     """
     nearest_lines = [
-        f"- {m['name']} (NHLE #{m['list_entry']}, {m['cls_label']}): {int(m['distance_m'])} m {m['bearing']}"
+        f"- {m['name']} (NHLE #{m['list_entry']}, {m['cls_label']}): located {int(m['distance_m'])} m {m['bearing']} of this candidate"
         for m in nearby_nhle[:3]
     ]
     nearest_block = "\n".join(nearest_lines) if nearest_lines else "- None within 4 km"
 
     slope = float(cand.get("mean_slope_tangent", 0.08))
     slope_deg = math.degrees(math.atan(slope))
+    has_img = diag_png_path is not None and diag_png_path.exists()
+    shape_prefix_instr = (
+        "First output either [SHAPE: RECTILINEAR_OR_U_BUND] (if the earthwork inside the circle in the 80m x 80m close-up "
+        "has straight/square 90-degree corners, a flat rectangular platform, or a U-shaped bank wrapping a dark blue sunken pit) "
+        "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound or ring). "
+        if has_img
+        else ""
+    )
     prompt_text = (
         f"Site OS Grid Ref: {cand.get('os_grid_ref')} (BNG E {cand.get('easting'):.0f}, N {cand.get('northing'):.0f})\n"
         f"Landscape Character Area: {cluster.get('landscape_area')}\n"
@@ -251,16 +289,17 @@ def query_local_vlm_academic_context(
         f"Scheduled Monuments within 2 km: {cluster.get('nhle_within_2km')} ({cluster.get('prehistoric_within_2km')} prehistoric); "
         f"within 5 km: {cluster.get('nhle_within_5km')}.\n"
         f"Nearest Historic England Scheduled Monuments:\n{nearest_block}\n\n"
-        "Write a concise 3-sentence academic landscape-archaeology and 1m LiDAR morphological assessment of this site. "
+        f"{shape_prefix_instr}"
+        "Then write a concise 3-sentence (maximum 90 words total) academic landscape-archaeology and 1m LiDAR morphological assessment of this site. "
         "Sentence 1: Landscape setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
-        "Sentence 2: Morphological reading of the 1m LiDAR bare-earth relief, slope angle, footprint, and nDSM canopy (and the 4-panel image if attached). "
-        "Sentence 3: Specific archaeological interpretation and what historic map / HER / field check should be performed to distinguish a prehistoric monument from post-medieval agricultural or extractive activity. "
+        "Sentence 2: Critical morphological reading of the 1m LiDAR close-up (Left=Bare-Earth Slope, Right=16m Local Relief where yellow is raised and blue is sunken) and measurements. "
+        "Sentence 3: Specific archaeological or modern-confounder interpretation and what historic map / HER / field check is required. "
         "Use plain, rigorous British archaeological prose with no bullet points, no markdown headers, and no invented facts."
     )
 
     user_content: object
-    if diag_png_path is not None and diag_png_path.exists():
-        b64 = base64.b64encode(diag_png_path.read_bytes()).decode("ascii")
+    if has_img and diag_png_path is not None:
+        b64 = make_zoomed_crop_b64(diag_png_path)
         user_content = [
             {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}},
             {"type": "text", "text": prompt_text},
@@ -274,14 +313,15 @@ def query_local_vlm_academic_context(
             {
                 "role": "system",
                 "content": (
-                    "You are a senior British landscape archaeologist and LiDAR specialist. "
-                    "You write concise, empirically grounded 3-sentence site assessments using only the supplied NHLE records and 1m LiDAR measurements."
+                    "You are a senior British landscape archaeologist and critical 1m LiDAR specialist inspecting a 3x-magnified 80m x 80m close-up "
+                    "(Left=Bare-Earth Slope where dark is steep scarp; Right=16m Local Relief where yellow is raised bank/mound and blue is sunken pit/hollow). "
+                    "You write concise, complete 3-sentence site assessments (under 90 words) using only the supplied NHLE records and 1m LiDAR imagery/measurements."
                 ),
             },
             {"role": "user", "content": user_content},
         ],
-        "max_tokens": 240,
-        "temperature": 0.2,
+        "max_tokens": 420,
+        "temperature": 0.15,
         "chat_template_kwargs": {"enable_thinking": False},
     }
 
@@ -293,9 +333,16 @@ def query_local_vlm_academic_context(
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            text = (data["choices"][0]["message"].get("content") or "").strip()
-            if len(text) > 60:
-                return " ".join(text.split())
+            raw_text = " ".join((data["choices"][0]["message"].get("content") or "").strip().split())
+            shape_tag = "ROUNDED_MOUND_OR_RING"
+            if "[SHAPE: RECTILINEAR_OR_U_BUND]" in raw_text:
+                shape_tag = "RECTILINEAR_OR_U_BUND"
+                raw_text = raw_text.replace("[SHAPE: RECTILINEAR_OR_U_BUND]", "").strip()
+            elif "[SHAPE: ROUNDED_MOUND_OR_RING]" in raw_text:
+                shape_tag = "ROUNDED_MOUND_OR_RING"
+                raw_text = raw_text.replace("[SHAPE: ROUNDED_MOUND_OR_RING]", "").strip()
+            if len(raw_text) > 60 and raw_text.endswith((".", "!", "?")):
+                return raw_text, shape_tag
     except Exception:
         return None
     return None
@@ -306,11 +353,13 @@ def enrich_candidates_with_archaeological_context(
     extractor: NHLESpatialContextExtractor,
     cache_path: Path,
     docs_diag_dir: Optional[Path] = None,
-    max_vlm_calls: int = 25,
+    max_vlm_calls: int = 80,
 ) -> int:
     """
     Populate `nearby_nhle_monuments`, `nhle_cluster_summary`, `arch_context_note`,
-    and `arch_context_source` ('qwen3.8_vlm' or 'nhle_grounded_synthesis') on every candidate.
+    and `arch_context_source` ('qwen3.8_vlm_vision', 'qwen3.8_llm', or 'nhle_grounded_synthesis')
+    on every candidate. Also routes candidates Visually Flagged as `[SHAPE: RECTILINEAR_OR_U_BUND]`
+    to `flagged_modern_or_karst_confounder`.
     """
     cache: Dict[str, Dict] = {}
     if cache_path.exists():
@@ -321,6 +370,23 @@ def enrich_candidates_with_archaeological_context(
 
     vlm_calls = 0
     cache_dirty = False
+
+    def _apply_rectilinear_flag(c: Dict) -> None:
+        if c.get("context_category") == "unidentified_candidate":
+            c["context_category"] = "flagged_modern_or_karst_confounder"
+            confs = list(c.get("osm_confounder_matches") or [])
+            confs.insert(
+                0,
+                {
+                    "osm_id": "vlm/rectilinear_bund",
+                    "subtype": "rectilinear_reservoir_or_u_bund",
+                    "name": "VLM Visual Audit: Square/rectilinear embankment or U-bund",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                },
+            )
+            c["osm_confounder_matches"] = confs
 
     # Prioritize Strict 1% FPR unidentified candidates with PNGs for VLM calls first
     sorted_indices = sorted(
@@ -338,16 +404,19 @@ def enrich_candidates_with_archaeological_context(
         e = float(cand.get("easting", 0.0))
         n = float(cand.get("northing", 0.0))
         cat = cand.get("context_category", "unidentified_candidate")
-        ckey = f"{cand.get('os_grid_ref')}_{int(round(e))}_{int(round(n))}_{cat}"
+        ckey = f"v2_{cand.get('os_grid_ref')}_{int(round(e))}_{int(round(n))}"
 
         nearby_nhle, cluster = extractor.query_context(e, n)
         cand["nearby_nhle_monuments"] = nearby_nhle
         cand["nhle_cluster_summary"] = cluster
 
         cached_entry = cache.get(ckey)
-        if cached_entry and cached_entry.get("note"):
+        if cached_entry and cached_entry.get("note") and str(cached_entry["note"]).strip().endswith((".", "!", "?")):
             cand["arch_context_note"] = cached_entry["note"]
             cand["arch_context_source"] = cached_entry.get("source", "nhle_grounded_synthesis")
+            cand["vlm_shape_verdict"] = cached_entry.get("shape_tag", "ROUNDED_MOUND_OR_RING")
+            if cand["vlm_shape_verdict"] == "RECTILINEAR_OR_U_BUND":
+                _apply_rectilinear_flag(cand)
             continue
 
         is_priority_unid = (
@@ -356,17 +425,21 @@ def enrich_candidates_with_archaeological_context(
         )
         if is_priority_unid and vlm_calls < max_vlm_calls:
             diag_p: Optional[Path] = None
-            if vlm_calls < 8 and docs_diag_dir is not None and cand.get("diagnostic_png"):
+            if docs_diag_dir is not None and cand.get("diagnostic_png"):
                 p_try = Path(docs_diag_dir) / str(cand["diagnostic_png"])
                 if p_try.exists():
                     diag_p = p_try
-            vlm_note = query_local_vlm_academic_context(cand, nearby_nhle, cluster, diag_png_path=diag_p)
+            res_vlm = query_local_vlm_academic_context(cand, nearby_nhle, cluster, diag_png_path=diag_p)
             vlm_calls += 1
-            if vlm_note:
+            if res_vlm:
+                vlm_note, shape_tag = res_vlm
                 src = "qwen3.8_vlm_vision" if diag_p is not None else "qwen3.8_llm"
                 cand["arch_context_note"] = vlm_note
                 cand["arch_context_source"] = src
-                cache[ckey] = {"note": vlm_note, "source": src}
+                cand["vlm_shape_verdict"] = shape_tag
+                if shape_tag == "RECTILINEAR_OR_U_BUND":
+                    _apply_rectilinear_flag(cand)
+                cache[ckey] = {"note": vlm_note, "source": src, "shape_tag": shape_tag}
                 cache_dirty = True
                 continue
 
