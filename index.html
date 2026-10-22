@@ -580,6 +580,9 @@
     const squaresLayer = L.layerGroup().addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
 
+    const DATA_BASE = window.location.hostname.endsWith("github.io")
+      ? "https://raw.githubusercontent.com/GlassOnTin/megalith-lidar/main/"
+      : "";
     let summaryData = null;
     let geojsonFeatures = [];
     let currentTab = "unidentified";
@@ -739,7 +742,7 @@
 
       if (p.diagnostic_png) {
         html += `
-          <img class="diag-img" src="docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
+          <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
           <div class="panel-legend">
             <div>
               <strong>Panel 1 (Left): Bare-Earth Slope</strong>
@@ -926,8 +929,8 @@
     async function init() {
       const bust = Date.now();
       const [sumResp, gjResp] = await Promise.all([
-        fetch(`docs/survey_summary.json?v=${bust}`, { cache: "no-store" }),
-        fetch(`docs/candidates.geojson?v=${bust}`, { cache: "no-store" })
+        fetch(`${DATA_BASE}docs/survey_summary.json?v=${bust}`, { cache: "no-store" }),
+        fetch(`${DATA_BASE}docs/candidates.geojson?v=${bust}`, { cache: "no-store" })
       ]);
       summaryData = await sumResp.json();
       const gj = await gjResp.json();
