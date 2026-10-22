@@ -618,7 +618,15 @@
       },
       diagnostic_png: "thornborough_central_henge_E428476_N479300_conf947.png",
       case_study_note:
-        "Featured Inspiration Benchmark: The model's 256 m × 256 m training tile (pos_1004912) covered only the Southern Thornborough Henge (N 478854–479110). When evaluated across the rest of the gravel terrace (N 479300–480400), the model independently isolates the concentric inner and outer banks of the Central Henge (calibrated tile p = 0.969) and Northern Henge (p = 0.965). Because the 20 km block (E420000_N460000) belongs to the training partition, Thornborough is excluded from the out-of-sample test tables on the left."
+        "Featured Inspiration Benchmark: The model's 256 m × 256 m training tile (pos_1004912) covered only the Southern Thornborough Henge (N 478854–479110). When evaluated across the rest of the gravel terrace (N 479300–480400), the model independently isolates the concentric inner and outer banks of the Central Henge (calibrated tile p = 0.969) and Northern Henge (p = 0.965). Because the 20 km block (E420000_N460000) belongs to the training partition, Thornborough is excluded from the out-of-sample test tables on the left.",
+      arch_context_source: "qwen3.8_vlm_vision",
+      arch_context_note:
+        "Set on the fluvio-glacial gravel terrace of the River Ure (North Yorkshire), the Central Henge at Thornborough (NHLE #1004912) forms the central component of a 1.7 km NW–SE Late Neolithic–Early Bronze Age ceremonial alignment alongside the Northern and Southern Henges, overlying an earlier Neolithic cursus monument and flanked by round barrow cemeteries (including Three Hills round barrows, NHLE #1011511, 610 m E). In the 1 m bare-earth DTM and 16 m local-relief panels, the double-entrance inner bank and external ditch (+3.32 m local relief across a 3,024 m² segmented bank footprint, 1.08× elongation) stand out sharply despite modern quarry encroachment around the wider terrace. Surface canopy height (nDSM) is near zero over the grassed Central Henge earthwork, contrasting with the dense woodland canopy covering the Northern Henge 750 m NW.",
+      nearby_nhle_monuments: [
+        { list_entry: 1004912, name: "Thornborough Henges, cursus and adjacent round barrows", cls_label: "Henge / stone circle / ceremonial alignment", distance_m: 12, bearing: "S" },
+        { list_entry: 1011511, name: "Three Hills Barrow Group (round barrows E of Thornborough)", cls_label: "Bronze Age round barrow / cairn", distance_m: 610, bearing: "E" },
+        { list_entry: 1011512, name: "Center Hill round barrow on Thornborough Moor", cls_label: "Bronze Age round barrow / cairn", distance_m: 840, bearing: "SSE" }
+      ]
     };
 
     function featureKey(p) {
@@ -703,6 +711,32 @@
           <div style="grid-column:1 / -1;"><span class="muted">NHLE &amp; OpenStreetMap Check:</span> <strong>${contextNote(p)}</strong></div>
         </div>
       `;
+
+      if (p.arch_context_note) {
+        const srcBadge = p.arch_context_source === "qwen3.8_vlm_vision"
+          ? '<span class="badge badge-osm">AI Vision + NHLE Grounded</span>'
+          : (p.arch_context_source === "qwen3.8_llm"
+            ? '<span class="badge badge-osm">AI + NHLE Grounded</span>'
+            : '<span class="badge badge-nhle">NHLE Spatial &amp; 1 m LiDAR Synthesis</span>');
+        let nearbyHtml = "";
+        if (p.nearby_nhle_monuments && p.nearby_nhle_monuments.length > 0) {
+          const items = p.nearby_nhle_monuments.slice(0, 3).map((m) =>
+            `<a href="https://historicengland.org.uk/listing/the-list/list-entry/${m.list_entry}" target="_blank" rel="noopener">${m.name} (#${m.list_entry})</a> <span class="muted">(${m.distance_m} m ${m.bearing})</span>`
+          ).join(" · ");
+          nearbyHtml = `<div style="margin-top:6px;font-size:11.5px;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
+        }
+        html += `
+          <div style="margin-top:10px;padding:10px 12px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:4px;font-size:12.5px;line-height:1.5;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">
+              <strong style="color:#fff;">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
+              ${srcBadge}
+            </div>
+            <div>${p.arch_context_note}</div>
+            ${nearbyHtml}
+          </div>
+        `;
+      }
+
       if (p.diagnostic_png) {
         html += `
           <img class="diag-img" src="docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />

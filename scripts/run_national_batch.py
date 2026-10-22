@@ -9,13 +9,17 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from megalith_lidar.arch_context import (
+    NHLESpatialContextExtractor,
+    enrich_candidates_with_archaeological_context,
+)
 from megalith_lidar.catalog import (
     CLASS_BARROW_CAIRN,
     CLASS_CIRCLE_HENGE_STONE,
@@ -312,6 +316,7 @@ def export_public_docs(
     survey_dir: Path,
     eval_metrics_path: Path,
     docs_dir: Path,
+    catalog: Optional[MonumentCatalog] = None,
 ) -> Dict:
     """
     Aggregate all completed 2 km x 2 km squares and export:
@@ -468,6 +473,18 @@ def export_public_docs(
         "calibration_parameters": eval_metrics.get("platt_calibrator", {}),
         "scanned_squares": square_summaries,
     }
+
+    if catalog is not None and all_features:
+        extractor = NHLESpatialContextExtractor(catalog)
+        cand_props = [f["properties"] for f in all_features]
+        arch_cache_path = survey_dir.parent / "arch_context_cache.json"
+        enrich_candidates_with_archaeological_context(
+            candidates=cand_props,
+            extractor=extractor,
+            cache_path=arch_cache_path,
+            docs_diag_dir=docs_diag_dir,
+            max_vlm_calls=60,
+        )
 
     (docs_dir / "survey_summary.json").write_text(
         json.dumps(public_summary, indent=2),
@@ -689,6 +706,7 @@ def main() -> None:
         survey_dir=survey_dir,
         eval_metrics_path=eval_metrics_path,
         docs_dir=args.docs_dir,
+        catalog=catalog,
     )
     print(
         f"[batch] Public docs updated: {pub['queue_progress']['completed_squares']} squares "
