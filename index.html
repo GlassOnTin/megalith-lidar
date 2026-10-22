@@ -233,6 +233,28 @@
       top: 0;
       z-index: 1;
     }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: color 0.12s ease, background 0.12s ease;
+    }
+    th.sortable:hover {
+      color: #fff;
+      background: #262e3a;
+    }
+    th.sortable.active-sort {
+      color: var(--accent);
+    }
+    .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 10px;
+      opacity: 0.45;
+    }
+    th.sortable.active-sort .sort-arrow {
+      opacity: 1;
+    }
     tr.cand-row { cursor: pointer; }
     tr.cand-row:hover { background: var(--panel-alt); }
     tr.cand-row.selected-row {
@@ -420,14 +442,14 @@
         <div class="table-scroll" id="candidateListContainer">
           <table>
             <thead>
-              <tr>
-                <th>OS Grid Ref</th>
-                <th>Predicted Form</th>
-                <th>Score</th>
-                <th>16 m Relief</th>
-                <th>Footprint</th>
-                <th>LiDAR Image</th>
-                <th>Spatial Cross-Check Note</th>
+              <tr id="candHeaderRow">
+                <th class="sortable" data-sort="os_grid_ref" data-default-dir="asc">OS Grid Ref <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="predicted_class" data-default-dir="asc">Predicted Form <span class="sort-arrow">⇅</span></th>
+                <th class="sortable active-sort" data-sort="confidence" data-default-dir="desc">Score <span class="sort-arrow">▼</span></th>
+                <th class="sortable" data-sort="est_local_relief_m" data-default-dir="desc">16 m Relief <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="area_m2" data-default-dir="desc">Footprint <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="diagnostic_png" data-default-dir="desc">LiDAR Image <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="context_note" data-default-dir="asc">Spatial Cross-Check Note <span class="sort-arrow">⇅</span></th>
               </tr>
             </thead>
             <tbody id="candTableBody"></tbody>
@@ -521,6 +543,8 @@
     let geojsonFeatures = [];
     let currentTab = "unidentified";
     let selectedFeatureKey = null;
+    let sortCol = "confidence";
+    let sortDir = "desc";
 
     const TAB_EXPLAINERS = {
       unidentified:
@@ -688,11 +712,43 @@
         return matchesTab(p, currentTab);
       });
 
-      // Sort sites with diagnostic images first when scores are tied, sorted by confidence descending
+      const dirMult = sortDir === "asc" ? 1 : -1;
       filtered.sort((a, b) => {
-        const diff = b.properties.confidence - a.properties.confidence;
-        if (Math.abs(diff) > 1e-4) return diff;
-        return (b.properties.diagnostic_png ? 1 : 0) - (a.properties.diagnostic_png ? 1 : 0);
+        const pa = a.properties;
+        const pb = b.properties;
+        let cmp = 0;
+        if (sortCol === "confidence") {
+          cmp = (pa.confidence || 0) - (pb.confidence || 0);
+        } else if (sortCol === "est_local_relief_m") {
+          cmp = (pa.est_local_relief_m || 0) - (pb.est_local_relief_m || 0);
+        } else if (sortCol === "area_m2") {
+          cmp = (pa.area_m2 || 0) - (pb.area_m2 || 0);
+        } else if (sortCol === "diagnostic_png") {
+          cmp = (pa.diagnostic_png ? 1 : 0) - (pb.diagnostic_png ? 1 : 0);
+        } else if (sortCol === "os_grid_ref") {
+          cmp = (pa.os_grid_ref || "").localeCompare(pb.os_grid_ref || "");
+        } else if (sortCol === "predicted_class") {
+          cmp = formatClass(pa.predicted_class).localeCompare(formatClass(pb.predicted_class));
+        } else if (sortCol === "context_note") {
+          cmp = contextNote(pa).localeCompare(contextNote(pb));
+        }
+        if (Math.abs(cmp) > 1e-6) return cmp * dirMult;
+        // Tie-breakers: rendered 4-panel PNG first, then higher confidence
+        const pngDiff = (pb.diagnostic_png ? 1 : 0) - (pa.diagnostic_png ? 1 : 0);
+        if (pngDiff !== 0) return pngDiff;
+        return (pb.confidence || 0) - (pa.confidence || 0);
+      });
+
+      document.querySelectorAll("#candHeaderRow th.sortable").forEach((th) => {
+        const col = th.dataset.sort;
+        const arrow = th.querySelector(".sort-arrow");
+        if (col === sortCol) {
+          th.classList.add("active-sort");
+          if (arrow) arrow.textContent = sortDir === "asc" ? "▲" : "▼";
+        } else {
+          th.classList.remove("active-sort");
+          if (arrow) arrow.textContent = "⇅";
+        }
       });
 
       filtered.forEach((f) => {
@@ -842,6 +898,19 @@
           btn.classList.add("active");
           currentTab = btn.dataset.tab;
           renderActiveView(true);
+        });
+      });
+
+      document.querySelectorAll("#candHeaderRow th.sortable").forEach((th) => {
+        th.addEventListener("click", () => {
+          const col = th.dataset.sort;
+          if (sortCol === col) {
+            sortDir = sortDir === "desc" ? "asc" : "desc";
+          } else {
+            sortCol = col;
+            sortDir = th.dataset.defaultDir || "desc";
+          }
+          renderActiveView(false);
         });
       });
 
