@@ -311,6 +311,186 @@ def prioritize_contiguous_seed_regions_in_queue(
     return True
 
 
+def expand_national_queue_if_needed(
+    queue_state: Dict,
+    catalog: MonumentCatalog,
+    square_size_m: int = 2000,
+    min_pending: int = 1200,
+    seed: int = 20261023,
+) -> bool:
+    """
+    When pending held-out test squares drop below `min_pending`, append:
+      1. Full 20 km x 20 km (10x10 squares) contiguous outward spirals for the 5 seed regions,
+      2. All remaining held-out test-split 2 km x 2 km squares in England containing
+         Prehistoric, Roman, or Iron Age/Enclosure NHLE Scheduled Monuments, interleaved 1:1
+         with newly drawn uniform_national_null squares across all 53 test-split 20 km blocks.
+    """
+    pending_now = sum(1 for q in queue_state["queue"] if q.get("status") == "pending")
+    if pending_now >= min_pending:
+        return False
+
+    rng = np.random.default_rng(seed)
+    existing_coords: Set[Tuple[int, int]] = {
+        (int(q["e_min"]), int(q["n_min"])) for q in queue_state["queue"]
+    }
+
+    prehistoric_classes = {
+        CLASS_MEGALITHIC_TOMB_LONG_BARROW,
+        CLASS_CIRCLE_HENGE_STONE,
+        CLASS_BARROW_CAIRN,
+    }
+    monument_squares_2k: Dict[Tuple[int, int], int] = {}
+    prehistoric_squares_2k: Dict[Tuple[int, int], int] = {}
+    land_blocks_20k: Set[Tuple[int, int]] = set()
+
+    for rec in catalog.records:
+        bx = int(rec.easting // 20000)
+        by = int(rec.northing // 20000)
+        land_blocks_20k.add((bx, by))
+        sx = int(rec.easting // square_size_m) * square_size_m
+        sy = int(rec.northing // square_size_m) * square_size_m
+        if rec.cls in prehistoric_classes:
+            prehistoric_squares_2k[(sx, sy)] = prehistoric_squares_2k.get((sx, sy), 0) + 1
+        if rec.cls in prehistoric_classes or rec.is_roman_or_road or rec.is_enclosure_or_settlement:
+            monument_squares_2k[(sx, sy)] = monument_squares_2k.get((sx, sy), 0) + 1
+
+    # 1. Full 10x10 (20 km x 20 km) outward spirals in the 5 held-out seed blocks
+    seed_spirals: List[List[Dict]] = []
+    for _region_name, seed_e, seed_n, block_e, block_n in HELDOUT_SEED_REGIONS:
+        spiral_coords: List[Tuple[float, int, int]] = []
+        for sx in range(block_e, block_e + 20000, square_size_m):
+            for sy in range(block_n, block_n + 20000, square_size_m):
+                if (sx, sy) in existing_coords:
+                    continue
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                if assign_spatial_split(ce, cn) != "test":
+                    continue
+                dx = (sx - seed_e) / square_size_m
+                dy = (sy - seed_n) / square_size_m
+                spiral_coords.append((float(dx * dx + dy * dy), sx, sy))
+        spiral_coords.sort(key=lambda t: (t[0], t[1], t[2]))
+        reg_items: List[Dict] = []
+        for _d2, sx, sy in spiral_coords:
+            existing_coords.add((sx, sy))
+            ce = sx + square_size_m // 2
+            cn = sy + square_size_m // 2
+            lat, lon = bng_to_latlon(ce, cn)
+            reg_items.append(
+                {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": "test",
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                    "status": "pending",
+                }
+            )
+        seed_spirals.append(reg_items)
+
+    new_seed_round_robin: List[Dict] = []
+    max_s = max((len(s) for s in seed_spirals), default=0)
+    for i in range(max_s):
+        for s in seed_spirals:
+            if i < len(s):
+                new_seed_round_robin.append(s[i])
+
+    # 2. Remaining held-out test landscape squares across England
+    new_landscape: List[Dict] = []
+    for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
+        if (sx, sy) in existing_coords:
+            continue
+        ce = sx + square_size_m // 2
+        cn = sy + square_size_m // 2
+        if assign_spatial_split(ce, cn) != "test":
+            continue
+        existing_coords.add((sx, sy))
+        lat, lon = bng_to_latlon(ce, cn)
+        new_landscape.append(
+            {
+                "square_id": f"test_landscape_E{sx}_N{sy}",
+                "sampling_stream": "heldout_test_landscape",
+                "split": "test",
+                "e_min": sx,
+                "n_min": sy,
+                "e_max": sx + square_size_m,
+                "n_max": sy + square_size_m,
+                "center_lat": round(lat, 5),
+                "center_lon": round(lon, 5),
+                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                "status": "pending",
+            }
+        )
+    rng.shuffle(new_landscape)
+    all_new_landscape = new_seed_round_robin + new_landscape
+
+    # 3. Matching number of uniform_national_null squares across all 53 test-split 20 km blocks
+    test_land_blocks = sorted(
+        [
+            (bx, by)
+            for (bx, by) in land_blocks_20k
+            if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) == "test"
+        ]
+    )
+    new_null: List[Dict] = []
+    for _pass_idx in range(25):
+        if len(new_null) >= len(all_new_landscape):
+            break
+        blocks_copy = list(test_land_blocks)
+        rng.shuffle(blocks_copy)
+        for bx, by in blocks_copy:
+            sub_x = int(rng.integers(0, 20000 // square_size_m))
+            sub_y = int(rng.integers(0, 20000 // square_size_m))
+            sx = bx * 20000 + sub_x * square_size_m
+            sy = by * 20000 + sub_y * square_size_m
+            if (sx, sy) in existing_coords or (sx, sy) in monument_squares_2k:
+                continue
+            existing_coords.add((sx, sy))
+            ce = sx + square_size_m // 2
+            cn = sy + square_size_m // 2
+            lat, lon = bng_to_latlon(ce, cn)
+            new_null.append(
+                {
+                    "square_id": f"null_test_E{sx}_N{sy}",
+                    "sampling_stream": "uniform_national_null",
+                    "split": "test",
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": 0,
+                    "status": "pending",
+                }
+            )
+            if len(new_null) >= len(all_new_landscape):
+                break
+
+    # Interleave 1:1
+    appended: List[Dict] = []
+    max_len = max(len(all_new_landscape), len(new_null))
+    for i in range(max_len):
+        if i < len(all_new_landscape):
+            appended.append(all_new_landscape[i])
+        if i < len(new_null):
+            appended.append(new_null[i])
+
+    if not appended:
+        return False
+    queue_state["queue"].extend(appended)
+    print(f"[queue] Expanded held-out test queue with {len(appended)} additional 2km x 2km squares.")
+    return True
+
+
 def export_public_docs(
     queue_state: Dict,
     survey_dir: Path,
@@ -552,6 +732,13 @@ def main() -> None:
         default=Path("/home/ian/Code/megalith-lidar/docs"),
     )
     parser.add_argument("--max-squares", type=int, default=4)
+    parser.add_argument("--cycles", type=int, default=1, help="Number of consecutive batch cycles to run")
+    parser.add_argument(
+        "--roman-enclosure-per-cycle",
+        type=int,
+        default=25,
+        help="Number of completed squares to scan with RomanUNet and EnclosureUNet per cycle",
+    )
     parser.add_argument("--device", type=str, default="cuda:1")
     parser.add_argument("--rescore-completed", action="store_true", help="Re-score all completed squares with current model & OSM context")
     parser.add_argument("--shard-idx", type=int, default=0, help="Shard index for parallel rescoring")
@@ -581,6 +768,8 @@ def main() -> None:
         }
     if prioritize_contiguous_seed_regions_in_queue(queue_state, catalog):
         queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+    if expand_national_queue_if_needed(queue_state, catalog):
+        queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
@@ -604,7 +793,6 @@ def main() -> None:
     channel_mean = np.array(ckpt["channel_mean"], dtype=np.float32)
     channel_std = np.array(ckpt["channel_std"], dtype=np.float32)
 
-    scanned_now = 0
     if args.rescore_completed:
         completed_items = []
         for q in queue_state["queue"]:
@@ -666,113 +854,154 @@ def main() -> None:
         if args.num_shards > 1:
             return
 
-    for item in queue_state["queue"]:
-        if args.rescore_completed:
-            break
-        if item.get("status") != "pending":
-            continue
-        if scanned_now >= args.max_squares:
-            break
+    from scripts.scan_enclosure_batch import run_enclosure_scan
+    from scripts.scan_roman_batch import run_roman_scan
 
-        sq_id = item["square_id"]
-        e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
-        t0 = time.time()
-        print(
-            f"[batch] Scanning {sq_id} ({item['sampling_stream']}, {item['os_grid_ref']}) "
-            f"bbox=[{e_min}, {n_min}, {e_max}, {n_max}] ..."
-        )
+    roman_ckpt = args.checkpoint.parent / "roman_unet_best.pt"
+    enclosure_ckpt = args.checkpoint.parent / "enclosure_unet_best.pt"
 
-        out_dir = survey_dir / sq_id
-        summary = scan_region(
-            model=model,
-            catalog=catalog,
-            channel_mean=channel_mean,
-            channel_std=channel_std,
-            calibrator=calibrator,
-            tile_prob_threshold=th_005,
-            pixel_prob_threshold=pixel_th_005,
-            e_min=e_min,
-            e_max=e_max,
-            n_min=n_min,
-            n_max=n_max,
-            device=device,
-            tile_cache_dir=tile_cache_dir,
-            output_dir=out_dir,
-            region_name=sq_id,
-            osm_cache_dir=osm_cache_dir,
-        )
-
-        if summary["windows_with_valid_1m_lidar"] == 0:
-            item["status"] = "no_lidar_coverage"
-            item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    total_cycles = max(1, int(args.cycles))
+    for cycle_idx in range(1, total_cycles + 1):
+        if expand_national_queue_if_needed(queue_state, catalog):
             queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
-            print(f"[batch] {sq_id}: 0 valid 1m LiDAR windows (skipping without counting toward quota)")
-            continue
 
-        # Tag each candidate in the saved GeoJSON and report with whether it also passes `fpr_0.01`
-        gj_path = out_dir / f"{sq_id}_candidates.geojson"
-        if gj_path.exists():
-            gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
-            for feat in gj_data.get("features", []):
-                p = feat.get("properties", {})
-                p["passes_fpr_0_01"] = bool(
-                    float(p.get("calibrated_tile_prob", 0.0)) >= th_001
-                    and float(p.get("peak_prob", 0.0)) >= pixel_th_001
-                )
-            gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+        scanned_now = 0
+        for item in queue_state["queue"]:
+            if args.rescore_completed:
+                break
+            if item.get("status") != "pending":
+                continue
+            if scanned_now >= args.max_squares:
+                break
 
-        item["status"] = "completed"
-        item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        item["elapsed_s"] = round(time.time() - t0, 1)
-        item["windows_with_valid_1m_lidar"] = summary["windows_with_valid_1m_lidar"]
-        item["rediscovered_nhle_scheduled_count"] = summary["rediscovered_scheduled_monuments_count"]
-        item["rediscovered_osm_archaeology_count"] = summary["rediscovered_osm_archaeology_count"]
-        item["flagged_modern_or_karst_confounders_count"] = summary["flagged_modern_or_karst_confounders_count"]
-        item["unidentified_candidates_count"] = summary["unidentified_candidates_count"]
+            sq_id = item["square_id"]
+            e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
+            t0 = time.time()
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] Scanning {sq_id} ({item['sampling_stream']}, {item['os_grid_ref']}) "
+                f"bbox=[{e_min}, {n_min}, {e_max}, {n_max}] ..."
+            )
 
-        queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
-        scanned_now += 1
+            out_dir = survey_dir / sq_id
+            summary = scan_region(
+                model=model,
+                catalog=catalog,
+                channel_mean=channel_mean,
+                channel_std=channel_std,
+                calibrator=calibrator,
+                tile_prob_threshold=th_005,
+                pixel_prob_threshold=pixel_th_005,
+                e_min=e_min,
+                e_max=e_max,
+                n_min=n_min,
+                n_max=n_max,
+                device=device,
+                tile_cache_dir=tile_cache_dir,
+                output_dir=out_dir,
+                region_name=sq_id,
+                osm_cache_dir=osm_cache_dir,
+            )
+
+            if summary["windows_with_valid_1m_lidar"] == 0:
+                item["status"] = "no_lidar_coverage"
+                item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+                print(f"[batch] {sq_id}: 0 valid 1m LiDAR windows (skipping without counting toward quota)")
+                continue
+
+            # Tag each candidate in the saved GeoJSON and report with whether it also passes `fpr_0.01`
+            gj_path = out_dir / f"{sq_id}_candidates.geojson"
+            if gj_path.exists():
+                gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
+                for feat in gj_data.get("features", []):
+                    p = feat.get("properties", {})
+                    p["passes_fpr_0_01"] = bool(
+                        float(p.get("calibrated_tile_prob", 0.0)) >= th_001
+                        and float(p.get("peak_prob", 0.0)) >= pixel_th_001
+                    )
+                gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+
+            item["status"] = "completed"
+            item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            item["elapsed_s"] = round(time.time() - t0, 1)
+            item["windows_with_valid_1m_lidar"] = summary["windows_with_valid_1m_lidar"]
+            item["rediscovered_nhle_scheduled_count"] = summary["rediscovered_scheduled_monuments_count"]
+            item["rediscovered_osm_archaeology_count"] = summary["rediscovered_osm_archaeology_count"]
+            item["flagged_modern_or_karst_confounders_count"] = summary["flagged_modern_or_karst_confounders_count"]
+            item["unidentified_candidates_count"] = summary["unidentified_candidates_count"]
+
+            queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+            scanned_now += 1
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] Completed {sq_id} in {item['elapsed_s']}s: "
+                f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
+                f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
+                f"OSM_confounder={summary['flagged_modern_or_karst_confounders_count']}, "
+                f"Unidentified={summary['unidentified_candidates_count']}"
+            )
+
+        pub = export_public_docs(
+            queue_state=queue_state,
+            survey_dir=survey_dir,
+            eval_metrics_path=eval_metrics_path,
+            docs_dir=args.docs_dir,
+            catalog=catalog,
+        )
         print(
-            f"[batch] Completed {sq_id} in {item['elapsed_s']}s: "
-            f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
-            f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
-            f"OSM_confounder={summary['flagged_modern_or_karst_confounders_count']}, "
-            f"Unidentified={summary['unidentified_candidates_count']}"
+            f"[cycle {cycle_idx}/{total_cycles}] Prehistoric public docs updated: "
+            f"{pub['queue_progress']['completed_squares']} squares "
+            f"({pub['queue_progress']['total_scanned_area_km2']} km²), "
+            f"{pub['queue_progress']['total_detections']} total detections."
         )
 
-    pub = export_public_docs(
-        queue_state=queue_state,
-        survey_dir=survey_dir,
-        eval_metrics_path=eval_metrics_path,
-        docs_dir=args.docs_dir,
-        catalog=catalog,
-    )
-    print(
-        f"[batch] Public docs updated: {pub['queue_progress']['completed_squares']} squares "
-        f"({pub['queue_progress']['total_scanned_area_km2']} km²), "
-        f"{pub['queue_progress']['total_detections']} total detections."
-    )
+        if args.roman_enclosure_per_cycle > 0:
+            if roman_ckpt.exists():
+                rom_sum = run_roman_scan(
+                    data_dir=args.data_dir,
+                    roman_ckpt_path=roman_ckpt,
+                    docs_dir=args.docs_dir,
+                    device_str=args.device,
+                    max_squares=args.roman_enclosure_per_cycle,
+                )
+                print(
+                    f"[cycle {cycle_idx}/{total_cycles}] Roman docs updated: "
+                    f"{rom_sum['squares_scanned']} squares ({rom_sum['area_km2']} km²), "
+                    f"Unid={rom_sum['unidentified_candidates']} (1% FPR={rom_sum['unidentified_candidates_fpr_0_01']})."
+                )
+            if enclosure_ckpt.exists():
+                enc_sum = run_enclosure_scan(
+                    data_dir=args.data_dir,
+                    enclosure_ckpt_path=enclosure_ckpt,
+                    docs_dir=args.docs_dir,
+                    device_str=args.device,
+                    max_squares=args.roman_enclosure_per_cycle,
+                )
+                print(
+                    f"[cycle {cycle_idx}/{total_cycles}] Enclosure docs updated: "
+                    f"{enc_sum['squares_scanned']} squares ({enc_sum['area_km2']} km²), "
+                    f"Unid={enc_sum['unidentified_candidates']} (1% FPR={enc_sum['unidentified_candidates_fpr_0_01']})."
+                )
 
-    if args.git_push and scanned_now > 0:
-        repo_root = Path(__file__).resolve().parents[1]
-        subprocess.run(["git", "add", "docs/"], cwd=repo_root, check=False)
-        status = subprocess.run(
-            ["git", "status", "--porcelain", "docs/"],
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if status.stdout.strip():
-            comp = pub["queue_progress"]["completed_squares"]
-            area = pub["queue_progress"]["total_scanned_area_km2"]
-            subprocess.run(
-                ["git", "commit", "-m", f"Update national survey batch ({comp} squares, {area} km²)"],
+        if args.git_push:
+            repo_root = Path(__file__).resolve().parents[1]
+            subprocess.run(["git", "add", "docs/"], cwd=repo_root, check=False)
+            status = subprocess.run(
+                ["git", "status", "--porcelain", "docs/"],
                 cwd=repo_root,
+                capture_output=True,
+                text=True,
                 check=False,
             )
-            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=repo_root, check=False)
-            subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=False)
+            if status.stdout.strip():
+                comp = pub["queue_progress"]["completed_squares"]
+                area = pub["queue_progress"]["total_scanned_area_km2"]
+                subprocess.run(
+                    ["git", "commit", "-m", f"Update national survey batch ({comp} squares, {area} km²)"],
+                    cwd=repo_root,
+                    check=False,
+                )
+                subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=repo_root, check=False)
+                subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=False)
 
 
 if __name__ == "__main__":

@@ -52,7 +52,6 @@ def run_enclosure_scan(
         return 0 if has_enc else 1
 
     completed.sort(key=lambda q: (_sq_priority(q), q["square_id"]))
-    target_squares = completed[:max_squares]
 
     device = torch.device(device_str if torch.cuda.is_available() else "cpu")
     ckpt = torch.load(enclosure_ckpt_path, map_location=device, weights_only=False)
@@ -74,12 +73,14 @@ def run_enclosure_scan(
     docs_diag_dir.mkdir(parents=True, exist_ok=True)
     copied_pngs: Set[str] = set()
     all_enclosure_features: List[Dict] = []
+    new_scanned = 0
+    total_scanned = 0
 
-    for idx, q in enumerate(target_squares, 1):
+    for q in completed:
         sq_id = f"enclosure_{q['square_id']}"
         out_dir = enclosure_survey_dir / sq_id
         gj_path = out_dir / f"{sq_id}_candidates.geojson"
-        if not gj_path.exists():
+        if not gj_path.exists() and new_scanned < max_squares:
             t0 = time.time()
             summary = scan_region(
                 model=model,
@@ -109,13 +110,15 @@ def run_enclosure_scan(
                         and float(p.get("peak_prob", 0.0)) >= pixel_th_001
                     )
                 gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+            new_scanned += 1
             print(
-                f"[enclosure {idx}/{len(target_squares)}] {sq_id} ({time.time() - t0:.1f}s): "
+                f"[enclosure +{new_scanned}/{max_squares}] {sq_id} ({time.time() - t0:.1f}s): "
                 f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
                 f"Unid={summary['unidentified_candidates_count']}"
             )
 
         if gj_path.exists():
+            total_scanned += 1
             gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
             for feat in gj_data.get("features", []):
                 p = feat["properties"]
@@ -144,8 +147,8 @@ def run_enclosure_scan(
     eval_metrics = json.loads(eval_metrics_path.read_text(encoding="utf-8")) if eval_metrics_path.exists() else {}
     enclosure_summary = {
         "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "squares_scanned": len(target_squares),
-        "area_km2": round(len(target_squares) * 4.0, 1),
+        "squares_scanned": total_scanned,
+        "area_km2": round(total_scanned * 4.0, 1),
         "total_detections": len(all_enclosure_features),
         "rediscovered_nhle_scheduled": sum(
             1 for f in all_enclosure_features if f["properties"].get("context_category") == "rediscovered_nhle_scheduled"
