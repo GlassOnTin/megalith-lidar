@@ -20,6 +20,12 @@ OSM_ARCHAEOLOGY_HISTORIC_VALUES = frozenset(
         "tumulus",
         "barrow",
         "stone",
+        "roman_road",
+        "roman_villa",
+        "fort",
+        "camp",
+        "castle",
+        "earthworks",
     }
 )
 
@@ -578,6 +584,7 @@ def annotate_candidates_with_spatial_context(
     osm_index: Optional[OSMSpatialIndex],
     max_canopy_ndsm_m: float = 2.8,
     min_positive_relief_m: float = 0.25,
+    target_domain: str = "prehistoric",
 ) -> List[Dict]:
     """
     Annotate each candidate detection with OpenStreetMap archaeological and confounder context
@@ -585,13 +592,26 @@ def annotate_candidates_with_spatial_context(
     sunken marl/chalk pits, or LiDAR void/TIN facets) WITHOUT altering `confidence`,
     `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
     """
+    is_roman = target_domain == "roman"
     for cand in candidates:
         osm_arch = []
         osm_conf = []
         if osm_index is not None:
             res = osm_index.query_point(cand["easting"], cand["northing"])
             osm_arch = res["osm_archaeology_matches"]
-            osm_conf = list(res["osm_confounder_matches"])
+            raw_conf = list(res["osm_confounder_matches"])
+            if is_roman:
+                # 14-21% of scheduled Roman villas, forts, and Roman road aggers sit inside woodland
+                # (landuse=forest / natural=wood) where 1m bare-earth LiDAR sees through the canopy.
+                # Keep modern roads, railways, buildings, quarries, reservoirs, and golf courses as
+                # confounders, while allowing woodland-covered Roman earthworks through.
+                osm_conf = [
+                    m
+                    for m in raw_conf
+                    if m.get("subtype") not in {"landuse=forest", "natural=wood", "natural=tree", "natural=tree_row"}
+                ]
+            else:
+                osm_conf = raw_conf
 
         # Intrinsic 1m LiDAR physical confounder checks (when outside known monuments)
         ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))
@@ -602,7 +622,7 @@ def annotate_candidates_with_spatial_context(
         slope_m = float(cand.get("mean_slope_tangent", 0.08))
         has_tin_facet = bool(cand.get("has_lidar_tin_facet", False))
 
-        if ndsm_m >= max_canopy_ndsm_m:
+        if not is_roman and ndsm_m >= max_canopy_ndsm_m:
             osm_conf.append(
                 {
                     "osm_id": "lidar/ndsm",
@@ -613,7 +633,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif ndsm_m >= 0.75 or (ndsm_m >= 0.50 and slope_m >= 0.075):
+        elif not is_roman and (ndsm_m >= 0.75 or (ndsm_m >= 0.50 and slope_m >= 0.075)):
             osm_conf.append(
                 {
                     "osm_id": "lidar/clamp_or_scrub",
@@ -624,7 +644,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif rel_m >= 2.00 or (slope_m >= 0.145 and rel_m >= 1.50):
+        elif rel_m >= 2.20 or (slope_m >= 0.165 and rel_m >= 1.65):
             osm_conf.append(
                 {
                     "osm_id": "lidar/reservoir_or_bund",
@@ -635,7 +655,18 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif patch_min_rel_m <= -0.35 and centroid_rel_m < 0.25:
+        elif not is_roman and (rel_m >= 2.00 or (slope_m >= 0.145 and rel_m >= 1.50)):
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/reservoir_or_bund",
+                    "subtype": f"covered_reservoir_or_steep_bund (relief={rel_m:+.2f}m, slope={slope_m:.2f})",
+                    "name": "Covered reservoir, steep embankment, or modern spoil bund",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        elif not is_roman and (patch_min_rel_m <= -0.35 and centroid_rel_m < 0.25):
             osm_conf.append(
                 {
                     "osm_id": "lidar/cut_fill_bund",
@@ -646,7 +677,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        if rel_m < -0.15 or max_pos_rel_m < min_positive_relief_m:
+        if rel_m < -0.15 or max_pos_rel_m < (0.20 if is_roman else min_positive_relief_m):
             osm_conf.append(
                 {
                     "osm_id": "lidar/pit",

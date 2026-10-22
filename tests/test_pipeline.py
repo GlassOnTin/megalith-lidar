@@ -2,16 +2,22 @@ import numpy as np
 import pytest
 import torch
 
+from megalith_lidar.arch_context import classify_vlm_note_downrating
 from megalith_lidar.catalog import (
     CLASS_BARROW_CAIRN,
     CLASS_CIRCLE_HENGE_STONE,
     CLASS_MEGALITHIC_TOMB_LONG_BARROW,
     CLASS_OTHER_MONUMENT,
+    ROMAN_CLASS_BACKGROUND,
+    ROMAN_CLASS_FORT_CAMP_SETTLEMENT,
+    ROMAN_CLASS_ROAD_AGGER_TRACKWAY,
+    ROMAN_CLASS_VILLA_BUILDING,
     MonumentCatalog,
     MonumentRecord,
     bng_to_latlon,
     bng_to_os_grid_ref,
     classify_monument_name,
+    classify_roman_monument_name,
 )
 from megalith_lidar.dataset import assign_spatial_split
 from megalith_lidar.model import MegalithLoss, MegalithUNet
@@ -222,4 +228,87 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
     assert cands[3]["confidence"] == 0.9650
     assert cands[4]["context_category"] == "flagged_modern_or_karst_confounder"
     assert cands[5]["context_category"] == "flagged_modern_or_karst_confounder"
+
+
+def test_roman_taxonomy_and_sub_canopy_context():
+    assert classify_roman_monument_name("Roman villa in Bottom Copse") == ROMAN_CLASS_VILLA_BUILDING
+    assert classify_roman_monument_name("Romano-Celtic temple 300m west of farm") == ROMAN_CLASS_VILLA_BUILDING
+    assert classify_roman_monument_name("Length of Roman road in Bradley Wood") == ROMAN_CLASS_ROAD_AGGER_TRACKWAY
+    assert classify_roman_monument_name("Roman road agger and flanking ditches") == ROMAN_CLASS_ROAD_AGGER_TRACKWAY
+    assert classify_roman_monument_name("Roman fort and marching camp") == ROMAN_CLASS_FORT_CAMP_SETTLEMENT
+    assert classify_roman_monument_name("Romano-British settlement and field system") == ROMAN_CLASS_FORT_CAMP_SETTLEMENT
+    assert classify_roman_monument_name("Roman milestone 100m south of bridge") == ROMAN_CLASS_BACKGROUND
+    assert classify_roman_monument_name("Two bowl barrows on hill") == ROMAN_CLASS_BACKGROUND
+
+    rec_villa = MonumentRecord(
+        list_entry=2002,
+        name="Roman villa in Bottom Copse",
+        easting=410000.0,
+        northing=167000.0,
+        area_ha=0.25,
+        ngr="SU 10000 67000",
+        cls=CLASS_OTHER_MONUMENT,
+        rings=[
+            [
+                [409970.0, 166970.0],
+                [410030.0, 166970.0],
+                [410030.0, 167030.0],
+                [409970.0, 167030.0],
+                [409970.0, 166970.0],
+            ]
+        ],
+    )
+    assert rec_villa.is_roman_or_road
+    assert rec_villa.roman_cls == ROMAN_CLASS_VILLA_BUILDING
+    cat = MonumentCatalog([rec_villa])
+    rmask = cat.rasterize_roman_tile(409872, 410128, 166872, 167128, size=256)
+    assert rmask[128, 128] == ROMAN_CLASS_VILLA_BUILDING
+
+    # Woodland canopy (nDSM >= 2.8m) and natural=wood should NOT flag a Roman earthwork as a confounder
+    lat_wood, lon_wood = bng_to_latlon(410000.0, 167000.0)
+    osm_idx = OSMSpatialIndex.from_osm_json(
+        {"elements": [{"type": "node", "id": 10, "lat": lat_wood, "lon": lon_wood, "tags": {"natural": "wood"}}]}
+    )
+    roman_cand = [
+        {
+            "easting": 410000.0,
+            "northing": 167000.0,
+            "confidence": 0.92,
+            "est_local_relief_m": 0.55,
+            "max_positive_relief_m": 0.55,
+            "est_surface_prominence_m": 11.2,
+            "mean_slope_tangent": 0.09,
+            "is_known_monument": False,
+            "target_domain": "roman",
+        }
+    ]
+    annotate_candidates_with_spatial_context(roman_cand, osm_idx, target_domain="roman")
+    assert roman_cand[0]["context_category"] == "unidentified_candidate"
+
+    # Test Qwen3.8 VLM note downrating for obvious false positives vs uncertain vs plausible
+    tier1, mult1, _ = classify_vlm_note_downrating(
+        "The morphology strongly indicates a ring ditch or a modern military emplacement.",
+        "ROUNDED_MOUND_OR_RING",
+        {"predicted_class": "megalithic_tomb_long_barrow", "elongation": 1.19},
+    )
+    assert tier1 == "OBVIOUS_FALSE_POSITIVE"
+    assert mult1 < 0.50
+
+    tier2, mult2, _ = classify_vlm_note_downrating(
+        "The model's long barrow classification is rejected due to the lack of rectilinear morphology.",
+        "ROUNDED_MOUND_OR_RING",
+        {"predicted_class": "megalithic_tomb_long_barrow", "elongation": 1.07},
+    )
+    assert tier2 == "UNCERTAIN_OR_DEGRADED"
+    assert 0.70 < mult2 < 0.95
+
+    tier3, mult3, _ = classify_vlm_note_downrating(
+        "The 1m LiDAR close-up reveals a well-defined circular bowl barrow with a surrounding quarry ditch.",
+        "ROUNDED_MOUND_OR_RING",
+        {"predicted_class": "round_barrow_cairn", "elongation": 1.06},
+    )
+    assert tier3 == "PLAUSIBLE_MONUMENT"
+    assert mult3 == 1.0
+
+
 

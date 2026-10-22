@@ -288,11 +288,13 @@ class MegalithLidarDataset(Dataset):
         feature_cache_dir: Optional[Path] = None,
         channel_mean: Optional[np.ndarray] = None,
         channel_std: Optional[np.ndarray] = None,
+        target_domain: str = "prehistoric",
     ) -> None:
         self.manifest = manifest
         self.catalog = catalog
         self.tile_cache_dir = Path(tile_cache_dir)
         self.augment = augment
+        self.target_domain = target_domain
         self.feature_cache_dir = Path(feature_cache_dir) if feature_cache_dir else None
         if self.feature_cache_dir is not None:
             self.feature_cache_dir.mkdir(parents=True, exist_ok=True)
@@ -315,8 +317,9 @@ class MegalithLidarDataset(Dataset):
         return len(self.manifest)
 
     def _load_features_and_mask(self, spec: Dict) -> Tuple[np.ndarray, np.ndarray]:
+        prefix = "roman_v1" if self.target_domain == "roman" else "v3"
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v3_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             if f_path.exists():
                 try:
                     with np.load(f_path) as d:
@@ -335,40 +338,71 @@ class MegalithLidarDataset(Dataset):
         dtm, dsm = pair
         features = compute_terrain_features(dtm, dsm)
         if spec["is_positive"]:
-            mask = self.catalog.rasterize_tile(
-                spec["e_min"],
-                spec["e_max"],
-                spec["n_min"],
-                spec["n_max"],
-                size=dtm.shape[0],
-            )
-            # Refine oversized NHLE legal-buffer polygons (> 600 m^2):
-            # Keep active local-relief earthwork pixels as the positive monument class,
-            # mark tree canopy (nDSM >= 2.5m) as background (0), and mark flat legal-buffer
-            # pasture inside the polygon as IGNORE_INDEX (255) so the segmentation head does
-            # not learn to paint 40m x 40m halos over flat farmland.
-            pos_px = mask > 0
-            if int(np.sum(pos_px)) > 600:
-                rel16 = np.abs(features[0] + features[1])
-                ndsm = np.expm1(features[5])
-                rel_th = max(0.20, float(np.percentile(rel16[pos_px], 75)))
-                earthwork = pos_px & (rel16 >= rel_th) & (ndsm < 2.5)
-                earthwork = binary_dilation(earthwork, iterations=2) & pos_px & (ndsm < 2.5)
-                if int(np.sum(earthwork)) < 36:
-                    ys, xs = np.where(pos_px)
-                    cy, cx = float(np.mean(ys)), float(np.mean(xs))
-                    yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
-                    core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 10.0**2) & pos_px & (ndsm < 2.5)
-                    earthwork = earthwork | core
-                refined = np.zeros_like(mask, dtype=np.uint8)
-                refined[pos_px & (~earthwork) & (ndsm < 2.5)] = 255
-                refined[earthwork] = mask[earthwork]
-                mask = refined
+            if self.target_domain == "roman":
+                mask = self.catalog.rasterize_roman_tile(
+                    spec["e_min"],
+                    spec["e_max"],
+                    spec["n_min"],
+                    spec["n_max"],
+                    size=dtm.shape[0],
+                )
+                # For Roman villas, playing-card forts, and Roman road aggers:
+                # 14-21% survive under woodland canopy (nDSM >= 2.5m) where bare-earth 1m DTM
+                # resolves the embankment/rampart through the trees. Keep active bare-earth
+                # relief pixels (|z - G_16(z)| >= 0.16m or top 35% of polygon relief) as positive
+                # regardless of canopy height, and mark flat legal-buffer farmland as IGNORE (255).
+                pos_px = mask > 0
+                if int(np.sum(pos_px)) > 500:
+                    rel16 = np.abs(features[0] + features[1])
+                    slope = features[3]
+                    rel_th = max(0.16, min(0.28, float(np.percentile(rel16[pos_px], 68))))
+                    earthwork = pos_px & ((rel16 >= rel_th) | (slope >= 0.065))
+                    earthwork = binary_dilation(earthwork, iterations=2) & pos_px
+                    if int(np.sum(earthwork)) < 48:
+                        ys, xs = np.where(pos_px)
+                        cy, cx = float(np.mean(ys)), float(np.mean(xs))
+                        yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                        core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 12.0**2) & pos_px
+                        earthwork = earthwork | core
+                    refined = np.zeros_like(mask, dtype=np.uint8)
+                    refined[pos_px & (~earthwork)] = 255
+                    refined[earthwork] = mask[earthwork]
+                    mask = refined
+            else:
+                mask = self.catalog.rasterize_tile(
+                    spec["e_min"],
+                    spec["e_max"],
+                    spec["n_min"],
+                    spec["n_max"],
+                    size=dtm.shape[0],
+                )
+                # Refine oversized NHLE legal-buffer polygons (> 600 m^2):
+                # Keep active local-relief earthwork pixels as the positive monument class,
+                # mark tree canopy (nDSM >= 2.5m) as background (0), and mark flat legal-buffer
+                # pasture inside the polygon as IGNORE_INDEX (255) so the segmentation head does
+                # not learn to paint 40m x 40m halos over flat farmland.
+                pos_px = mask > 0
+                if int(np.sum(pos_px)) > 600:
+                    rel16 = np.abs(features[0] + features[1])
+                    ndsm = np.expm1(features[5])
+                    rel_th = max(0.20, float(np.percentile(rel16[pos_px], 75)))
+                    earthwork = pos_px & (rel16 >= rel_th) & (ndsm < 2.5)
+                    earthwork = binary_dilation(earthwork, iterations=2) & pos_px & (ndsm < 2.5)
+                    if int(np.sum(earthwork)) < 36:
+                        ys, xs = np.where(pos_px)
+                        cy, cx = float(np.mean(ys)), float(np.mean(xs))
+                        yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                        core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 10.0**2) & pos_px & (ndsm < 2.5)
+                        earthwork = earthwork | core
+                    refined = np.zeros_like(mask, dtype=np.uint8)
+                    refined[pos_px & (~earthwork) & (ndsm < 2.5)] = 255
+                    refined[earthwork] = mask[earthwork]
+                    mask = refined
         else:
             mask = np.zeros(dtm.shape, dtype=np.uint8)
 
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v3_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             np.savez_compressed(f_path, features=features.astype(np.float16), mask=mask)
         return features, mask
 

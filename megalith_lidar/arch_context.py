@@ -158,6 +158,15 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     elif cls_name == "stone_circle_henge_alignment":
         form_phrase = f"a ring-bank or annular earthwork ({area:.0f} m² footprint, ~{eq_diam:.0f} m diameter, {elong:.2f}× elongation)"
         arch_parallel = "Neolithic/Early Bronze Age henge bank, ring cairn, or enclosed cremation cemetery"
+    elif cls_name == "roman_villa_building":
+        form_phrase = f"a rectilinear building platform or courtyard enclosure ({area:.0f} m² footprint, ~{eq_diam:.0f} m span, {elong:.2f}× axial elongation)"
+        arch_parallel = "Romano-British villa range, aisled building platform, or temple temenos earthwork"
+    elif cls_name == "roman_road_agger_trackway":
+        form_phrase = f"a cambered linear embankment or hollow-way terrace ({elong:.2f}× axial elongation, {area:.0f} m² footprint)"
+        arch_parallel = "Roman road agger with flanking quarry-scoop ditches or ancient ridgeway trackway"
+    elif cls_name == "roman_fort_camp_settlement":
+        form_phrase = f"a rectilinear rampart-and-ditch enclosure or settlement earthwork ({area:.0f} m² footprint, ~{eq_diam:.0f} m span, {elong:.2f}× elongation)"
+        arch_parallel = "Roman fortlet, marching-camp vallum, signal station, or Romano-British enclosed farmstead"
     else:
         form_phrase = f"a sub-circular mound ({elong:.2f}× elongation, {area:.0f} m² footprint, ~{eq_diam:.0f} m diameter)"
         arch_parallel = "Bronze Age bowl/bell barrow or upland funerary cairn"
@@ -249,6 +258,89 @@ def make_zoomed_crop_b64(png_path: Path) -> str:
     return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
+_VLM_OBVIOUS_CONFOUNDER_PAT = (
+    "modern military emplacement",
+    "covered reservoir",
+    "modern reservoir",
+    "modern utility",
+    "modern spoil",
+    "modern forestry spoil",
+    "field clearance ring",
+    "post-medieval chalk extraction",
+    "post-medieval marl pit",
+    "extractive pit",
+    "quarry scoop",
+    "fighter pen",
+)
+
+
+def classify_vlm_note_downrating(
+    note: str,
+    shape_tag: str,
+    cand: Dict,
+) -> Tuple[str, float, Optional[str]]:
+    """
+    Evaluate Qwen3.8's visual/text assessment and physical morphology to determine:
+      - `verdict_tier`: 'PLAUSIBLE_MONUMENT' (1.0x), 'UNCERTAIN_OR_DEGRADED' (0.82x),
+        or 'OBVIOUS_FALSE_POSITIVE' (0.35x and routed to Tab 3 confounders).
+      - `multiplier`: factor applied to `raw_unet_confidence` to compute `confidence`.
+      - `reason`: concise explanation when downrated or routed to Tab 3.
+    """
+    low = (note or "").lower()
+    is_roman = cand.get("target_domain") == "roman"
+    pred_cls = cand.get("predicted_class", "")
+    elong = float(cand.get("elongation", 1.15))
+
+    if not is_roman and shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}:
+        return (
+            "OBVIOUS_FALSE_POSITIVE",
+            0.35,
+            "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
+        )
+
+    for phrase in _VLM_OBVIOUS_CONFOUNDER_PAT:
+        if phrase in low and ("more likely" in low or "strongly indicates" in low or "likely represents" in low):
+            # If the note explicitly concludes it is a modern military emplacement, reservoir, or spoil/extraction pit
+            if phrase in {"modern military emplacement", "covered reservoir", "modern reservoir", "modern utility", "fighter pen"}:
+                return (
+                    "OBVIOUS_FALSE_POSITIVE",
+                    0.35,
+                    f"VLM Assessment: Flagged as {phrase}",
+                )
+
+    # Check if VLM notes a contradiction between long-barrow prediction and circular/low-amplitude morphology,
+    # or concludes it is likely natural scree/gravel hummock/forestry spoil
+    if (
+        (
+            pred_cls == "megalithic_tomb_long_barrow"
+            and elong < 1.35
+            and (
+                "despite the model" in low
+                or "contradicts" in low
+                or "rejected" in low
+                or "lacking the axial elongation" in low
+                or "lacking any rectilinear" in low
+                or "absence of a defined long-barrow" in low
+                or "although the model" in low
+            )
+        )
+        or "natural fluvio-glacial" in low
+        or "natural chalk scree" in low
+        or "natural limestone scree" in low
+        or "natural granite outcrop" in low
+        or "modern forestry" in low
+        or "field clearance ring" in low
+        or "more likely a post-medieval" in low
+    ):
+        return (
+            "UNCERTAIN_OR_DEGRADED",
+            0.84,
+            "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)",
+        )
+
+    return ("PLAUSIBLE_MONUMENT", 1.0, None)
+
+
 def query_local_vlm_academic_context(
     cand: Dict,
     nearby_nhle: List[Dict],
@@ -259,8 +351,9 @@ def query_local_vlm_academic_context(
 ) -> Optional[Tuple[str, str]]:
     """
     Query the local Qwen3.8-Flash-Next vision-language server (`localhost:8090`) with the exact
-    NHLE spatial fact sheet + 3x-magnified 80m x 80m 1m LiDAR close-up to produce both a shape
-    verdict ('RECTILINEAR_OR_U_BUND' vs 'ROUNDED_MOUND_OR_RING') and a 3-sentence academic assessment.
+    NHLE spatial fact sheet + 3x-magnified 80m x 80m 1m LiDAR close-up to produce both a shape/confounder
+    verdict ('RECTILINEAR_OR_U_BUND', 'OBVIOUS_MODERN_CONFOUNDER', or 'ROUNDED_MOUND_OR_RING') and a
+    3-sentence academic assessment.
     """
     nearest_lines = [
         f"- {m['name']} (NHLE #{m['list_entry']}, {m['cls_label']}): located {int(m['distance_m'])} m {m['bearing']} of this candidate"
@@ -272,8 +365,9 @@ def query_local_vlm_academic_context(
     slope_deg = math.degrees(math.atan(slope))
     has_img = diag_png_path is not None and diag_png_path.exists()
     shape_prefix_instr = (
-        "First output either [SHAPE: RECTILINEAR_OR_U_BUND] (if the earthwork inside the circle in the 80m x 80m close-up "
-        "has straight/square 90-degree corners, a flat rectangular platform, or a U-shaped bank wrapping a dark blue sunken pit) "
+        "First output one tag: [SHAPE: RECTILINEAR_OR_U_BUND] (if the earthwork inside the circle in the 80m x 80m close-up "
+        "has straight/square 90-degree corners, a flat rectangular reservoir/building platform, or a U-shaped bank wrapping a dark blue sunken pit), "
+        "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if it is clearly a modern road/track embankment, quarry scoop, military gun-pit, or utility feature), "
         "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound or ring). "
         if has_img
         else ""
@@ -338,6 +432,9 @@ def query_local_vlm_academic_context(
             if "[SHAPE: RECTILINEAR_OR_U_BUND]" in raw_text:
                 shape_tag = "RECTILINEAR_OR_U_BUND"
                 raw_text = raw_text.replace("[SHAPE: RECTILINEAR_OR_U_BUND]", "").strip()
+            elif "[SHAPE: OBVIOUS_MODERN_CONFOUNDER]" in raw_text:
+                shape_tag = "OBVIOUS_MODERN_CONFOUNDER"
+                raw_text = raw_text.replace("[SHAPE: OBVIOUS_MODERN_CONFOUNDER]", "").strip()
             elif "[SHAPE: ROUNDED_MOUND_OR_RING]" in raw_text:
                 shape_tag = "ROUNDED_MOUND_OR_RING"
                 raw_text = raw_text.replace("[SHAPE: ROUNDED_MOUND_OR_RING]", "").strip()
@@ -357,9 +454,10 @@ def enrich_candidates_with_archaeological_context(
 ) -> int:
     """
     Populate `nearby_nhle_monuments`, `nhle_cluster_summary`, `arch_context_note`,
-    and `arch_context_source` ('qwen3.8_vlm_vision', 'qwen3.8_llm', or 'nhle_grounded_synthesis')
-    on every candidate. Also routes candidates Visually Flagged as `[SHAPE: RECTILINEAR_OR_U_BUND]`
-    to `flagged_modern_or_karst_confounder`.
+    `arch_context_source` ('qwen3.8_vlm_vision', 'qwen3.8_llm', or 'nhle_grounded_synthesis'),
+    `raw_unet_confidence`, and `vlm_verdict_tier` on every candidate.
+    Downrates candidates where Qwen3.8 identifies obvious false-positive morphology or
+    class-vs-shape contradiction, and routes obvious false positives to `flagged_modern_or_karst_confounder`.
     """
     cache: Dict[str, Dict] = {}
     if cache_path.exists():
@@ -371,16 +469,23 @@ def enrich_candidates_with_archaeological_context(
     vlm_calls = 0
     cache_dirty = False
 
-    def _apply_rectilinear_flag(c: Dict) -> None:
-        if c.get("context_category") == "unidentified_candidate":
+    def _apply_vlm_verdict(c: Dict, note: str, shape_tag: str) -> None:
+        raw_conf = float(c.get("raw_unet_confidence", c.get("confidence", 0.0)))
+        c["raw_unet_confidence"] = round(raw_conf, 4)
+        tier, mult, reason = classify_vlm_note_downrating(note, shape_tag, c)
+        c["vlm_verdict_tier"] = tier
+        c["vlm_downrate_reason"] = reason
+        if c.get("context_category") in {"unidentified_candidate", "flagged_modern_or_karst_confounder"}:
+            c["confidence"] = round(raw_conf * mult, 4)
+        if tier == "OBVIOUS_FALSE_POSITIVE" and c.get("context_category") == "unidentified_candidate":
             c["context_category"] = "flagged_modern_or_karst_confounder"
             confs = list(c.get("osm_confounder_matches") or [])
             confs.insert(
                 0,
                 {
-                    "osm_id": "vlm/rectilinear_bund",
-                    "subtype": "rectilinear_reservoir_or_u_bund",
-                    "name": "VLM Visual Audit: Square/rectilinear embankment or U-bund",
+                    "osm_id": "vlm/visual_audit",
+                    "subtype": "vlm_obvious_false_positive",
+                    "name": reason or "VLM Visual Audit: Obvious modern/rectilinear confounder",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,
@@ -415,8 +520,7 @@ def enrich_candidates_with_archaeological_context(
             cand["arch_context_note"] = cached_entry["note"]
             cand["arch_context_source"] = cached_entry.get("source", "nhle_grounded_synthesis")
             cand["vlm_shape_verdict"] = cached_entry.get("shape_tag", "ROUNDED_MOUND_OR_RING")
-            if cand["vlm_shape_verdict"] == "RECTILINEAR_OR_U_BUND":
-                _apply_rectilinear_flag(cand)
+            _apply_vlm_verdict(cand, cand["arch_context_note"], cand["vlm_shape_verdict"])
             continue
 
         is_priority_unid = (
@@ -437,8 +541,7 @@ def enrich_candidates_with_archaeological_context(
                 cand["arch_context_note"] = vlm_note
                 cand["arch_context_source"] = src
                 cand["vlm_shape_verdict"] = shape_tag
-                if shape_tag == "RECTILINEAR_OR_U_BUND":
-                    _apply_rectilinear_flag(cand)
+                _apply_vlm_verdict(cand, vlm_note, shape_tag)
                 cache[ckey] = {"note": vlm_note, "source": src, "shape_tag": shape_tag}
                 cache_dirty = True
                 continue
@@ -446,6 +549,8 @@ def enrich_candidates_with_archaeological_context(
         det_note = build_deterministic_academic_context(cand, nearby_nhle, cluster)
         cand["arch_context_note"] = det_note
         cand["arch_context_source"] = "nhle_grounded_synthesis"
+        cand["raw_unet_confidence"] = round(float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0))), 4)
+        cand["vlm_verdict_tier"] = "PLAUSIBLE_MONUMENT"
 
     if cache_dirty:
         cache_path.parent.mkdir(parents=True, exist_ok=True)

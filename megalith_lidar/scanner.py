@@ -13,6 +13,7 @@ from scipy.ndimage import gaussian_filter, label, uniform_filter
 
 from megalith_lidar.catalog import (
     CLASS_NAMES,
+    ROMAN_CLASS_NAMES,
     MonumentCatalog,
     bng_to_latlon,
     bng_to_os_grid_ref,
@@ -40,6 +41,7 @@ def extract_candidates_from_tile(
     min_area_m2: float = 9.0,
     border_margin_px: int = 8,
     known_match_radius_m: float = 45.0,
+    target_domain: str = "prehistoric",
 ) -> List[Dict]:
     """
     Extract connected-component candidate detections purely from the model's predicted
@@ -131,12 +133,15 @@ def extract_candidates_from_tile(
         nearby = catalog.find_nearby(easting, northing, max_distance_m=known_match_radius_m)
         is_known = len(nearby) > 0
         matched_info = None
+        cls_map_dict = ROMAN_CLASS_NAMES if target_domain == "roman" else CLASS_NAMES
         if is_known:
             rec, dist_m = nearby[0]
+            matched_cls_id = rec.roman_cls if (target_domain == "roman" and rec.roman_cls > 0) else rec.cls
+            matched_cls_dict = ROMAN_CLASS_NAMES if (target_domain == "roman" and rec.roman_cls > 0) else CLASS_NAMES
             matched_info = {
                 "list_entry": rec.list_entry,
                 "name": rec.name,
-                "class": CLASS_NAMES.get(rec.cls, "unknown"),
+                "class": matched_cls_dict.get(matched_cls_id, "unknown"),
                 "distance_m": round(float(dist_m), 1),
             }
 
@@ -154,7 +159,8 @@ def extract_candidates_from_tile(
                 "peak_prob": round(peak_prob, 4),
                 "mean_prob": round(mean_prob, 4),
                 "predicted_class_id": best_cls_idx,
-                "predicted_class": CLASS_NAMES.get(best_cls_idx, "megalithic_monument"),
+                "predicted_class": cls_map_dict.get(best_cls_idx, "megalithic_monument"),
+                "target_domain": target_domain,
                 "area_m2": round(area_m2, 1),
                 "elongation": round(elongation, 2),
                 "est_local_relief_m": round(signed_relief_m, 2),
@@ -330,6 +336,7 @@ def scan_region(
     window_size: int = 256,
     stride: int = 192,
     osm_cache_dir: Optional[Path] = None,
+    target_domain: str = "prehistoric",
 ) -> Dict:
     """
     Scan a contiguous EPSG:27700 bounding box using strictly validation-calibrated
@@ -397,8 +404,9 @@ def scan_region(
             n_max=n1,
             catalog=catalog,
             prob_threshold=pixel_prob_threshold,
+            target_domain=target_domain,
         )
-        annotate_candidates_with_spatial_context(cands, osm_index)
+        annotate_candidates_with_spatial_context(cands, osm_index, target_domain=target_domain)
         for c in cands:
             c["calibrated_tile_prob"] = round(cal_tile_prob, 4)
             c["raw_tile_logit"] = round(raw_tile_logit, 4)

@@ -328,7 +328,7 @@ def export_public_docs(
     docs_diag_dir = docs_dir / "diagnostics"
     if docs_diag_dir.exists():
         for old_png in docs_diag_dir.glob("*.png"):
-            if old_png.name.startswith("thornborough_"):
+            if old_png.name.startswith("thornborough_") or old_png.name.startswith("roman_"):
                 continue
             old_png.unlink(missing_ok=True)
     docs_diag_dir.mkdir(parents=True, exist_ok=True)

@@ -30,6 +30,54 @@ CLASS_NAMES = {
     CLASS_OTHER_MONUMENT: "other_scheduled_monument",
 }
 
+ROMAN_CLASS_BACKGROUND = 0
+ROMAN_CLASS_VILLA_BUILDING = 1
+ROMAN_CLASS_ROAD_AGGER_TRACKWAY = 2
+ROMAN_CLASS_FORT_CAMP_SETTLEMENT = 3
+
+ROMAN_CLASS_NAMES = {
+    ROMAN_CLASS_BACKGROUND: "background",
+    ROMAN_CLASS_VILLA_BUILDING: "roman_villa_building",
+    ROMAN_CLASS_ROAD_AGGER_TRACKWAY: "roman_road_agger_trackway",
+    ROMAN_CLASS_FORT_CAMP_SETTLEMENT: "roman_fort_camp_settlement",
+}
+
+_ROMAN_VILLA_PAT = re.compile(
+    r"\b("
+    r"roman\s+villa|romano[-\s]british\s+villa|villa\s+complex|courtyard\s+villa|"
+    r"corridor\s+villa|aisled\s+villa|roman\s+bath(?:\s+house)?|roman\s+temple|"
+    r"romano[-\s]celtic\s+temple|roman\s+shrine|roman\s+mausoleum|roman\s+building"
+    r")s?\b|\bvilla\b",
+    re.IGNORECASE,
+)
+
+_ROMAN_ROAD_PAT = re.compile(
+    r"\b("
+    r"roman\s+road|roman\s+street|roman\s+causeway|roman\s+way|agger|"
+    r"trackway|hollow\s+way|sunken\s+road|packhorse\s+road|ancient\s+road"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
+_ROMAN_FORT_SETTLEMENT_PAT = re.compile(
+    r"\b("
+    r"roman\s+fort|roman\s+fortlet|roman\s+camp|marching\s+camp|practice\s+camp|"
+    r"signal\s+station|roman\s+watchtower|milecastle|roman\s+turret|"
+    r"vallum|roman\s+amphitheatre|roman\s+town|roman\s+vicus|mansio|"
+    r"roman\s+settlement|romano[-\s]british\s+settlement|romano[-\s]british\s+enclosure|"
+    r"romano[-\s]british\s+village|romano[-\s]british\s+farmstead|romano[-\s]british\s+native"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
+_ROMAN_EXCLUDE_PAT = re.compile(
+    r"\b("
+    r"milestone|inscribed\s+stone|altar|wayside\s+cross|churchyard\s+cross|"
+    r"medieval\s+moat|motte|World\s+War|pillbox"
+    r")\b",
+    re.IGNORECASE,
+)
+
 _TOMB_PAT = re.compile(
     r"\b("
     r"long\s+barrow|long\s+cairn|bank\s+barrow|chambered\s+tomb|chambered\s+barrow|"
@@ -105,6 +153,28 @@ def classify_monument_name(name: str) -> int:
     return CLASS_OTHER_MONUMENT
 
 
+def classify_roman_monument_name(name: str) -> int:
+    """
+    Classify a Scheduled Monument title into Roman / Romano-British & Lost Road classes
+    using only generic archaeological type terms (zero site-specific proper noun lists):
+      - ROMAN_CLASS_VILLA_BUILDING (1)
+      - ROMAN_CLASS_ROAD_AGGER_TRACKWAY (2)
+      - ROMAN_CLASS_FORT_CAMP_SETTLEMENT (3)
+      - ROMAN_CLASS_BACKGROUND (0) for non-Roman / other monuments
+    """
+    if not name:
+        return ROMAN_CLASS_BACKGROUND
+    if _ROMAN_EXCLUDE_PAT.search(name):
+        return ROMAN_CLASS_BACKGROUND
+    if _ROMAN_VILLA_PAT.search(name):
+        return ROMAN_CLASS_VILLA_BUILDING
+    if _ROMAN_ROAD_PAT.search(name):
+        return ROMAN_CLASS_ROAD_AGGER_TRACKWAY
+    if _ROMAN_FORT_SETTLEMENT_PAT.search(name):
+        return ROMAN_CLASS_FORT_CAMP_SETTLEMENT
+    return ROMAN_CLASS_BACKGROUND
+
+
 def bng_to_latlon(easting: float, northing: float) -> Tuple[float, float]:
     """Convert British National Grid (EPSG:27700) Easting/Northing to WGS84 (lat, lon)."""
     lon, lat = _TRANSFORMER_27700_TO_4326.transform(easting, northing)
@@ -137,9 +207,12 @@ class MonumentRecord:
     ngr: str
     cls: int
     rings: List[List[List[float]]] = field(default_factory=list)
+    roman_cls: int = 0
     bbox: Tuple[float, float, float, float] = field(init=False)
 
     def __post_init__(self) -> None:
+        if self.roman_cls == 0 and self.name:
+            self.roman_cls = classify_roman_monument_name(self.name)
         if self.rings:
             xs = [pt[0] for ring in self.rings for pt in ring]
             ys = [pt[1] for ring in self.rings for pt in ring]
@@ -159,6 +232,14 @@ class MonumentRecord:
             CLASS_MEGALITHIC_TOMB_LONG_BARROW,
             CLASS_CIRCLE_HENGE_STONE,
             CLASS_BARROW_CAIRN,
+        )
+
+    @property
+    def is_roman_or_road(self) -> bool:
+        return self.roman_cls in (
+            ROMAN_CLASS_VILLA_BUILDING,
+            ROMAN_CLASS_ROAD_AGGER_TRACKWAY,
+            ROMAN_CLASS_FORT_CAMP_SETTLEMENT,
         )
 
 
@@ -287,6 +368,41 @@ class MonumentCatalog:
                 if len(ring) >= 3:
                     pts = [((pt[0] - e_min) * scale_x, (n_max - pt[1]) * scale_y) for pt in ring]
                     draw.polygon(pts, fill=cls_val, outline=cls_val)
+        return np.array(mask_im, dtype=np.uint8)
+
+    def rasterize_roman_tile(
+        self,
+        e_min: float,
+        e_max: float,
+        n_min: float,
+        n_max: float,
+        size: int = 256,
+    ) -> np.ndarray:
+        """
+        Rasterize all Roman / Romano-British & Lost Road monument polygons intersecting
+        [e_min, e_max] x [n_min, n_max] into a (size, size) uint8 class mask (1..3).
+        """
+        mask_im = Image.new("L", (size, size), 0)
+        draw = ImageDraw.Draw(mask_im)
+        scale_x = size / (e_max - e_min)
+        scale_y = size / (n_max - n_min)
+
+        intersecting = self.query_bbox(e_min, n_min, e_max, n_max)
+        intersecting.sort(key=lambda r: -r.roman_cls)
+        for rec in intersecting:
+            if not rec.is_roman_or_road:
+                continue
+            cls_val = int(rec.roman_cls)
+            if rec.rings:
+                for ring in rec.rings:
+                    if len(ring) >= 3:
+                        pts = [((pt[0] - e_min) * scale_x, (n_max - pt[1]) * scale_y) for pt in ring]
+                        draw.polygon(pts, fill=cls_val, outline=cls_val)
+            else:
+                cx = (rec.easting - e_min) * scale_x
+                cy = (n_max - rec.northing) * scale_y
+                r_px = max(8.0, math.sqrt(max(rec.area_ha, 0.02) * 10000.0 / math.pi) * scale_x)
+                draw.ellipse([cx - r_px, cy - r_px, cx + r_px, cy + r_px], fill=cls_val, outline=cls_val)
         return np.array(mask_im, dtype=np.uint8)
 
 
