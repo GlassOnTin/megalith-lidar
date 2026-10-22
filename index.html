@@ -537,23 +537,23 @@
         <div class="tabs">
           <button class="tab-btn active" data-tab="unidentified" id="tabBtnUnid">
             <span class="dot" style="background:var(--gold)"></span>
-            1. Unidentified Candidates
+            1. Unidentified Prehistoric Candidates
             <span class="tab-count" id="countUnid">0</span>
+          </button>
+          <button class="tab-btn" data-tab="roman" id="tabBtnRoman">
+            <span class="dot" style="background:#d2a8ff"></span>
+            2. Unidentified Roman Candidates
+            <span class="tab-count" id="countRoman">0</span>
           </button>
           <button class="tab-btn" data-tab="known" id="tabBtnKnown">
             <span class="dot" style="background:var(--green)"></span>
-            2. Rediscovered Known Monuments
+            3. Rediscovered Known Monuments
             <span class="tab-count" id="countKnown">0</span>
           </button>
           <button class="tab-btn" data-tab="confounders" id="tabBtnConf">
             <span class="dot" style="background:var(--orange)"></span>
-            3. Filtered Modern / Karst Confounders
+            4. Filtered Modern / Karst Confounders
             <span class="tab-count" id="countConf">0</span>
-          </button>
-          <button class="tab-btn" data-tab="roman" id="tabBtnRoman">
-            <span class="dot" style="background:#d2a8ff"></span>
-            4. Roman Villas, Camps &amp; Lost Roads
-            <span class="tab-count" id="countRoman">0</span>
           </button>
           <button class="tab-btn" data-tab="stats" id="tabBtnStats">
             5. Statistical Benchmarks &amp; Null Tests
@@ -714,13 +714,13 @@
 
     const TAB_EXPLAINERS = {
       unidentified:
-        "<strong>What this list shows:</strong> Locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric monuments, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.",
-      known:
-        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and unscheduled OpenStreetMap cairns/barrows that the model independently rediscovered inside held-out test squares that were never seen during training.",
-      confounders:
-        "<strong>What this list shows:</strong> Earthworks and depressions that look like barrows or henges in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check or Qwen3.8 Visual Audit as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, U-bunds, golf bunkers, embankments, or 18th-century garden temples).",
+        "<strong>What this list shows:</strong> Unrecorded prehistoric monument candidates — locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric barrows, henges, or chambered mounds, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.",
       roman:
-        "<strong>What this list shows:</strong> Detections from our dedicated <strong>RomanUNet</strong> detector (trained on 2,211 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; out-of-sample held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>). Includes both rediscovered Scheduled Roman monuments (green) and unscheduled candidate Roman platforms/aggers (gold), including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
+        "<strong>What this list shows:</strong> Unrecorded Roman &amp; Romano-British candidates — locations where our dedicated <strong>RomanUNet</strong> detector (trained on 2,211 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) detects candidate villa platforms, enclosures, or linear road aggers that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
+      known:
+        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and recorded OpenStreetMap archaeological sites (both prehistoric and Roman) that the models independently rediscovered inside held-out test squares that were never seen during training.",
+      confounders:
+        "<strong>What this list shows:</strong> Earthworks and depressions that resemble monuments in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check or Qwen3.8 Visual Audit as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, U-bunds, golf bunkers, embankments, or 18th-century garden temples).",
       stats:
         "<strong>What this tab shows:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across five distinct negative null distributions, plus regional density comparisons from the scheduled 2 km × 2 km batch scanner."
     };
@@ -757,7 +757,7 @@
     };
 
     function featureKey(p) {
-      return `${p.os_grid_ref}_${p.easting}_${p.northing}`;
+      return `${p.os_grid_ref}_${p.easting}_${p.northing}_${p.predicted_class || ""}`;
     }
 
     function categoryColor(cat) {
@@ -966,17 +966,19 @@
         return true;
       });
 
-      const cUnid = baseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
-      const cKnown = baseList.filter((f) => matchesTab(f.properties, "known")).length;
-      const cConf = baseList.filter((f) => matchesTab(f.properties, "confounders")).length;
-
-      const cRoman = romanFeatures.filter((f) => {
+      const romanBaseList = romanFeatures.filter((f) => {
         const p = f.properties;
-        if (p.context_category === "flagged_modern_or_karst_confounder") return false;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         return true;
-      }).length;
+      });
+
+      const cUnid = baseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
+      const cRoman = romanBaseList.filter((f) => matchesTab(f.properties, "unidentified")).length;
+      const cKnown = baseList.filter((f) => matchesTab(f.properties, "known")).length +
+        romanBaseList.filter((f) => matchesTab(f.properties, "known")).length;
+      const cConf = baseList.filter((f) => matchesTab(f.properties, "confounders")).length +
+        romanBaseList.filter((f) => matchesTab(f.properties, "confounders")).length;
 
       document.getElementById("countUnid").textContent = cUnid;
       document.getElementById("countKnown").textContent = cKnown;
@@ -1003,13 +1005,15 @@
       const tbody = document.getElementById("candTableBody");
       tbody.innerHTML = "";
 
-      const sourceList = currentTab === "roman" ? romanFeatures : geojsonFeatures;
+      const sourceList = currentTab === "roman"
+        ? romanFeatures
+        : (currentTab === "unidentified" ? geojsonFeatures : geojsonFeatures.concat(romanFeatures));
       const filtered = sourceList.filter((f) => {
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         if (currentTab === "roman") {
-          return p.context_category !== "flagged_modern_or_karst_confounder";
+          return matchesTab(p, "unidentified");
         }
         return matchesTab(p, currentTab);
       });
