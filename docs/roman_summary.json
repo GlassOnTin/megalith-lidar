@@ -1,0 +1,261 @@
+{
+  "updated_at_utc": "2026-10-22T20:03:21Z",
+  "squares_scanned": 55,
+  "area_km2": 220.0,
+  "total_detections": 504,
+  "rediscovered_nhle_scheduled": 58,
+  "rediscovered_osm_archaeology": 16,
+  "unidentified_candidates": 124,
+  "unidentified_candidates_fpr_0_01": 37,
+  "heldout_test_evaluation": {
+    "n_samples": 288,
+    "n_positives": 109,
+    "n_negatives": 179,
+    "roc_auc": 0.7967,
+    "roc_auc_ci95": [
+      0.7406,
+      0.8495
+    ],
+    "pr_auc_sample_prevalence": 0.6727,
+    "pr_auc_ci95": [
+      0.5968,
+      0.7638
+    ],
+    "brier_score_uncalibrated": 0.1846,
+    "brier_score_calibrated": 0.188,
+    "ece_uncalibrated": 0.081,
+    "ece_calibrated": 0.107,
+    "operating_points": {
+      "fpr_0.01": {
+        "val_selected_threshold": 0.61553,
+        "tpr_recall": 0.156,
+        "tpr_ci95": [
+          0.0917,
+          0.2294
+        ],
+        "fpr_false_positive_rate": 0.0223,
+        "fpr_ci95": [
+          0.0056,
+          0.0447
+        ],
+        "youden_j": 0.1337,
+        "likelihood_ratio_pos": 7.0,
+        "ppv_at_prior_0.01": 0.066,
+        "ppv_at_prior_0.001": 0.007
+      },
+      "fpr_0.05": {
+        "val_selected_threshold": 0.57683,
+        "tpr_recall": 0.2202,
+        "tpr_ci95": [
+          0.1468,
+          0.3028
+        ],
+        "fpr_false_positive_rate": 0.0335,
+        "fpr_ci95": [
+          0.0112,
+          0.0615
+        ],
+        "youden_j": 0.1867,
+        "likelihood_ratio_pos": 6.57,
+        "ppv_at_prior_0.01": 0.0623,
+        "ppv_at_prior_0.001": 0.0065
+      },
+      "fpr_0.10": {
+        "val_selected_threshold": 0.52903,
+        "tpr_recall": 0.3394,
+        "tpr_ci95": [
+          0.2477,
+          0.4404
+        ],
+        "fpr_false_positive_rate": 0.0782,
+        "fpr_ci95": [
+          0.0391,
+          0.1173
+        ],
+        "youden_j": 0.2612,
+        "likelihood_ratio_pos": 4.34,
+        "ppv_at_prior_0.01": 0.042,
+        "ppv_at_prior_0.001": 0.0043
+      },
+      "max_youden_j": {
+        "val_selected_threshold": 0.35329,
+        "tpr_recall": 0.633,
+        "tpr_ci95": [
+          0.5413,
+          0.7248
+        ],
+        "fpr_false_positive_rate": 0.2346,
+        "fpr_ci95": [
+          0.1732,
+          0.3017
+        ],
+        "youden_j": 0.3984,
+        "likelihood_ratio_pos": 2.7,
+        "ppv_at_prior_0.01": 0.0265,
+        "ppv_at_prior_0.001": 0.0027
+      }
+    }
+  },
+  "subgroup_and_confounding_analysis": {
+    "discrimination_by_negative_null": {
+      "random_national": {
+        "n_negatives": 53,
+        "roc_auc": 0.7741,
+        "ci95": [
+          0.6974,
+          0.8472
+        ]
+      },
+      "matched_environment": {
+        "n_negatives": 51,
+        "roc_auc": 0.833,
+        "ci95": [
+          0.7555,
+          0.8942
+        ]
+      },
+      "anthropogenic_non_roman": {
+        "n_negatives": 35,
+        "roc_auc": 0.7898,
+        "ci95": [
+          0.6894,
+          0.8821
+        ]
+      },
+      "woodland_canopy_and_pit": {
+        "n_negatives": 20,
+        "roc_auc": 0.7078,
+        "ci95": [
+          0.5734,
+          0.8394
+        ]
+      },
+      "trackside_and_field_boundary": {
+        "n_negatives": 20,
+        "roc_auc": 0.8647,
+        "ci95": [
+          0.7642,
+          0.9431
+        ]
+      }
+    },
+    "operating_point_breakdowns": {
+      "fpr_0.01": {
+        "threshold": 0.61553,
+        "tpr_by_monument_class": {
+          "roman_villa_building": 0.0811,
+          "roman_road_agger_trackway": 0.1304,
+          "roman_fort_camp_settlement": 0.2245
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0189,
+          "matched_environment": 0.0196,
+          "anthropogenic_non_roman": 0.0571,
+          "woodland_canopy_and_pit": 0.0,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 34,
+            "tpr_recall": 0.0588
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 42,
+            "tpr_recall": 0.1905
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 33,
+            "tpr_recall": 0.2121
+          }
+        }
+      },
+      "fpr_0.05": {
+        "threshold": 0.57683,
+        "tpr_by_monument_class": {
+          "roman_villa_building": 0.1622,
+          "roman_road_agger_trackway": 0.1304,
+          "roman_fort_camp_settlement": 0.3061
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0189,
+          "matched_environment": 0.0392,
+          "anthropogenic_non_roman": 0.0571,
+          "woodland_canopy_and_pit": 0.05,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 34,
+            "tpr_recall": 0.1765
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 42,
+            "tpr_recall": 0.2143
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 33,
+            "tpr_recall": 0.2727
+          }
+        }
+      },
+      "fpr_0.10": {
+        "threshold": 0.52903,
+        "tpr_by_monument_class": {
+          "roman_villa_building": 0.1892,
+          "roman_road_agger_trackway": 0.1304,
+          "roman_fort_camp_settlement": 0.551
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0566,
+          "matched_environment": 0.0784,
+          "anthropogenic_non_roman": 0.1143,
+          "woodland_canopy_and_pit": 0.1,
+          "trackside_and_field_boundary": 0.05
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 34,
+            "tpr_recall": 0.2353
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 42,
+            "tpr_recall": 0.4524
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 33,
+            "tpr_recall": 0.303
+          }
+        }
+      },
+      "max_youden_j": {
+        "threshold": 0.35329,
+        "tpr_by_monument_class": {
+          "roman_villa_building": 0.4865,
+          "roman_road_agger_trackway": 0.4348,
+          "roman_fort_camp_settlement": 0.8367
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.3019,
+          "matched_environment": 0.1569,
+          "anthropogenic_non_roman": 0.2286,
+          "woodland_canopy_and_pit": 0.4,
+          "trackside_and_field_boundary": 0.1
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 34,
+            "tpr_recall": 0.5588
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 42,
+            "tpr_recall": 0.6905
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 33,
+            "tpr_recall": 0.6364
+          }
+        }
+      }
+    }
+  }
+}
