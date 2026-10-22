@@ -366,11 +366,16 @@
         Automated terrain screening for unrecorded barrows, henges, and megalithic earthworks in Environment Agency 1 m LiDAR
       </div>
     </div>
-    <div class="sub">
-      Inspired by <a href="https://youtu.be/D_R0bgNgY2o" target="_blank" rel="noopener">Adam Morgan Ibbotson's LiDAR survey video</a> ·
-      <a href="https://github.com/GlassOnTin/megalith-lidar">GitHub Repository (AGPL-3.0)</a> ·
-      <a href="docs/candidates.geojson">Download GeoJSON</a> ·
-      <a href="docs/survey_summary.json">Raw Summary JSON</a>
+    <div class="sub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span>
+        Inspired by <a href="https://youtu.be/D_R0bgNgY2o" target="_blank" rel="noopener">Adam Morgan Ibbotson's Thornborough LiDAR video</a> ·
+        <a href="https://github.com/GlassOnTin/megalith-lidar">GitHub Repository (AGPL-3.0)</a> ·
+        <a href="docs/candidates.geojson">Download GeoJSON</a> ·
+        <a href="docs/survey_summary.json">Raw Summary JSON</a>
+      </span>
+      <button class="btn-link" id="btnThornboroughCase" type="button" style="cursor:pointer;">
+        Inspect Thornborough Central Henge (SE 28585 79405) Case Study
+      </button>
     </div>
   </header>
 
@@ -459,7 +464,7 @@
         <!-- Statistical benchmark view (hidden unless tab 4 is clicked) -->
         <div id="statsContainer" class="hidden">
           <p class="muted" style="margin-top:0;font-size:12.5px;">
-            Before scanning new areas, the model was evaluated on <strong>263 held-out test tiles</strong> inside 20 km × 20 km British National Grid blocks that were never used during training or threshold calibration.
+            Before scanning new areas, the model was evaluated on <strong>303 held-out test tiles</strong> (143 Scheduled Monument tiles and 160 negative control tiles across five null distributions) inside 20 km × 20 km British National Grid blocks that were never used during training or threshold calibration.
           </p>
           <div class="stat-grid" id="evalStatsGrid"></div>
 
@@ -570,7 +575,30 @@
       confounders:
         "<strong>What this list shows:</strong> Earthworks and depressions that look like barrows or henges in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, golf bunkers, embankments, or 18th-century garden temples).",
       stats:
-        "<strong>What this tab shows:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across three distinct negative null distributions, plus regional density comparisons from the scheduled 2 km × 2 km batch scanner."
+        "<strong>What this tab shows:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across five distinct negative null distributions, plus regional density comparisons from the scheduled 2 km × 2 km batch scanner."
+    };
+
+    const THORNBOROUGH_CASE_STUDY = {
+      os_grid_ref: "SE 28585 79405",
+      easting: 428585.0,
+      northing: 479405.0,
+      lat: 54.20969,
+      lon: -1.56327,
+      confidence: 0.9467,
+      calibrated_tile_prob: 0.9692,
+      predicted_class: "stone_circle_henge_alignment",
+      est_local_relief_m: 3.32,
+      area_m2: 3024.0,
+      elongation: 1.08,
+      context_category: "rediscovered_nhle_scheduled",
+      matched_monument: {
+        list_entry: 1004912,
+        name: "Thornborough Henges (Central Henge — outside the Southern Henge 256 m training window)",
+        distance_m: 12.0
+      },
+      diagnostic_png: "thornborough_central_henge_E428476_N479300_conf947.png",
+      case_study_note:
+        "Featured Inspiration Benchmark: The model's 256 m × 256 m training tile (pos_1004912) covered only the Southern Thornborough Henge (N 478854–479110). When evaluated across the rest of the gravel terrace (N 479300–480400), the model independently isolates the concentric inner and outer banks of the Central Henge (calibrated tile p = 0.969) and Northern Henge (p = 0.965). Because the 20 km block (E420000_N460000) belongs to the training partition, Thornborough is excluded from the out-of-sample test tables on the left."
     };
 
     function featureKey(p) {
@@ -630,16 +658,23 @@
       const card = document.getElementById("inspectorBody");
       const osmUrl = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}#map=17/${p.lat}/${p.lon}`;
       const gmapsUrl = `https://www.google.com/maps/@${p.lat},${p.lon},350m/data=!3m1!1e3`;
+      const heUrl = p.matched_monument && p.matched_monument.list_entry
+        ? `https://historicengland.org.uk/listing/the-list/list-entry/${p.matched_monument.list_entry}`
+        : `https://historicengland.org.uk/listing/the-list/map-search?clearresults=true`;
+      const copyPayload = `${p.os_grid_ref} | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} | WGS84 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
       let html = `
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div>
             <strong style="font-size:15px;">${p.os_grid_ref}</strong> · ${categoryBadge(p.context_category)}
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <a class="btn-link" href="${osmUrl}" target="_blank" rel="noopener">Open in OpenStreetMap ↗</a>
-            <a class="btn-link" href="${gmapsUrl}" target="_blank" rel="noopener">Aerial Satellite View ↗</a>
+            <button class="btn-link" id="btnCopyCoords" type="button" style="cursor:pointer;" data-copy="${copyPayload}">Copy Grid Ref &amp; Coords</button>
+            <a class="btn-link" href="${osmUrl}" target="_blank" rel="noopener">OpenStreetMap ↗</a>
+            <a class="btn-link" href="${gmapsUrl}" target="_blank" rel="noopener">Aerial Satellite ↗</a>
+            <a class="btn-link" href="${heUrl}" target="_blank" rel="noopener">Historic England NHLE ↗</a>
           </div>
         </div>
+        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:12px;">${p.case_study_note}</div>` : ""}
         <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;font-size:12.5px;background:var(--panel-alt);padding:10px;border-radius:4px;border:1px solid var(--border);">
           <div><span class="muted">Nearest Form Class:</span><br/><strong>${formatClass(p.predicted_class)}</strong></div>
           <div><span class="muted">Candidate Score (Tile Prob):</span><br/><strong>${p.confidence.toFixed(3)}</strong> (calibrated tile p = ${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
@@ -678,6 +713,16 @@
         `;
       }
       card.innerHTML = html;
+      const copyBtn = document.getElementById("btnCopyCoords");
+      if (copyBtn && navigator.clipboard) {
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(copyBtn.dataset.copy || "").then(() => {
+            const orig = copyBtn.textContent;
+            copyBtn.textContent = "Copied to Clipboard!";
+            setTimeout(() => { copyBtn.textContent = orig; }, 1600);
+          });
+        });
+      }
       if (zoomMap) {
         map.setView([p.lat, p.lon], Math.max(map.getZoom(), 11));
       }
@@ -910,14 +955,21 @@
         if (!document.getElementById("chkShowScannedSquares").checked) return;
         (summaryData.scanned_squares || []).forEach((sq) => {
           const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
-          const tip = `<strong>Scanned 2 km × 2 km Square: ${sq.os_grid_ref}</strong><br/>Stream: ${sq.sampling_stream}<br/>Rediscovered NHLE: ${sq.rediscovered_nhle_scheduled_count} · Filtered Confounders: ${sq.flagged_modern_or_karst_confounders_count}<br/>Unidentified Candidates: ${sq.unidentified_candidates_count} (${sq.unidentified_candidates_fpr_0_01_count || 0} @ Strict 1% FPR)`;
+          const tip = `<strong>Scanned 2 km × 2 km Square: ${sq.os_grid_ref}</strong><br/>Stream: ${sq.sampling_stream}<br/>Rediscovered NHLE: ${sq.rediscovered_nhle_scheduled_count} · Filtered Confounders: ${sq.flagged_modern_or_karst_confounders_count}<br/>Unidentified Candidates: ${sq.unidentified_candidates_count} (${sq.unidentified_candidates_fpr_0_01_count || 0} @ Strict 1% FPR)<br/><em>Click to zoom to this 2 km × 2 km square</em>`;
+          const zoomToSq = () => {
+            if (sq.bounds_latlon && sq.bounds_latlon.length === 2) {
+              map.fitBounds(sq.bounds_latlon, { maxZoom: 14, padding: [20, 20] });
+            } else {
+              map.setView([sq.center_lat, sq.center_lon], 13);
+            }
+          };
           if (sq.bounds_latlon && sq.bounds_latlon.length === 2) {
             L.rectangle(sq.bounds_latlon, {
               color: color,
               weight: 2,
               fillColor: color,
               fillOpacity: 0.18
-            }).bindTooltip(tip).addTo(squaresLayer);
+            }).bindTooltip(tip).on("click", zoomToSq).addTo(squaresLayer);
           }
           L.circleMarker([sq.center_lat, sq.center_lon], {
             radius: 6,
@@ -926,7 +978,7 @@
             dashArray: "3,2",
             fillColor: color,
             fillOpacity: 0.15
-          }).bindTooltip(tip).addTo(squaresLayer);
+          }).bindTooltip(tip).on("click", zoomToSq).addTo(squaresLayer);
         });
       }
       renderScannedSquares();
@@ -934,6 +986,13 @@
       document.getElementById("btnResetNationalView").addEventListener("click", () => {
         map.setView([52.85, -1.85], 6);
       });
+      const btnThorn = document.getElementById("btnThornboroughCase");
+      if (btnThorn) {
+        btnThorn.addEventListener("click", () => {
+          selectCandidate(THORNBOROUGH_CASE_STUDY, false);
+          map.setView([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon], 14);
+        });
+      }
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {

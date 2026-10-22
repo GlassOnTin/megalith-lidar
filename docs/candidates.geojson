@@ -49,6 +49,22 @@
             "inside_polygon": false
           },
           {
+            "osm_id": "way/610266450",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1418181893",
+            "subtype": "highway=primary",
+            "name": "Oxford Road",
+            "wikidata": null,
+            "distance_m": 25.8,
+            "inside_polygon": false
+          },
+          {
             "osm_id": "way/610266309",
             "subtype": "building=pavilion",
             "name": "West Wycombe Cricket Club",
@@ -666,6 +682,30 @@
             "inside_polygon": true
           },
           {
+            "osm_id": "node/9953296861",
+            "subtype": "natural=tree",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 21.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/52161570",
+            "subtype": "highway=residential",
+            "name": "Andrewes Gardens",
+            "wikidata": null,
+            "distance_m": 25.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/22337643",
+            "subtype": "highway=residential",
+            "name": "Barry Road",
+            "wikidata": null,
+            "distance_m": 26.1,
+            "inside_polygon": false
+          },
+          {
             "osm_id": "way/1087151388",
             "subtype": "leisure=garden",
             "name": null,
@@ -759,9 +799,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.77m, slope=0.27)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.64m, slope=0.27)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -838,6 +878,14 @@
             "wikidata": null,
             "distance_m": 13.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.21m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -886,8 +934,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.40m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8297,
         "raw_tile_logit": 1.6284,
         "window_bbox": [
@@ -944,9 +1001,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+1.98m, slope=0.26)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.95m, slope=0.26)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -1078,6 +1135,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.73m, slope=0.13)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -1139,6 +1204,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.14m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -1188,8 +1261,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.90m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9602,
         "raw_tile_logit": 3.291,
         "window_bbox": [
@@ -1564,9 +1646,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=1.3m, slope=0.24)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.34m, slope=0.24)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -1965,9 +2047,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.6m, slope=0.18)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.59m, slope=0.18)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -2327,9 +2409,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+3.21m, slope=0.24)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.21m, slope=0.24)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -2679,9 +2761,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=1.7m, slope=0.42)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.66m, slope=0.42)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -3162,6 +3244,14 @@
             "wikidata": null,
             "distance_m": 8.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.30m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -3218,6 +3308,14 @@
             "wikidata": null,
             "distance_m": 8.0,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.93m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -3290,6 +3388,14 @@
             "wikidata": null,
             "distance_m": 18.1,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.21m, slope=0.23)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -3354,6 +3460,14 @@
             "wikidata": null,
             "distance_m": 7.9,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.17m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -3471,6 +3585,14 @@
             "osm_id": "relation/21356413(way/1555182022)",
             "subtype": "landuse=forest",
             "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.85m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -3592,7 +3714,16 @@
             "inside_polygon": false
           }
         ],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/316151634",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 22.5,
+            "inside_polygon": false
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9512,
         "raw_tile_logit": 3.0684,
@@ -4006,8 +4137,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.67m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8598,
         "raw_tile_logit": 1.8672,
         "window_bbox": [
@@ -4054,8 +4194,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.60m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8507,
         "raw_tile_logit": 1.791,
         "window_bbox": [
@@ -4104,9 +4253,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.0m, slope=0.20)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.00m, slope=0.20)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -4264,9 +4413,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.65m, slope=0.28)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.65m, slope=0.28)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -4520,9 +4669,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=1.3m, slope=0.22)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.34m, slope=0.22)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -4640,9 +4789,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.25m, slope=0.22)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.81m, slope=0.22)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -4694,8 +4843,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.84m, slope=0.15)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9023,
         "raw_tile_logit": 2.293,
         "window_bbox": [
@@ -4934,6 +5092,14 @@
             "wikidata": null,
             "distance_m": 3.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.63m, slope=0.20)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -4998,6 +5164,14 @@
             "wikidata": null,
             "distance_m": 25.1,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.86m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -5054,6 +5228,14 @@
             "wikidata": null,
             "distance_m": 11.5,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.87m, slope=0.18)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -5102,8 +5284,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.56m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9225,
         "raw_tile_logit": 2.5566,
         "window_bbox": [
@@ -5206,8 +5397,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.56m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8409,
         "raw_tile_logit": 1.7129,
         "window_bbox": [
@@ -5262,6 +5462,14 @@
             "wikidata": null,
             "distance_m": 22.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.78m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -5547,6 +5755,14 @@
             "wikidata": null,
             "distance_m": 30.7,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.83m, slope=0.20)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -5602,6 +5818,14 @@
             "subtype": "landuse=military",
             "name": "Porton Down and Winterbourne Gunner Military Lands",
             "wikidata": "Q7232208",
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.88m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
           }
@@ -5798,6 +6022,14 @@
             "wikidata": "Q7232208",
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "way/251782537",
+            "subtype": "highway=service",
+            "name": "Thorneydown Road",
+            "wikidata": null,
+            "distance_m": 31.2,
+            "inside_polygon": false
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -5907,7 +6139,16 @@
           "distance_m": 0.0
         },
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.59m, slope=0.18)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.8836,
         "raw_tile_logit": 2.0889,
@@ -5971,6 +6212,22 @@
             "wikidata": null,
             "distance_m": 19.0,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "way/856781383",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 33.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.62m, slope=0.12)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -6360,8 +6617,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.55m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9358,
         "raw_tile_logit": 2.7676,
         "window_bbox": [
@@ -6488,6 +6754,14 @@
             "wikidata": null,
             "distance_m": 7.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.68m, slope=0.13)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -6544,6 +6818,14 @@
             "wikidata": null,
             "distance_m": 20.3,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.73m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -6656,6 +6938,14 @@
             "wikidata": null,
             "distance_m": 30.0,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.85m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -7345,7 +7635,16 @@
           "distance_m": 0.0
         },
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.97m, slope=0.16)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9392,
         "raw_tile_logit": 2.8281,
@@ -7547,12 +7846,28 @@
             "inside_polygon": true
           },
           {
+            "osm_id": "way/104665407",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.0,
+            "inside_polygon": false
+          },
+          {
             "osm_id": "way/1064385020",
             "subtype": "golf=fairway",
             "name": null,
             "wikidata": null,
             "distance_m": 34.7,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.10m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -7704,9 +8019,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+3.27m, slope=0.29)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.27m, slope=0.29)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -7764,7 +8079,16 @@
           "distance_m": 0.0
         },
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.53m, slope=0.16)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9651,
         "raw_tile_logit": 3.4316,
@@ -7814,9 +8138,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.0m, slope=0.23)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.96m, slope=0.23)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -8225,6 +8549,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.72m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -8282,6 +8614,14 @@
             "wikidata": null,
             "distance_m": 3.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.04m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -8453,6 +8793,14 @@
             "osm_id": "way/44115319",
             "subtype": "natural=wood",
             "name": "West Wood",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.88m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -8958,6 +9306,14 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
+            "osm_id": "way/746151743",
+            "subtype": "barrier=hedge",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.7,
+            "inside_polygon": false
+          },
+          {
             "osm_id": "way/591217363",
             "subtype": "highway=service",
             "name": null,
@@ -9020,6 +9376,14 @@
             "wikidata": null,
             "distance_m": 16.2,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.59m, slope=0.10)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -9260,6 +9624,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.51m, slope=0.17)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -9313,6 +9685,22 @@
             "osm_id": "relation/21099672(way/475876659)",
             "subtype": "landuse=forest",
             "name": "Kershope Forest",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/203779307",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 28.9,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.84m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -9374,6 +9762,14 @@
             "osm_id": "relation/21099672(way/475876659)",
             "subtype": "landuse=forest",
             "name": "Kershope Forest",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+4.38m, slope=0.27)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -9877,6 +10273,14 @@
             "wikidata": null,
             "distance_m": 15.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.57m, slope=0.19)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -9946,6 +10350,14 @@
             "wikidata": null,
             "distance_m": 26.9,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.67m, slope=0.23)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -10019,6 +10431,14 @@
             "wikidata": null,
             "distance_m": 28.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.82m, slope=0.21)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -10209,6 +10629,30 @@
             "wikidata": null,
             "distance_m": 16.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "way/676693998",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 30.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/122403340",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 34.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.66m, slope=0.30)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -10532,6 +10976,14 @@
             "wikidata": null,
             "distance_m": 16.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.81m, slope=0.27)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -10596,6 +11048,14 @@
             "wikidata": null,
             "distance_m": 27.3,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.59m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -10951,6 +11411,22 @@
             "wikidata": null,
             "distance_m": 23.9,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "way/339950828",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 34.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.99m, slope=0.20)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -11062,6 +11538,14 @@
             "osm_id": "way/120016678",
             "subtype": "landuse=forest",
             "name": "Houghton Forest",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.92m, slope=0.23)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -11193,9 +11677,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=1.7m, slope=0.28)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.70m, slope=0.28)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -11325,6 +11809,14 @@
             "wikidata": null,
             "distance_m": 17.5,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.76m, slope=0.18)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -11384,9 +11876,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.37m, slope=0.27)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.73m, slope=0.27)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -12210,6 +12702,14 @@
             "wikidata": null,
             "distance_m": 28.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.36m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -12394,6 +12894,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.59m, slope=0.16)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -12517,6 +13025,14 @@
             "wikidata": null,
             "distance_m": 15.3,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.56m, slope=0.13)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -12922,9 +13438,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.36m, slope=0.29)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.36m, slope=0.29)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -12984,6 +13500,14 @@
             "wikidata": null,
             "distance_m": 13.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.25m, slope=0.26)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -13039,6 +13563,22 @@
             "name": null,
             "wikidata": null,
             "distance_m": 9.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/40599469",
+            "subtype": "highway=secondary",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 21.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/148087282",
+            "subtype": "highway=unclassified",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 34.1,
             "inside_polygon": false
           }
         ],
@@ -13322,9 +13862,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.80m, slope=0.33)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.80m, slope=0.33)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -13682,6 +14222,30 @@
             "wikidata": null,
             "distance_m": 17.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "way/37091974",
+            "subtype": "highway=bridleway",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 22.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/701582395",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 29.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.21m, slope=0.19)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -13792,6 +14356,30 @@
             "osm_id": "way/1117345110",
             "subtype": "landuse=industrial",
             "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/8591182",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 23.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/657338243",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 27.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.09m, slope=0.35)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -13960,7 +14548,16 @@
           "distance_m": 0.0
         },
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.77m, slope=0.19)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.902,
         "raw_tile_logit": 2.2891,
@@ -14057,6 +14654,14 @@
         "matched_monument": null,
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.36m, slope=0.13)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
           {
             "osm_id": "lidar/void",
             "subtype": "lidar_coverage_edge_or_tin_facet",
@@ -14192,6 +14797,14 @@
             "wikidata": null,
             "distance_m": 21.1,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.95m, slope=0.16)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -15308,6 +15921,14 @@
             "wikidata": null,
             "distance_m": 14.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.15m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -15390,9 +16011,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.3m, slope=0.31)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.33m, slope=0.31)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -15452,6 +16073,14 @@
             "wikidata": null,
             "distance_m": 11.0,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.95m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -15558,9 +16187,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+1.88m, slope=0.30)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.79m, slope=0.30)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -15806,6 +16435,14 @@
             "name": null,
             "wikidata": null,
             "distance_m": 7.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/424332642",
+            "subtype": "barrier=ditch",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 12.5,
             "inside_polygon": false
           },
           {
@@ -16206,6 +16843,14 @@
             "wikidata": null,
             "distance_m": 23.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.84m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -16262,6 +16907,14 @@
             "wikidata": null,
             "distance_m": 16.2,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.85m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -16556,6 +17209,14 @@
             "inside_polygon": false
           },
           {
+            "osm_id": "way/424294296",
+            "subtype": "barrier=ditch",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 14.6,
+            "inside_polygon": false
+          },
+          {
             "osm_id": "way/424294297",
             "subtype": "man_made=embankment",
             "name": null,
@@ -16765,6 +17426,14 @@
             "osm_id": "relation/3122730(way/44114165)",
             "subtype": "natural=wood",
             "name": "The Roughs",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.73m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -17055,6 +17724,14 @@
             "wikidata": null,
             "distance_m": 11.5,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.63m, slope=0.16)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -17230,8 +17907,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.71m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9201,
         "raw_tile_logit": 2.5225,
         "window_bbox": [
@@ -17600,9 +18286,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+3.28m, slope=0.31)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.88m, slope=0.31)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -17779,6 +18465,22 @@
             "wikidata": null,
             "distance_m": 13.1,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "way/202554092",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 18.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/9708796",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 22.3,
+            "inside_polygon": false
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -17943,9 +18645,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.71m, slope=0.22)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.71m, slope=0.22)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -18013,6 +18715,14 @@
             "wikidata": null,
             "distance_m": 10.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.45m, slope=0.15)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -18286,9 +18996,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.37m, slope=0.25)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.37m, slope=0.25)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -18446,9 +19156,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.5m, slope=0.28)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.53m, slope=0.28)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -18508,6 +19218,14 @@
             "wikidata": null,
             "distance_m": 28.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.30m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -18726,9 +19444,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+3.19m, slope=0.34)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.70m, slope=0.34)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -19112,7 +19830,16 @@
           "distance_m": 0.0
         },
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.64m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9597,
         "raw_tile_logit": 3.2773,
@@ -19479,9 +20206,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.3m, slope=0.33)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.31m, slope=0.33)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -19877,6 +20604,14 @@
             "wikidata": null,
             "distance_m": 5.7,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.40m, slope=0.12)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -19927,9 +20662,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=1.2m, slope=0.21)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.22m, slope=0.21)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -19997,6 +20732,14 @@
             "wikidata": null,
             "distance_m": 5.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.26m, slope=0.10)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -20125,6 +20868,14 @@
             "wikidata": null,
             "distance_m": 14.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.01m, slope=0.17)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -20181,6 +20932,14 @@
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.70m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -20234,6 +20993,14 @@
             "osm_id": "way/357538045",
             "subtype": "natural=wood",
             "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.91m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -20299,7 +21066,16 @@
             "inside_polygon": false
           }
         ],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.22m, slope=0.17)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9668,
         "raw_tile_logit": 3.4863,
@@ -20609,6 +21385,14 @@
             "wikidata": null,
             "distance_m": 28.5,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.76m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "rediscovered_nhle_scheduled",
@@ -20985,6 +21769,14 @@
             "inside_polygon": false
           },
           {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.18m, slope=0.12)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
             "osm_id": "lidar/void",
             "subtype": "lidar_coverage_edge_or_tin_facet",
             "name": "LiDAR coverage boundary or interpolated TIN facet",
@@ -21095,6 +21887,14 @@
             "wikidata": null,
             "distance_m": 3.4,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.05m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -21168,6 +21968,14 @@
             "wikidata": null,
             "distance_m": 28.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.20m, slope=0.14)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           },
           {
             "osm_id": "lidar/void",
@@ -21826,9 +22634,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/clamp_or_tank",
-            "subtype": "steep_surface_heap_or_tank (nDSM=2.1m, slope=0.26)",
-            "name": "Agricultural silage clamp, manure heap, or tank",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.08m, slope=0.26)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -22029,6 +22837,14 @@
             "wikidata": null,
             "distance_m": 4.1,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.99m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -22188,6 +23004,14 @@
             "wikidata": null,
             "distance_m": 18.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.06m, slope=0.23)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -22250,7 +23074,16 @@
             "inside_polygon": true
           }
         ],
-        "osm_confounder_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.06m, slope=0.25)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
         "context_category": "rediscovered_nhle_scheduled",
         "calibrated_tile_prob": 0.9447,
         "raw_tile_logit": 2.9316,
@@ -22628,9 +23461,9 @@
             "inside_polygon": false
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+4.29m, slope=0.35)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+4.29m, slope=0.35)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -22692,9 +23525,9 @@
             "inside_polygon": true
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+5.08m, slope=0.44)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+5.08m, slope=0.44)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -22889,9 +23722,9 @@
             "inside_polygon": true
           },
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+3.77m, slope=0.41)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.77m, slope=0.41)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -23018,9 +23851,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.38m, slope=0.27)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.76m, slope=0.27)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -23454,6 +24287,14 @@
             "wikidata": null,
             "distance_m": 19.3,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.57m, slope=0.10)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -23518,6 +24359,14 @@
             "wikidata": null,
             "distance_m": 30.8,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.86m, slope=0.19)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",
@@ -23667,8 +24516,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.76m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9262,
         "raw_tile_logit": 2.6113,
         "window_bbox": [
@@ -23771,8 +24629,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.58m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.926,
         "raw_tile_logit": 2.6084,
         "window_bbox": [
@@ -23875,8 +24742,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.65m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8488,
         "raw_tile_logit": 1.7754,
         "window_bbox": [
@@ -23979,8 +24855,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.42m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8125,
         "raw_tile_logit": 1.5063,
         "window_bbox": [
@@ -24027,8 +24912,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.42m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.8189,
         "raw_tile_logit": 1.5508,
         "window_bbox": [
@@ -24828,8 +25722,17 @@
         "is_known_monument": false,
         "matched_monument": null,
         "osm_archaeology_matches": [],
-        "osm_confounder_matches": [],
-        "context_category": "unidentified_candidate",
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.76m, slope=0.16)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
         "calibrated_tile_prob": 0.9545,
         "raw_tile_logit": 3.1455,
         "window_bbox": [
@@ -25027,9 +25930,9 @@
         "osm_archaeology_matches": [],
         "osm_confounder_matches": [
           {
-            "osm_id": "lidar/steep_bund",
-            "subtype": "steep_bund_or_spoil (relief=+2.67m, slope=0.26)",
-            "name": "Steep-walled modern bund or spoil heap",
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.67m, slope=0.26)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
             "wikidata": null,
             "distance_m": 0.0,
             "inside_polygon": true
@@ -25098,6 +26001,14 @@
             "wikidata": null,
             "distance_m": 25.6,
             "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.92m, slope=0.16)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
           }
         ],
         "context_category": "flagged_modern_or_karst_confounder",

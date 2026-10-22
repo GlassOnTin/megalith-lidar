@@ -611,23 +611,23 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif ndsm_m >= 1.10 and slope_m >= 0.18:
+        elif (ndsm_m >= 1.10 and slope_m >= 0.15) or (ndsm_m >= 0.55 and slope_m >= 0.085):
             osm_conf.append(
                 {
-                    "osm_id": "lidar/clamp_or_tank",
-                    "subtype": f"steep_surface_heap_or_tank (nDSM={ndsm_m:.1f}m, slope={slope_m:.2f})",
-                    "name": "Agricultural silage clamp, manure heap, or tank",
+                    "osm_id": "lidar/clamp_or_scrub",
+                    "subtype": f"surface_vegetation_or_clamp (nDSM={ndsm_m:.2f}m, slope={slope_m:.2f})",
+                    "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,
                 }
             )
-        elif slope_m >= 0.20 and rel_m >= 1.80:
+        elif rel_m >= 2.20 or (slope_m >= 0.20 and rel_m >= 1.80):
             osm_conf.append(
                 {
-                    "osm_id": "lidar/steep_bund",
-                    "subtype": f"steep_bund_or_spoil (relief={rel_m:+.2f}m, slope={slope_m:.2f})",
-                    "name": "Steep-walled modern bund or spoil heap",
+                    "osm_id": "lidar/reservoir_or_bund",
+                    "subtype": f"covered_reservoir_or_steep_bund (relief={rel_m:+.2f}m, slope={slope_m:.2f})",
+                    "name": "Covered reservoir, steep embankment, or modern spoil bund",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,
