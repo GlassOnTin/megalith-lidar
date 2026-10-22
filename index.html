@@ -326,11 +326,18 @@
 
     /* Mobile & portrait friendly layout */
     @media (max-width: 900px), (orientation: portrait) {
+      body {
+        font-size: 15px;
+        -webkit-text-size-adjust: 100%;
+      }
       header {
         padding: 10px 12px;
       }
       header h1 {
-        font-size: 15.5px;
+        font-size: 17px;
+      }
+      header .sub {
+        font-size: 13.5px;
       }
       .guide-bar {
         display: none;
@@ -338,59 +345,125 @@
       .layout {
         grid-template-columns: 1fr;
         gap: 10px;
-        padding: 8px 8px 14px 8px;
+        padding: 8px 8px 16px 8px;
       }
       .card {
-        padding: 10px;
+        padding: 12px;
         margin-bottom: 10px;
+        overflow-x: hidden;
+      }
+      .card-header h2 {
+        font-size: 16px;
       }
       .tabs {
-        gap: 4px;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        gap: 8px;
         margin-bottom: 8px;
         padding-bottom: 8px;
       }
       .tab-btn {
-        padding: 5px 8px;
-        font-size: 11.5px;
+        padding: 8px 12px;
+        font-size: 13.5px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .tab-count {
+        font-size: 12px;
       }
       .tab-explainer {
-        font-size: 11.5px;
-        padding: 6px 9px;
+        font-size: 13.5px;
+        line-height: 1.45;
+        padding: 8px 10px;
         margin-bottom: 8px;
+        max-height: 78px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .controls {
+        font-size: 13.5px;
+        gap: 8px;
+      }
+      select {
+        font-size: 13.5px;
+        max-width: 100%;
+        padding: 6px 8px;
+      }
+      .btn-link {
+        font-size: 13px;
+        padding: 6px 10px;
       }
       .table-scroll {
         max-height: 36vh;
         overflow-x: auto;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+      .table-scroll table {
+        min-width: 720px;
+        font-size: 14px;
       }
       th, td {
-        padding: 5px 6px;
-        font-size: 11.5px;
+        padding: 8px 10px;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      th:first-child,
+      td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: var(--panel);
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.35);
+      }
+      th:first-child {
+        background: var(--panel-alt);
+        z-index: 3;
+      }
+      tr.cand-row.selected-row td:first-child {
+        background: #2c2a18;
+      }
+      .row-copy-btn {
+        font-size: 12px;
+        padding: 3px 7px;
+      }
+      #inspectorBody {
+        font-size: 14px;
+      }
+      .inspector-arch-note {
+        max-height: 210px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       .mobile-panel-switcher {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 4px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
         margin-top: 10px;
       }
       .mobile-panel-radio {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 4px;
+        justify-content: flex-start;
+        gap: 6px;
         background: var(--panel-alt);
         border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 6px 4px;
-        font-size: 11.5px;
+        border-radius: 5px;
+        padding: 8px 10px;
+        font-size: 13.5px;
         font-weight: 600;
         color: var(--muted);
         cursor: pointer;
-        text-align: center;
         user-select: none;
       }
       .mobile-panel-radio input[type="radio"] {
         margin: 0;
+        width: 16px;
+        height: 16px;
         accent-color: var(--accent);
       }
       .mobile-panel-radio.active-radio {
@@ -400,12 +473,12 @@
       }
       .diag-viewport {
         width: 100%;
-        max-width: 420px;
+        max-width: 100%;
         aspect-ratio: 1 / 1;
         overflow: hidden;
         border-radius: 4px;
         border: 1px solid var(--border);
-        margin: 6px auto 0 auto;
+        margin: 8px auto 0 auto;
         background: #090b0e;
         position: relative;
       }
@@ -422,6 +495,10 @@
       }
       .panel-legend {
         grid-template-columns: 1fr;
+        font-size: 13.5px;
+      }
+      .panel-legend div {
+        padding: 7px 10px;
       }
       .panel-legend div[data-panel-desc] {
         display: none;
@@ -430,7 +507,7 @@
         display: block;
       }
       #map {
-        height: 300px;
+        height: 320px;
       }
     }
     .stat-grid {
@@ -872,8 +949,8 @@
             <a class="btn-link" href="${heUrl}" target="_blank" rel="noopener">Historic England NHLE ↗</a>
           </div>
         </div>
-        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:12px;">${p.case_study_note}</div>` : ""}
-        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;font-size:12.5px;background:var(--panel-alt);padding:10px;border-radius:4px;border:1px solid var(--border);">
+        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:inherit;">${p.case_study_note}</div>` : ""}
+        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;font-size:inherit;background:var(--panel-alt);padding:10px;border-radius:4px;border:1px solid var(--border);">
           <div><span class="muted">Nearest Form Class:</span><br/><strong>${formatClass(p.predicted_class)}</strong></div>
           <div><span class="muted">Candidate Score (Tile Prob):</span><br/><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && Math.abs(p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="badge badge-conf" title="${p.vlm_downrate_reason || 'Downrated by Qwen3.8 VLM'}">↓ from ${p.raw_unet_confidence.toFixed(3)}</span>` : ""} (calibrated tile p = ${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
           <div><span class="muted">16 m Bare-Earth Relief:</span><br/><strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m² footprint, ${p.elongation}× elongation)</div>
@@ -893,10 +970,10 @@
           const items = p.nearby_nhle_monuments.slice(0, 3).map((m) =>
             `<a href="https://historicengland.org.uk/listing/the-list/list-entry/${m.list_entry}" target="_blank" rel="noopener">${m.name} (#${m.list_entry})</a> <span class="muted">(${m.distance_m} m ${m.bearing})</span>`
           ).join(" · ");
-          nearbyHtml = `<div style="margin-top:6px;font-size:11.5px;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
+          nearbyHtml = `<div style="margin-top:6px;font-size:0.92em;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
         }
         html += `
-          <div style="margin-top:10px;padding:10px 12px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:4px;font-size:12.5px;line-height:1.5;">
+          <div class="inspector-arch-note" style="margin-top:10px;padding:10px 12px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:4px;font-size:inherit;line-height:1.5;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">
               <strong style="color:#fff;">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
               ${srcBadge}
@@ -1373,6 +1450,7 @@
         btn.addEventListener("click", () => {
           document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
+          btn.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
           currentTab = btn.dataset.tab;
           renderActiveView(true);
         });
