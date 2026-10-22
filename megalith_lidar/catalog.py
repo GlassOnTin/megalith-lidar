@@ -42,6 +42,54 @@ ROMAN_CLASS_NAMES = {
     ROMAN_CLASS_FORT_CAMP_SETTLEMENT: "roman_fort_camp_settlement",
 }
 
+ENCLOSURE_CLASS_BACKGROUND = 0
+ENCLOSURE_CLASS_HUT_CIRCLE_POUND = 1
+ENCLOSURE_CLASS_HILLFORT_BANJO_ENCLOSURE = 2
+ENCLOSURE_CLASS_DYKE_FIELD_SYSTEM = 3
+
+ENCLOSURE_CLASS_NAMES = {
+    ENCLOSURE_CLASS_BACKGROUND: "background",
+    ENCLOSURE_CLASS_HUT_CIRCLE_POUND: "hut_circle_pound_settlement",
+    ENCLOSURE_CLASS_HILLFORT_BANJO_ENCLOSURE: "iron_age_hillfort_banjo_enclosure",
+    ENCLOSURE_CLASS_DYKE_FIELD_SYSTEM: "cross_ridge_dyke_field_system",
+}
+
+_ENCLOSURE_HUT_PAT = re.compile(
+    r"\b("
+    r"hut\s+circle|stone\s+hut|courtyard\s+house|enclosed\s+settlement|unenclosed\s+settlement|"
+    r"prehistoric\s+settlement|bronze\s+age\s+settlement|iron\s+age\s+settlement|"
+    r"enclosed\s+hut|unenclosed\s+hut|\bpound\b|cornish\s+round|crannog"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
+_ENCLOSURE_FORT_PAT = re.compile(
+    r"\b("
+    r"hillfort|hill\s+fort|promontory\s+fort|cliff\s+castle|banjo\s+enclosure|"
+    r"univallate|multivallate|bivallate|iron\s+age\s+enclosure|iron\s+age\s+defended|"
+    r"defended\s+enclosure|defended\s+settlement|contour\s+fort|prehistoric\s+enclosure|"
+    r"curvilinear\s+enclosure|rectilinear\s+enclosure|palisaded\s+enclosure"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
+_ENCLOSURE_DYKE_FIELD_PAT = re.compile(
+    r"\b("
+    r"cross[- ]ridge\s+dyke|linear\s+boundary|linear\s+earthwork|grim.s\s+ditch|"
+    r"celtic\s+field|field\s+system|strip\s+lynchet|lynchet|reave|coaxial\s+field"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
+_ENCLOSURE_EXCLUDE_PAT = re.compile(
+    r"\b("
+    r"roman\s+fort|roman\s+camp|roman\s+villa|medieval|motte|moat|moated|"
+    r"deserted\s+medieval|shrunken\s+medieval|world\s+war|pillbox|colliery|"
+    r"wayside\s+cross|churchyard\s+cross|milestone"
+    r")s?\b",
+    re.IGNORECASE,
+)
+
 _ROMAN_VILLA_PAT = re.compile(
     r"\b("
     r"roman\s+villa|romano[-\s]british\s+villa|villa\s+complex|courtyard\s+villa|"
@@ -175,6 +223,28 @@ def classify_roman_monument_name(name: str) -> int:
     return ROMAN_CLASS_BACKGROUND
 
 
+def classify_enclosure_monument_name(name: str) -> int:
+    """
+    Classify a Scheduled Monument title into Iron Age Enclosures, Hut Circle Settlements,
+    and Cross-Ridge Dykes / Prehistoric Field Systems:
+      - ENCLOSURE_CLASS_HUT_CIRCLE_POUND (1)
+      - ENCLOSURE_CLASS_HILLFORT_BANJO_ENCLOSURE (2)
+      - ENCLOSURE_CLASS_DYKE_FIELD_SYSTEM (3)
+      - ENCLOSURE_CLASS_BACKGROUND (0) for other monuments
+    """
+    if not name:
+        return ENCLOSURE_CLASS_BACKGROUND
+    if _ENCLOSURE_EXCLUDE_PAT.search(name):
+        return ENCLOSURE_CLASS_BACKGROUND
+    if _ENCLOSURE_FORT_PAT.search(name):
+        return ENCLOSURE_CLASS_HILLFORT_BANJO_ENCLOSURE
+    if _ENCLOSURE_HUT_PAT.search(name):
+        return ENCLOSURE_CLASS_HUT_CIRCLE_POUND
+    if _ENCLOSURE_DYKE_FIELD_PAT.search(name):
+        return ENCLOSURE_CLASS_DYKE_FIELD_SYSTEM
+    return ENCLOSURE_CLASS_BACKGROUND
+
+
 def bng_to_latlon(easting: float, northing: float) -> Tuple[float, float]:
     """Convert British National Grid (EPSG:27700) Easting/Northing to WGS84 (lat, lon)."""
     lon, lat = _TRANSFORMER_27700_TO_4326.transform(easting, northing)
@@ -208,11 +278,14 @@ class MonumentRecord:
     cls: int
     rings: List[List[List[float]]] = field(default_factory=list)
     roman_cls: int = 0
+    enclosure_cls: int = 0
     bbox: Tuple[float, float, float, float] = field(init=False)
 
     def __post_init__(self) -> None:
         if self.roman_cls == 0 and self.name:
             self.roman_cls = classify_roman_monument_name(self.name)
+        if self.enclosure_cls == 0 and self.name:
+            self.enclosure_cls = classify_enclosure_monument_name(self.name)
         if self.rings:
             xs = [pt[0] for ring in self.rings for pt in ring]
             ys = [pt[1] for ring in self.rings for pt in ring]
@@ -240,6 +313,14 @@ class MonumentRecord:
             ROMAN_CLASS_VILLA_BUILDING,
             ROMAN_CLASS_ROAD_AGGER_TRACKWAY,
             ROMAN_CLASS_FORT_CAMP_SETTLEMENT,
+        )
+
+    @property
+    def is_enclosure_or_settlement(self) -> bool:
+        return self.enclosure_cls in (
+            ENCLOSURE_CLASS_HUT_CIRCLE_POUND,
+            ENCLOSURE_CLASS_HILLFORT_BANJO_ENCLOSURE,
+            ENCLOSURE_CLASS_DYKE_FIELD_SYSTEM,
         )
 
 
@@ -393,6 +474,42 @@ class MonumentCatalog:
             if not rec.is_roman_or_road:
                 continue
             cls_val = int(rec.roman_cls)
+            if rec.rings:
+                for ring in rec.rings:
+                    if len(ring) >= 3:
+                        pts = [((pt[0] - e_min) * scale_x, (n_max - pt[1]) * scale_y) for pt in ring]
+                        draw.polygon(pts, fill=cls_val, outline=cls_val)
+            else:
+                cx = (rec.easting - e_min) * scale_x
+                cy = (n_max - rec.northing) * scale_y
+                r_px = max(8.0, math.sqrt(max(rec.area_ha, 0.02) * 10000.0 / math.pi) * scale_x)
+                draw.ellipse([cx - r_px, cy - r_px, cx + r_px, cy + r_px], fill=cls_val, outline=cls_val)
+        return np.array(mask_im, dtype=np.uint8)
+
+    def rasterize_enclosure_tile(
+        self,
+        e_min: float,
+        e_max: float,
+        n_min: float,
+        n_max: float,
+        size: int = 256,
+    ) -> np.ndarray:
+        """
+        Rasterize all Iron Age Enclosures, Hut Circle Settlements, and Cross-Ridge Dykes /
+        Field System polygons intersecting [e_min, e_max] x [n_min, n_max] into a (size, size)
+        uint8 class mask (1..3).
+        """
+        mask_im = Image.new("L", (size, size), 0)
+        draw = ImageDraw.Draw(mask_im)
+        scale_x = size / (e_max - e_min)
+        scale_y = size / (n_max - n_min)
+
+        intersecting = self.query_bbox(e_min, n_min, e_max, n_max)
+        intersecting.sort(key=lambda r: -r.enclosure_cls)
+        for rec in intersecting:
+            if not rec.is_enclosure_or_settlement:
+                continue
+            cls_val = int(rec.enclosure_cls)
             if rec.rings:
                 for ring in rec.rings:
                     if len(ring) >= 3:

@@ -167,6 +167,15 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     elif cls_name == "roman_fort_camp_settlement":
         form_phrase = f"a rectilinear rampart-and-ditch enclosure or settlement earthwork ({area:.0f} m² footprint, ~{eq_diam:.0f} m span, {elong:.2f}× elongation)"
         arch_parallel = "Roman fortlet, marching-camp vallum, signal station, or Romano-British enclosed farmstead"
+    elif cls_name == "hut_circle_pound_settlement":
+        form_phrase = f"a sub-circular stone/turf hut ring or pound compound ({area:.0f} m² footprint, ~{eq_diam:.0f} m span, {elong:.2f}× elongation)"
+        arch_parallel = "Bronze/Iron Age stone hut circle, enclosed upland settlement, or Dartmoor/Cornish pound"
+    elif cls_name == "iron_age_hillfort_banjo_enclosure":
+        form_phrase = f"a curvilinear rampart-and-ditch enclosure ({area:.0f} m² footprint, ~{eq_diam:.0f} m span, {elong:.2f}× elongation)"
+        arch_parallel = "Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement"
+    elif cls_name == "cross_ridge_dyke_field_system":
+        form_phrase = f"a linear boundary bank/ditch or terraced lynchet scarp ({elong:.2f}× axial elongation, {area:.0f} m² footprint)"
+        arch_parallel = "prehistoric cross-ridge dyke, coaxial reave, or Celtic field lynchet boundary"
     else:
         form_phrase = f"a sub-circular mound ({elong:.2f}× elongation, {area:.0f} m² footprint, ~{eq_diam:.0f} m diameter)"
         arch_parallel = "Bronze Age bowl/bell barrow or upland funerary cairn"

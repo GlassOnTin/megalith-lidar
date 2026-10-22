@@ -317,7 +317,12 @@ class MegalithLidarDataset(Dataset):
         return len(self.manifest)
 
     def _load_features_and_mask(self, spec: Dict) -> Tuple[np.ndarray, np.ndarray]:
-        prefix = "roman_v1" if self.target_domain == "roman" else "v3"
+        if self.target_domain == "roman":
+            prefix = "roman_v1"
+        elif self.target_domain == "enclosure":
+            prefix = "enclosure_v1"
+        else:
+            prefix = "v3"
         if self.feature_cache_dir is not None:
             f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             if f_path.exists():
@@ -338,18 +343,27 @@ class MegalithLidarDataset(Dataset):
         dtm, dsm = pair
         features = compute_terrain_features(dtm, dsm)
         if spec["is_positive"]:
-            if self.target_domain == "roman":
-                mask = self.catalog.rasterize_roman_tile(
-                    spec["e_min"],
-                    spec["e_max"],
-                    spec["n_min"],
-                    spec["n_max"],
-                    size=dtm.shape[0],
-                )
-                # For Roman villas, playing-card forts, and Roman road aggers:
-                # 14-21% survive under woodland canopy (nDSM >= 2.5m) where bare-earth 1m DTM
-                # resolves the embankment/rampart through the trees. Keep active bare-earth
-                # relief pixels (|z - G_16(z)| >= 0.16m or top 35% of polygon relief) as positive
+            if self.target_domain in ("roman", "enclosure"):
+                if self.target_domain == "roman":
+                    mask = self.catalog.rasterize_roman_tile(
+                        spec["e_min"],
+                        spec["e_max"],
+                        spec["n_min"],
+                        spec["n_max"],
+                        size=dtm.shape[0],
+                    )
+                else:
+                    mask = self.catalog.rasterize_enclosure_tile(
+                        spec["e_min"],
+                        spec["e_max"],
+                        spec["n_min"],
+                        spec["n_max"],
+                        size=dtm.shape[0],
+                    )
+                # For Roman villas/forts/roads and Iron Age hillforts/enclosures/hut circles/dykes:
+                # Many survive under woodland canopy (nDSM >= 2.5m) where bare-earth 1m DTM
+                # resolves the embankment/rampart/hut ring through the trees. Keep active bare-earth
+                # relief pixels (|z - G_16(z)| >= 0.16m or top 32% of polygon relief) as positive
                 # regardless of canopy height, and mark flat legal-buffer farmland as IGNORE (255).
                 pos_px = mask > 0
                 if int(np.sum(pos_px)) > 500:

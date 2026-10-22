@@ -13,6 +13,7 @@ from scipy.ndimage import gaussian_filter, label, uniform_filter
 
 from megalith_lidar.catalog import (
     CLASS_NAMES,
+    ENCLOSURE_CLASS_NAMES,
     ROMAN_CLASS_NAMES,
     MonumentCatalog,
     bng_to_latlon,
@@ -133,11 +134,23 @@ def extract_candidates_from_tile(
         nearby = catalog.find_nearby(easting, northing, max_distance_m=known_match_radius_m)
         is_known = len(nearby) > 0
         matched_info = None
-        cls_map_dict = ROMAN_CLASS_NAMES if target_domain == "roman" else CLASS_NAMES
+        if target_domain == "roman":
+            cls_map_dict = ROMAN_CLASS_NAMES
+        elif target_domain == "enclosure":
+            cls_map_dict = ENCLOSURE_CLASS_NAMES
+        else:
+            cls_map_dict = CLASS_NAMES
         if is_known:
             rec, dist_m = nearby[0]
-            matched_cls_id = rec.roman_cls if (target_domain == "roman" and rec.roman_cls > 0) else rec.cls
-            matched_cls_dict = ROMAN_CLASS_NAMES if (target_domain == "roman" and rec.roman_cls > 0) else CLASS_NAMES
+            if target_domain == "roman" and rec.roman_cls > 0:
+                matched_cls_id = rec.roman_cls
+                matched_cls_dict = ROMAN_CLASS_NAMES
+            elif target_domain == "enclosure" and rec.enclosure_cls > 0:
+                matched_cls_id = rec.enclosure_cls
+                matched_cls_dict = ENCLOSURE_CLASS_NAMES
+            else:
+                matched_cls_id = rec.cls
+                matched_cls_dict = CLASS_NAMES
             matched_info = {
                 "list_entry": rec.list_entry,
                 "name": rec.name,

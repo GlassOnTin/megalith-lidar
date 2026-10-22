@@ -592,7 +592,8 @@ def annotate_candidates_with_spatial_context(
     sunken marl/chalk pits, or LiDAR void/TIN facets) WITHOUT altering `confidence`,
     `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
     """
-    is_roman = target_domain == "roman"
+    is_roman = target_domain in ("roman", "enclosure")
+    is_enclosure = target_domain == "enclosure"
     for cand in candidates:
         osm_arch = []
         osm_conf = []
@@ -644,7 +645,9 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif rel_m >= 2.20 or (slope_m >= 0.165 and rel_m >= 1.65):
+        elif (not is_enclosure and (rel_m >= 2.20 or (slope_m >= 0.165 and rel_m >= 1.65))) or (
+            is_enclosure and (rel_m >= 3.80 or (slope_m >= 0.26 and rel_m >= 2.60))
+        ):
             osm_conf.append(
                 {
                     "osm_id": "lidar/reservoir_or_bund",
