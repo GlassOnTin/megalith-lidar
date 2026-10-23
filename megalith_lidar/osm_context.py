@@ -704,23 +704,41 @@ def annotate_candidates_with_spatial_context(
         elif (
             not is_enclosure
             and area_m2 <= 14000.0
-            and max_pos_rel_m >= 0.90
-            and centroid_rel_m <= 0.35
-            and (max_pos_rel_m - centroid_rel_m) >= 0.85
             and (
-                float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.040
-                or (ndsm_m >= 0.85 and float(cand.get("cropmark_ring_exg_diff", 0.0)) >= 0.04)
-                or cand.get("vlm_shape_verdict") == "RECTILINEAR_OR_U_BUND"
-                or any(
-                    phrase in str(cand.get("arch_context_note") or "").lower()
-                    for phrase in (
-                        "is a false positive",
-                        "likely a modern",
-                        "likely represents a modern",
-                        "confounding the model",
-                        "modern agricultural",
-                        "modern field boundary",
-                        "building platform",
+                (centroid_rel_m <= 0.05 and patch_min_rel_m <= -0.28 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
+                or cand.get("vlm_shape_verdict") == "OBVIOUS_MODERN_CONFOUNDER"
+                or (
+                    cand.get("vlm_shape_verdict") == "RECTILINEAR_OR_U_BUND"
+                    and centroid_rel_m <= 0.25
+                    and ((max_pos_rel_m - centroid_rel_m) >= 0.50 or patch_min_rel_m <= -0.25)
+                )
+                or (
+                    max_pos_rel_m >= 0.80
+                    and centroid_rel_m <= 0.35
+                    and (max_pos_rel_m - centroid_rel_m) >= 0.65
+                    and (
+                        float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.038
+                        or (ndsm_m >= 0.85 and float(cand.get("cropmark_ring_exg_diff", 0.0)) >= 0.04)
+                        or (
+                            str(cand.get("arch_context_source") or "") in {"qwen3.8_vlm_vision", "qwen3.8_llm"}
+                            and any(
+                                phrase in str(cand.get("arch_context_note") or "").lower()
+                                for phrase in (
+                                    "is a false positive",
+                                    "likely a modern",
+                                    "likely represents a modern",
+                                    "confounding the model",
+                                    "modern agricultural",
+                                    "modern field boundary",
+                                    "building platform",
+                                    "modern utility",
+                                    "modern pond",
+                                    "farm pond",
+                                    "slurry",
+                                    "gravel pit",
+                                )
+                            )
+                        )
                     )
                 )
             )

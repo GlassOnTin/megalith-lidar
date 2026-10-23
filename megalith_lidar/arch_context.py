@@ -311,28 +311,41 @@ def classify_vlm_note_downrating(
         area_m2 = float(cand.get("area_m2", 0.0))
         max_pos_rel_m = float(cand.get("max_positive_relief_m", cand.get("est_local_relief_m", 0.0)))
         centroid_rel_m = float(cand.get("centroid_local_relief_m", max_pos_rel_m))
+        patch_min_rel_m = float(cand.get("patch_min_relief_m", 0.0))
         ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))
         lum_diff = float(cand.get("soilmark_core_lum_diff", 0.0))
         ring_exg = float(cand.get("cropmark_ring_exg_diff", 0.0))
-        if (
-            area_m2 <= 14000.0
-            and max_pos_rel_m >= 0.90
-            and centroid_rel_m <= 0.35
-            and (max_pos_rel_m - centroid_rel_m) >= 0.85
-            and (
-                lum_diff <= -0.040
-                or (ndsm_m >= 0.85 and ring_exg >= 0.04)
-                or shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}
-                or any(
-                    phrase in low
-                    for phrase in (
-                        "is a false positive",
-                        "likely a modern",
-                        "likely represents a modern",
-                        "confounding the model",
-                        "modern agricultural",
-                        "modern field boundary",
-                        "building platform",
+        if area_m2 <= 14000.0 and (
+            (centroid_rel_m <= 0.05 and patch_min_rel_m <= -0.28 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
+            or shape_tag == "OBVIOUS_MODERN_CONFOUNDER"
+            or (
+                shape_tag == "RECTILINEAR_OR_U_BUND"
+                and centroid_rel_m <= 0.25
+                and ((max_pos_rel_m - centroid_rel_m) >= 0.50 or patch_min_rel_m <= -0.25)
+            )
+            or (
+                max_pos_rel_m >= 0.80
+                and centroid_rel_m <= 0.35
+                and (max_pos_rel_m - centroid_rel_m) >= 0.65
+                and (
+                    lum_diff <= -0.038
+                    or (ndsm_m >= 0.85 and ring_exg >= 0.04)
+                    or any(
+                        phrase in low
+                        for phrase in (
+                            "is a false positive",
+                            "likely a modern",
+                            "likely represents a modern",
+                            "confounding the model",
+                            "modern agricultural",
+                            "modern field boundary",
+                            "building platform",
+                            "modern utility",
+                            "modern pond",
+                            "farm pond",
+                            "slurry",
+                            "gravel pit",
+                        )
                     )
                 )
             )

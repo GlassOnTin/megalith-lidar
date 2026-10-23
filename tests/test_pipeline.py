@@ -342,6 +342,19 @@ def test_roman_taxonomy_and_sub_canopy_context():
             "is_known_monument": False,
             "target_domain": "roman",
         },
+        {
+            "easting": 504759.0,
+            "northing": 350363.0,
+            "confidence": 0.921,
+            "area_m2": 1980.0,
+            "est_local_relief_m": 0.93,
+            "max_positive_relief_m": 0.93,
+            "centroid_local_relief_m": -0.45,
+            "patch_min_relief_m": -0.60,
+            "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+            "is_known_monument": False,
+            "target_domain": "roman",
+        },
     ]
     annotate_candidates_with_spatial_context(lagoon_cands, None, target_domain="roman")
     for lc in lagoon_cands:
