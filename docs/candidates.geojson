@@ -402781,7 +402781,7 @@
         "lat": 55.583773,
         "lon": -1.946976,
         "os_grid_ref": "NU 03441 32238",
-        "confidence": 0.9853,
+        "confidence": 0.8277,
         "peak_prob": 0.9932,
         "mean_prob": 0.9614,
         "predicted_class_id": 1,
@@ -402857,10 +402857,12 @@
           "prehistoric_within_5km": 3
         },
         "county": "Northumberland",
-        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (4 scheduled monuments within 2 km and 31 within 5 km, closest being Iron Age defended settlement in Fox Covert (NHLE #1016246, 858 m NW) and Cup and ring marked rocks 1/4 mile (400m) NE of Buttony Wood, Horton Moor (NHLE #1006532, 1484 m WSW)), the 1 m DTM isolates an elongated or oval mound (1.08\u00d7 axial elongation, 442 m\u00b2 footprint, ~24 m equivalent span) rising +0.95 m above its 16 m local trend surface with weathered scarp gradients of 0.079 (4.5\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on the North Pennine sandstone/whin upland, this candidate lies 858m NW of the Iron Age Fox Covert settlement (NHLE #1016246) and 1484m WSW of the Horton Moor rock art (NHLE #1006532). The 1m LiDAR close-up reveals a smooth, circular raised earthwork with a central peak, lacking the axial elongation (1.08x) or linear ditch required for the model's long barrow prediction. Given the +0.95m relief and 442m\u00b2 footprint, this is likely a natural glacial erratic or peat hummock; a HER check and field survey are required to rule out a small round barrow.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.9853,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
       }
     },
     {
@@ -405099,7 +405101,7 @@
         "lat": 52.190284,
         "lon": 0.538629,
         "os_grid_ref": "TL 73626 57709",
-        "confidence": 0.9639,
+        "confidence": 0.8097,
         "peak_prob": 0.9732,
         "mean_prob": 0.936,
         "predicted_class_id": 1,
@@ -405175,10 +405177,12 @@
           "prehistoric_within_5km": 1
         },
         "county": "Suffolk",
-        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (2 scheduled monuments within 2 km and 13 within 5 km, closest being Roman villa SE of Lidgate (NHLE #1002971, 771 m SW) and Lidgate Castle and C16 Fortified Manorial Complex (NHLE #1006024, 1532 m W)), the 1 m DTM isolates an elongated or oval mound (1.15\u00d7 axial elongation, 199 m\u00b2 footprint, ~16 m equivalent span) rising +0.32 m above its 16 m local trend surface with weathered scarp gradients of 0.036 (2.1\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.49 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated on an English lowland river terrace, this candidate lies 771m northeast of the Roman villa at Lidgate (NHLE #1002971) and 1532m east of Lidgate Castle (NHLE #1006024). The 1m LiDAR close-up reveals a smooth, low-relief oval footprint (199m\u00b2) with minimal axial elongation (1.15x), presenting as a faint yellow raised bank on the 16m Local Relief and a subtle grey scarp on the Bare-Earth Slope, yielding a modest +0.32m elevation. Despite the model's high confidence for a long barrow, the heavily degraded, rounded morphology and shallow scarp slope (2.1\u00b0) suggest a heavily ploughed prehistoric ring ditch or a natural fluvial feature, necessitating a HER review and targeted fieldwalking to rule out modern agricultural or drainage confounders.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.9639,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
       }
     },
     {
@@ -407934,6 +407938,3330 @@
         "arch_context_note": "Located in the English lowland / river terrace landscape, this 123 m\u00b2 topographic anomaly (+1.01 m local relief, 0.041 / 2.3\u00b0 mean scarp slope, nDSM 0.08 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'leisure=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Maiden Castle promontory fort on Bickerton Hill 700m west of Hill Farm (NHLE #1013293, 602 m E) and Bowl barrow 140m east of Long Lane (NHLE #1011143, 1900 m E).",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.8575,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.43882,
+          53.789007
+        ]
+      },
+      "properties": {
+        "easting": 437069.3,
+        "northing": 432667.0,
+        "lat": 53.789007,
+        "lon": -1.43882,
+        "os_grid_ref": "SE 37069 32667",
+        "confidence": 0.964,
+        "peak_prob": 0.9757,
+        "mean_prob": 0.9289,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 279.0,
+        "elongation": 1.23,
+        "est_local_relief_m": 1.9,
+        "max_positive_relief_m": 1.9,
+        "centroid_local_relief_m": 1.28,
+        "patch_min_relief_m": 0.04,
+        "est_surface_prominence_m": 3.5,
+        "mean_slope_tangent": 0.114,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/686627108",
+            "subtype": "leisure=park",
+            "name": "Temple Newsam Estate",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/814211121",
+            "subtype": "natural=wood",
+            "name": "Ridge Wood",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=3.5m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9275,
+        "raw_tile_logit": 2.6309,
+        "window_bbox": [
+          436960,
+          432576,
+          437216,
+          432832
+        ],
+        "region_name": "test_landscape_E436000_N432000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E436000_N432000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005777,
+            "name": "Shrunken medieval village of Colton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 521.0,
+            "bearing": "WSW"
+          },
+          {
+            "list_entry": 1018794,
+            "name": "Length of Grim's Ditch from Cotton Road East to the A63, Colton Common",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 612.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1018793,
+            "name": "Length of Grim's Ditch extending 1.4km from a point 70m south of Cotton Road East to the south east corner of Avenue Wood",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 815.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1018795,
+            "name": "Length of Grim's Ditch immediately east of Barrowby Road",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 940.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 6,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 0
+        },
+        "county": "West Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 279 m\u00b2 topographic anomaly (+1.90 m local relief, 0.114 / 6.5\u00b0 mean scarp slope, nDSM 3.50 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Temple Newsam Estate'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Shrunken medieval village of Colton (NHLE #1005777, 521 m WSW) and Length of Grim's Ditch from Cotton Road East to the A63, Colton Common (NHLE #1018794, 612 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.964,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.705818,
+          55.504059
+        ]
+      },
+      "properties": {
+        "easting": 418680.5,
+        "northing": 623404.0,
+        "lat": 55.504059,
+        "lon": -1.705818,
+        "os_grid_ref": "NU 18681 23404",
+        "confidence": 0.9007,
+        "peak_prob": 0.9092,
+        "mean_prob": 0.8752,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 287.0,
+        "elongation": 1.11,
+        "est_local_relief_m": 0.57,
+        "max_positive_relief_m": 0.57,
+        "centroid_local_relief_m": 0.55,
+        "patch_min_relief_m": 0.03,
+        "est_surface_prominence_m": 0.03,
+        "mean_slope_tangent": 0.051,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8633,
+        "raw_tile_logit": 1.8984,
+        "window_bbox": [
+          418576,
+          623344,
+          418832,
+          623600
+        ],
+        "region_name": "test_landscape_E418000_N622000",
+        "diagnostic_png": "test_landscape_E418000_N622000_unidentified_01_E418576_N623344_conf900.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E418000_N622000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014486,
+            "name": "Defended settlement on Dunstan Hill 400m north of Doxford Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 510.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1018348,
+            "name": "North Charlton medieval village and open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1619.0,
+            "bearing": "WSW"
+          },
+          {
+            "list_entry": 1006612,
+            "name": "Preston Tower",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2055.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1018499,
+            "name": "Prehistoric burial mound, 420m north west of East Linkhall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2073.0,
+            "bearing": "SW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (2 scheduled monuments within 2 km and 10 within 5 km, closest being Defended settlement on Dunstan Hill 400m north of Doxford Farm (NHLE #1014486, 510 m NW) and North Charlton medieval village and open field system (NHLE #1018348, 1619 m WSW)), the 1 m DTM isolates a sub-circular mound (1.11\u00d7 elongation, 287 m\u00b2 footprint, ~19 m diameter) rising +0.57 m above its 16 m local trend surface with weathered scarp gradients of 0.051 (2.9\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.03 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9007,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.701867,
+          55.495927
+        ]
+      },
+      "properties": {
+        "easting": 418934.0,
+        "northing": 622500.0,
+        "lat": 55.495927,
+        "lon": -1.701867,
+        "os_grid_ref": "NU 18934 22500",
+        "confidence": 0.8719,
+        "peak_prob": 0.8769,
+        "mean_prob": 0.8571,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 93.0,
+        "elongation": 1.24,
+        "est_local_relief_m": 0.38,
+        "max_positive_relief_m": 0.38,
+        "centroid_local_relief_m": 0.35,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.024,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8135,
+        "raw_tile_logit": 1.5132,
+        "window_bbox": [
+          418768,
+          622384,
+          419024,
+          622640
+        ],
+        "region_name": "test_landscape_E418000_N622000",
+        "diagnostic_png": "test_landscape_E418000_N622000_unidentified_02_E418768_N622384_conf871.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E418000_N622000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014486,
+            "name": "Defended settlement on Dunstan Hill 400m north of Doxford Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1393.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1006500,
+            "name": "Camp at West Linkhall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1731.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1018348,
+            "name": "North Charlton medieval village and open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1796.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1018499,
+            "name": "Prehistoric burial mound, 420m north west of East Linkhall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1863.0,
+            "bearing": "WSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (4 scheduled monuments within 2 km and 12 within 5 km, closest being Defended settlement on Dunstan Hill 400m north of Doxford Farm (NHLE #1014486, 1393 m NNW) and Camp at West Linkhall (NHLE #1006500, 1731 m SW)), the 1 m DTM isolates an elongated or oval mound (1.24\u00d7 axial elongation, 93 m\u00b2 footprint, ~11 m equivalent span) rising +0.38 m above its 16 m local trend surface with weathered scarp gradients of 0.024 (1.4\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.01 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8719,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.699662,
+          55.499709
+        ]
+      },
+      "properties": {
+        "easting": 419071.5,
+        "northing": 622921.5,
+        "lat": 55.499709,
+        "lon": -1.699662,
+        "os_grid_ref": "NU 19072 22921",
+        "confidence": 0.8541,
+        "peak_prob": 0.8567,
+        "mean_prob": 0.8463,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 37.0,
+        "elongation": 1.0,
+        "est_local_relief_m": 0.28,
+        "max_positive_relief_m": 0.28,
+        "centroid_local_relief_m": 0.26,
+        "patch_min_relief_m": -0.19,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.027,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8157,
+        "raw_tile_logit": 1.5288,
+        "window_bbox": [
+          418960,
+          622768,
+          419216,
+          623024
+        ],
+        "region_name": "test_landscape_E418000_N622000",
+        "diagnostic_png": "test_landscape_E418000_N622000_unidentified_03_E418960_N622768_conf854.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E418000_N622000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014486,
+            "name": "Defended settlement on Dunstan Hill 400m north of Doxford Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1127.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1018348,
+            "name": "North Charlton medieval village and open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1906.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1006500,
+            "name": "Camp at West Linkhall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2116.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1018499,
+            "name": "Prehistoric burial mound, 420m north west of East Linkhall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2136.0,
+            "bearing": "WSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (2 scheduled monuments within 2 km and 10 within 5 km, closest being Defended settlement on Dunstan Hill 400m north of Doxford Farm (NHLE #1014486, 1127 m NW) and North Charlton medieval village and open field system (NHLE #1018348, 1906 m W)), the 1 m DTM isolates an elongated or oval mound (1.00\u00d7 axial elongation, 37 m\u00b2 footprint, ~7 m equivalent span) rising +0.28 m above its 16 m local trend surface with weathered scarp gradients of 0.027 (1.5\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.01 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8541,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.292136,
+          51.172037
+        ]
+      },
+      "properties": {
+        "easting": 379672.8,
+        "northing": 141462.6,
+        "lat": 51.172037,
+        "lon": -2.292136,
+        "os_grid_ref": "ST 79673 41463",
+        "confidence": 0.8552,
+        "peak_prob": 0.8572,
+        "mean_prob": 0.8494,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 39.0,
+        "elongation": 1.05,
+        "est_local_relief_m": 1.29,
+        "max_positive_relief_m": 1.29,
+        "centroid_local_relief_m": 1.06,
+        "patch_min_relief_m": -0.25,
+        "est_surface_prominence_m": 0.94,
+        "mean_slope_tangent": 0.183,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/85351027",
+            "subtype": "landuse=forest",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.94m, slope=0.18)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8112,
+        "raw_tile_logit": 1.498,
+        "window_bbox": [
+          379536,
+          141344,
+          379792,
+          141600
+        ],
+        "region_name": "test_landscape_E378000_N140000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E378000_N140000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017304,
+            "name": "Woodhouse Castle fortified manor house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 688.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1006153,
+            "name": "Roman villa complex, 330m south-west of St Algar's Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1403.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1008804,
+            "name": "Hillfort on Roddenbury Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2465.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1015940,
+            "name": "Bowl barrow 110m south east of crossroads, Maiden Bradley",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2551.0,
+            "bearing": "SSE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 8
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 39 m\u00b2 topographic anomaly (+1.29 m local relief, 0.183 / 10.4\u00b0 mean scarp slope, nDSM 0.94 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=forest'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Woodhouse Castle fortified manor house (NHLE #1017304, 688 m NNE) and Roman villa complex, 330m south-west of St Algar's Farm (NHLE #1006153, 1403 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8552,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.333267,
+          54.031519
+        ]
+      },
+      "properties": {
+        "easting": 443769.7,
+        "northing": 459708.9,
+        "lat": 54.031519,
+        "lon": -1.333267,
+        "os_grid_ref": "SE 43770 59709",
+        "confidence": 0.9419,
+        "peak_prob": 0.9538,
+        "mean_prob": 0.9062,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 342.0,
+        "elongation": 1.06,
+        "est_local_relief_m": 0.62,
+        "max_positive_relief_m": 0.62,
+        "centroid_local_relief_m": 0.58,
+        "patch_min_relief_m": 0.21,
+        "est_surface_prominence_m": 0.04,
+        "mean_slope_tangent": 0.032,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8858,
+        "raw_tile_logit": 2.1113,
+        "window_bbox": [
+          443728,
+          459536,
+          443984,
+          459792
+        ],
+        "region_name": "null_test_E442000_N458000",
+        "diagnostic_png": "null_test_E442000_N458000_unidentified_01_E443728_N459536_conf941.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E442000_N458000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1021018,
+            "name": "Cattal Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 5800.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Northern England upland / valley terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 0,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Situated in the Northern England upland / valley terrace landscape in a lightly scheduled sector of the Northern England upland / valley terrace landscape (nearest scheduled monument: Cattal Bridge (NHLE #1021018, 5800 m S)), the 1 m DTM isolates a sub-circular mound (1.06\u00d7 elongation, 342 m\u00b2 footprint, ~21 m diameter) rising +0.62 m above its 16 m local trend surface with weathered scarp gradients of 0.032 (1.8\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.04 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9419,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.344105,
+          54.024246
+        ]
+      },
+      "properties": {
+        "easting": 443067.3,
+        "northing": 458893.1,
+        "lat": 54.024246,
+        "lon": -1.344105,
+        "os_grid_ref": "SE 43067 58893",
+        "confidence": 0.9233,
+        "peak_prob": 0.9315,
+        "mean_prob": 0.8989,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 238.0,
+        "elongation": 1.43,
+        "est_local_relief_m": 1.61,
+        "max_positive_relief_m": 1.61,
+        "centroid_local_relief_m": 1.42,
+        "patch_min_relief_m": -0.31,
+        "est_surface_prominence_m": 0.2,
+        "mean_slope_tangent": 0.235,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1360072731",
+            "subtype": "power=minor_line",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 2.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1249724406",
+            "subtype": "building=yes",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 16.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/841378974",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 24.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1249724405",
+            "subtype": "building=yes",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 32.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.61m, slope=0.23)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.884,
+        "raw_tile_logit": 2.0938,
+        "window_bbox": [
+          442960,
+          458768,
+          443216,
+          459024
+        ],
+        "region_name": "null_test_E442000_N458000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E442000_N458000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1021018,
+            "name": "Cattal Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 5186.0,
+            "bearing": "SSE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Northern England upland / valley terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 0,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the Northern England upland / valley terrace landscape, this 238 m\u00b2 topographic anomaly (+1.61 m local relief, 0.235 / 13.2\u00b0 mean scarp slope, nDSM 0.20 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'power=minor_line'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Cattal Bridge (NHLE #1021018, 5186 m SSE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9233,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.028126,
+          54.499421
+        ]
+      },
+      "properties": {
+        "easting": 398276.3,
+        "northing": 511566.7,
+        "lat": 54.499421,
+        "lon": -2.028126,
+        "os_grid_ref": "NY 98276 11567",
+        "confidence": 0.9305,
+        "peak_prob": 0.939,
+        "mean_prob": 0.905,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 176.0,
+        "elongation": 1.07,
+        "est_local_relief_m": 0.65,
+        "max_positive_relief_m": 0.65,
+        "centroid_local_relief_m": 0.58,
+        "patch_min_relief_m": -0.03,
+        "est_surface_prominence_m": 0.23,
+        "mean_slope_tangent": 0.076,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8832,
+        "raw_tile_logit": 2.085,
+        "window_bbox": [
+          398192,
+          511536,
+          398448,
+          511792
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "diagnostic_png": "test_landscape_E398000_N510000_unidentified_01_E398192_N511536_conf930.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1614.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1459287,
+            "name": "Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1677.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1757.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2041.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (3 scheduled monuments within 2 km and 17 within 5 km, closest being Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse (NHLE #1449374, 1614 m WNW) and Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse (NHLE #1459287, 1677 m WNW)), the 1 m DTM isolates an elongated or oval mound (1.07\u00d7 axial elongation, 176 m\u00b2 footprint, ~15 m equivalent span) rising +0.65 m above its 16 m local trend surface with weathered scarp gradients of 0.076 (4.3\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.23 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9305,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.018666,
+          54.497895
+        ]
+      },
+      "properties": {
+        "easting": 398888.9,
+        "northing": 511396.6,
+        "lat": 54.497895,
+        "lon": -2.018666,
+        "os_grid_ref": "NY 98889 11397",
+        "confidence": 0.9078,
+        "peak_prob": 0.9155,
+        "mean_prob": 0.8847,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 142.0,
+        "elongation": 1.12,
+        "est_local_relief_m": 0.78,
+        "max_positive_relief_m": 0.78,
+        "centroid_local_relief_m": 0.47,
+        "patch_min_relief_m": -0.18,
+        "est_surface_prominence_m": 0.29,
+        "mean_slope_tangent": 0.091,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8536,
+        "raw_tile_logit": 1.8154,
+        "window_bbox": [
+          398768,
+          511344,
+          399024,
+          511600
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "diagnostic_png": "test_landscape_E398000_N510000_unidentified_02_E398768_N511344_conf907.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1475.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002316,
+            "name": "Roman Fort (Lavatrae)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2040.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1002318,
+            "name": "Bowes Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2117.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2233.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 17 within 5 km, closest being Roman shrine on Scargill Moor (NHLE #1002317, 1475 m SE) and Roman Fort (Lavatrae) (NHLE #1002316, 2040 m N)), the 1 m DTM isolates a sub-circular mound (1.12\u00d7 elongation, 142 m\u00b2 footprint, ~13 m diameter) rising +0.78 m above its 16 m local trend surface with weathered scarp gradients of 0.091 (5.2\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Moderate surface roughness (nDSM 0.29 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9078,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.007559,
+          54.495338
+        ]
+      },
+      "properties": {
+        "easting": 399608.2,
+        "northing": 511112.0,
+        "lat": 54.495338,
+        "lon": -2.007559,
+        "os_grid_ref": "NY 99608 11112",
+        "confidence": 0.9041,
+        "peak_prob": 0.9114,
+        "mean_prob": 0.8822,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 203.0,
+        "elongation": 1.16,
+        "est_local_relief_m": 0.83,
+        "max_positive_relief_m": 0.83,
+        "centroid_local_relief_m": 0.48,
+        "patch_min_relief_m": -0.08,
+        "est_surface_prominence_m": 0.24,
+        "mean_slope_tangent": 0.104,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8442,
+        "raw_tile_logit": 1.7388,
+        "window_bbox": [
+          399536,
+          510960,
+          399792,
+          511216
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "diagnostic_png": "test_landscape_E398000_N510000_unidentified_03_E399536_N510960_conf904.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 854.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1002316,
+            "name": "Roman Fort (Lavatrae)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2325.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1002318,
+            "name": "Bowes Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2406.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3005.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 3
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 12 within 5 km, closest being Roman shrine on Scargill Moor (NHLE #1002317, 854 m SSE) and Roman Fort (Lavatrae) (NHLE #1002316, 2325 m N)), the 1 m DTM isolates a sub-circular mound (1.16\u00d7 elongation, 203 m\u00b2 footprint, ~16 m diameter) rising +0.83 m above its 16 m local trend surface with weathered scarp gradients of 0.104 (5.9\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.24 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9041,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.024604,
+          54.502242
+        ]
+      },
+      "properties": {
+        "easting": 398504.5,
+        "northing": 511880.5,
+        "lat": 54.502242,
+        "lon": -2.024604,
+        "os_grid_ref": "NY 98504 11881",
+        "confidence": 0.8965,
+        "peak_prob": 0.904,
+        "mean_prob": 0.8739,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 156.0,
+        "elongation": 1.36,
+        "est_local_relief_m": 0.61,
+        "max_positive_relief_m": 0.61,
+        "centroid_local_relief_m": 0.39,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 0.3,
+        "mean_slope_tangent": 0.063,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8479,
+        "raw_tile_logit": 1.7686,
+        "window_bbox": [
+          398384,
+          511728,
+          398640,
+          511984
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "diagnostic_png": "test_landscape_E398000_N510000_unidentified_04_E398384_N511728_conf896.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002316,
+            "name": "Roman Fort (Lavatrae)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1692.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1694.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1002318,
+            "name": "Bowes Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1760.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1792.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 5,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 5
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (5 scheduled monuments within 2 km and 17 within 5 km, closest being Roman Fort (Lavatrae) (NHLE #1002316, 1692 m NNE) and Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse (NHLE #1449374, 1694 m WNW)), the 1 m DTM isolates an elongated or oval mound (1.36\u00d7 axial elongation, 156 m\u00b2 footprint, ~14 m equivalent span) rising +0.61 m above its 16 m local trend surface with weathered scarp gradients of 0.063 (3.6\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.30 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8965,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.024758,
+          54.495527
+        ]
+      },
+      "properties": {
+        "easting": 398494.2,
+        "northing": 511133.2,
+        "lat": 54.495527,
+        "lon": -2.024758,
+        "os_grid_ref": "NY 98494 11133",
+        "confidence": 0.8888,
+        "peak_prob": 0.8958,
+        "mean_prob": 0.8679,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 245.0,
+        "elongation": 1.49,
+        "est_local_relief_m": 0.83,
+        "max_positive_relief_m": 0.83,
+        "centroid_local_relief_m": 0.67,
+        "patch_min_relief_m": -0.25,
+        "est_surface_prominence_m": 0.28,
+        "mean_slope_tangent": 0.078,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8516,
+        "raw_tile_logit": 1.7988,
+        "window_bbox": [
+          398384,
+          510960,
+          398640,
+          511216
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "diagnostic_png": "test_landscape_E398000_N510000_unidentified_06_E398384_N510960_conf888.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1614.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2039.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1459287,
+            "name": "Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2076.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2202.0,
+            "bearing": "NW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 17 within 5 km, closest being Roman shrine on Scargill Moor (NHLE #1002317, 1614 m ESE) and Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse (NHLE #1449374, 2039 m NW)), the 1 m DTM isolates a sub-circular mound (1.49\u00d7 elongation, 245 m\u00b2 footprint, ~18 m diameter) rising +0.83 m above its 16 m local trend surface with weathered scarp gradients of 0.078 (4.5\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Moderate surface roughness (nDSM 0.28 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8888,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.030518,
+          54.488094
+        ]
+      },
+      "properties": {
+        "easting": 398120.8,
+        "northing": 510306.4,
+        "lat": 54.488094,
+        "lon": -2.030518,
+        "os_grid_ref": "NY 98121 10306",
+        "confidence": 0.8652,
+        "peak_prob": 0.8693,
+        "mean_prob": 0.8531,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 112.0,
+        "elongation": 1.1,
+        "est_local_relief_m": 1.07,
+        "max_positive_relief_m": 1.07,
+        "centroid_local_relief_m": 0.94,
+        "patch_min_relief_m": -0.54,
+        "est_surface_prominence_m": 0.12,
+        "mean_slope_tangent": 0.062,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8085,
+        "raw_tile_logit": 1.4795,
+        "window_bbox": [
+          398000,
+          510192,
+          398256,
+          510448
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1756.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1459287,
+            "name": "Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2381.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2421.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2633.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 17 within 5 km, closest being Roman shrine on Scargill Moor (NHLE #1002317, 1756 m E) and Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse (NHLE #1459287, 2381 m NW)), the 1 m DTM isolates a sub-circular mound (1.10\u00d7 elongation, 112 m\u00b2 footprint, ~12 m diameter) rising +1.07 m above its 16 m local trend surface with weathered scarp gradients of 0.062 (3.5\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.12 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8652,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.029497,
+          54.495156
+        ]
+      },
+      "properties": {
+        "easting": 398187.3,
+        "northing": 511092.1,
+        "lat": 54.495156,
+        "lon": -2.029497,
+        "os_grid_ref": "NY 98187 11092",
+        "confidence": 0.865,
+        "peak_prob": 0.869,
+        "mean_prob": 0.8527,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 128.0,
+        "elongation": 1.06,
+        "est_local_relief_m": 0.5,
+        "max_positive_relief_m": 0.5,
+        "centroid_local_relief_m": 0.49,
+        "patch_min_relief_m": -0.18,
+        "est_surface_prominence_m": 0.05,
+        "mean_slope_tangent": 0.061,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8292,
+        "raw_tile_logit": 1.625,
+        "window_bbox": [
+          398000,
+          510960,
+          398256,
+          511216
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1836.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1459287,
+            "name": "Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1850.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1866.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2019.0,
+            "bearing": "NW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (3 scheduled monuments within 2 km and 17 within 5 km, closest being Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse (NHLE #1449374, 1836 m NW) and Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse (NHLE #1459287, 1850 m NW)), the 1 m DTM isolates a sub-circular mound (1.06\u00d7 elongation, 128 m\u00b2 footprint, ~13 m diameter) rising +0.50 m above its 16 m local trend surface with weathered scarp gradients of 0.061 (3.5\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.05 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.865,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.027956,
+          54.49418
+        ]
+      },
+      "properties": {
+        "easting": 398287.1,
+        "northing": 510983.5,
+        "lat": 54.49418,
+        "lon": -2.027956,
+        "os_grid_ref": "NY 98287 10983",
+        "confidence": 0.8482,
+        "peak_prob": 0.8501,
+        "mean_prob": 0.8427,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 56.0,
+        "elongation": 1.13,
+        "est_local_relief_m": 0.52,
+        "max_positive_relief_m": 0.52,
+        "centroid_local_relief_m": 0.45,
+        "patch_min_relief_m": -0.21,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.059,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8094,
+        "raw_tile_logit": 1.4854,
+        "window_bbox": [
+          398192,
+          510768,
+          398448,
+          511024
+        ],
+        "region_name": "test_landscape_E398000_N510000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E398000_N510000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002317,
+            "name": "Roman shrine on Scargill Moor",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1730.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1449374,
+            "name": "Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1984.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1459287,
+            "name": "Late prehistoric ditched, scarp-edge settlement 400m south-south-west of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1996.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1459288,
+            "name": "Romano-British settlement site to the east and south-east of East Mellwaters farmhouse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2166.0,
+            "bearing": "NW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 17,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Durham",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (3 scheduled monuments within 2 km and 17 within 5 km, closest being Roman shrine on Scargill Moor (NHLE #1002317, 1730 m ESE) and Late prehistoric walled settlement 200m south-south-east of East Mellwaters farmhouse (NHLE #1449374, 1984 m NW)), the 1 m DTM isolates a sub-circular mound (1.13\u00d7 elongation, 56 m\u00b2 footprint, ~8 m diameter) rising +0.52 m above its 16 m local trend surface with weathered scarp gradients of 0.059 (3.4\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8482,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.238994,
+          53.495555
+        ]
+      },
+      "properties": {
+        "easting": 450583.2,
+        "northing": 400141.7,
+        "lat": 53.495555,
+        "lon": -1.238994,
+        "os_grid_ref": "SE 50583 00142",
+        "confidence": 0.9801,
+        "peak_prob": 0.9907,
+        "mean_prob": 0.9483,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 802.0,
+        "elongation": 1.01,
+        "est_local_relief_m": 3.18,
+        "max_positive_relief_m": 3.18,
+        "centroid_local_relief_m": 0.78,
+        "patch_min_relief_m": 0.61,
+        "est_surface_prominence_m": 0.11,
+        "mean_slope_tangent": 0.248,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/957890987",
+            "subtype": "man_made=embankment",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/845480967",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 9.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.18m, slope=0.25)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9605,
+        "raw_tile_logit": 3.2988,
+        "window_bbox": [
+          450384,
+          400000,
+          450640,
+          400256
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1201.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1295.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1010828,
+            "name": "Conisbrough Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1527.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1013650,
+            "name": "Castle Hills motte and bailey castle, Mexborough",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2129.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 14,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 802 m\u00b2 topographic anomaly (+3.18 m local relief, 0.248 / 13.9\u00b0 mean scarp slope, nDSM 0.11 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'man_made=embankment'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Wildthorpe medieval settlement 680m south of Leylands Farm (NHLE #1020579, 1201 m NNE) and Icehouse 720m south east of Bath House Farm (NHLE #1020715, 1295 m N).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9801,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.231315,
+          53.497129
+        ]
+      },
+      "properties": {
+        "easting": 451090.8,
+        "northing": 400322.3,
+        "lat": 53.497129,
+        "lon": -1.231315,
+        "os_grid_ref": "SE 51091 00322",
+        "confidence": 0.8217,
+        "peak_prob": 0.9863,
+        "mean_prob": 0.954,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 326.0,
+        "elongation": 1.17,
+        "est_local_relief_m": 1.45,
+        "max_positive_relief_m": 1.45,
+        "centroid_local_relief_m": 1.09,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.35,
+        "mean_slope_tangent": 0.141,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.9491,
+        "raw_tile_logit": 3.0234,
+        "window_bbox": [
+          450960,
+          400192,
+          451216,
+          400448
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "diagnostic_png": "null_test_E450000_N400000_unidentified_01_E450960_N400192_conf978.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 891.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1134.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1010828,
+            "name": "Conisbrough Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1479.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1004798,
+            "name": "Romano-British enclosure and earthworks in Pot Ridings Wood",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1831.0,
+            "bearing": "ENE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Situated within a lowland river terrace landscape, this candidate lies 891m south of the medieval Wildthorpe settlement (NHLE #1020579) and 1134m south-east of the Bath House Farm Icehouse (NHLE #1020715). The 1m LiDAR close-up reveals a discrete, sub-circular positive earthwork, with the 16m Local Relief showing a central yellow raised mound surrounded by a faint blue depression, while the bare-earth slope indicates a steep scarp; this is supported by a +1.45m relief height and a low axial elongation of 1.17x. Despite the model's high confidence for a long barrow, the compact, rounded morphology suggests a potential round barrow or natural fluvial feature, necessitating a HER review and targeted fieldwalking to confirm its origin.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+        "raw_unet_confidence": 0.9782,
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.221696,
+          53.497055
+        ]
+      },
+      "properties": {
+        "easting": 451728.9,
+        "northing": 400321.0,
+        "lat": 53.497055,
+        "lon": -1.221696,
+        "os_grid_ref": "SE 51729 00321",
+        "confidence": 0.9721,
+        "peak_prob": 0.9815,
+        "mean_prob": 0.9438,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 416.0,
+        "elongation": 1.07,
+        "est_local_relief_m": 1.18,
+        "max_positive_relief_m": 1.18,
+        "centroid_local_relief_m": 0.98,
+        "patch_min_relief_m": -0.39,
+        "est_surface_prominence_m": 0.11,
+        "mean_slope_tangent": 0.11,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/302283072",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 22.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/60462178",
+            "subtype": "highway=unclassified",
+            "name": "Garden Lane",
+            "wikidata": null,
+            "distance_m": 30.5,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9388,
+        "raw_tile_logit": 2.8203,
+        "window_bbox": [
+          451536,
+          400192,
+          451792,
+          400448
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1077.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1004798,
+            "name": "Romano-British enclosure and earthworks in Pot Ridings Wood",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1224.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1437.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1010828,
+            "name": "Conisbrough Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1458.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 13,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 416 m\u00b2 topographic anomaly (+1.18 m local relief, 0.110 / 6.3\u00b0 mean scarp slope, nDSM 0.11 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Wildthorpe medieval settlement 680m south of Leylands Farm (NHLE #1020579, 1077 m NW) and Romano-British enclosure and earthworks in Pot Ridings Wood (NHLE #1004798, 1224 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9721,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.239566,
+          53.510006
+        ]
+      },
+      "properties": {
+        "easting": 450528.1,
+        "northing": 401749.0,
+        "lat": 53.510006,
+        "lon": -1.239566,
+        "os_grid_ref": "SE 50528 01749",
+        "confidence": 0.8986,
+        "peak_prob": 0.908,
+        "mean_prob": 0.8704,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 288.0,
+        "elongation": 1.88,
+        "est_local_relief_m": 2.36,
+        "max_positive_relief_m": 2.36,
+        "centroid_local_relief_m": 1.57,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 2.44,
+        "mean_slope_tangent": 0.191,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "relation/19734607(way/302250287)",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/302250288",
+            "subtype": "leisure=golf_course",
+            "name": "High Melton Golf Course",
+            "wikidata": null,
+            "distance_m": 11.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.44m, slope=0.19)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8625,
+        "raw_tile_logit": 1.8906,
+        "window_bbox": [
+          450384,
+          401536,
+          450640,
+          401792
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 428.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 803.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1004799,
+            "name": "Site of St Helen's Chapel",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1808.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1013204,
+            "name": "King Hengist Rein long cairn",
+            "cls_id": 1,
+            "cls_label": "Neolithic long barrow / chambered tomb",
+            "distance_m": 2207.0,
+            "bearing": "E"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 288 m\u00b2 topographic anomaly (+2.36 m local relief, 0.191 / 10.8\u00b0 mean scarp slope, nDSM 2.44 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Icehouse 720m south east of Bath House Farm (NHLE #1020715, 428 m SE) and Wildthorpe medieval settlement 680m south of Leylands Farm (NHLE #1020579, 803 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8986,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.231453,
+          53.509132
+        ]
+      },
+      "properties": {
+        "easting": 451067.2,
+        "northing": 401657.6,
+        "lat": 53.509132,
+        "lon": -1.231453,
+        "os_grid_ref": "SE 51067 01658",
+        "confidence": 0.8928,
+        "peak_prob": 0.8983,
+        "mean_prob": 0.8765,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 69.0,
+        "elongation": 1.09,
+        "est_local_relief_m": 1.05,
+        "max_positive_relief_m": 1.05,
+        "centroid_local_relief_m": 0.7,
+        "patch_min_relief_m": -0.02,
+        "est_surface_prominence_m": 6.65,
+        "mean_slope_tangent": 0.103,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=6.7m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8183,
+        "raw_tile_logit": 1.5466,
+        "window_bbox": [
+          450960,
+          401536,
+          451216,
+          401792
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 359.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 448.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1013204,
+            "name": "King Hengist Rein long cairn",
+            "cls_id": 1,
+            "cls_label": "Neolithic long barrow / chambered tomb",
+            "distance_m": 1702.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1004798,
+            "name": "Romano-British enclosure and earthworks in Pot Ridings Wood",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2000.0,
+            "bearing": "ESE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 13,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 69 m\u00b2 topographic anomaly (+1.05 m local relief, 0.103 / 5.9\u00b0 mean scarp slope, nDSM 6.65 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Tall tree canopy or standing structure'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Icehouse 720m south east of Bath House Farm (NHLE #1020715, 359 m SW) and Wildthorpe medieval settlement 680m south of Leylands Farm (NHLE #1020579, 448 m S).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8928,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.243772,
+          53.496148
+        ]
+      },
+      "properties": {
+        "easting": 450265.5,
+        "northing": 400204.4,
+        "lat": 53.496148,
+        "lon": -1.243772,
+        "os_grid_ref": "SE 50266 00204",
+        "confidence": 0.8794,
+        "peak_prob": 0.8858,
+        "mean_prob": 0.8599,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 251.0,
+        "elongation": 1.18,
+        "est_local_relief_m": 1.93,
+        "max_positive_relief_m": 1.93,
+        "centroid_local_relief_m": 1.15,
+        "patch_min_relief_m": 0.11,
+        "est_surface_prominence_m": 0.53,
+        "mean_slope_tangent": 0.121,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/958838504",
+            "subtype": "landuse=forest",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 14.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.53m, slope=0.12)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.884,
+        "raw_tile_logit": 2.0938,
+        "window_bbox": [
+          450192,
+          400000,
+          450448,
+          400256
+        ],
+        "region_name": "null_test_E450000_N400000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E450000_N400000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020579,
+            "name": "Wildthorpe medieval settlement 680m south of Leylands Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1326.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1020715,
+            "name": "Icehouse 720m south east of Bath House Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1326.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1010828,
+            "name": "Conisbrough Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1774.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1013650,
+            "name": "Castle Hills motte and bailey castle, Mexborough",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1823.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 1
+        },
+        "county": "South Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 251 m\u00b2 topographic anomaly (+1.93 m local relief, 0.121 / 6.9\u00b0 mean scarp slope, nDSM 0.53 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=forest'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Wildthorpe medieval settlement 680m south of Leylands Farm (NHLE #1020579, 1326 m NE) and Icehouse 720m south east of Bath House Farm (NHLE #1020715, 1326 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8794,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.376742,
+          52.199155
+        ]
+      },
+      "properties": {
+        "easting": 562529.7,
+        "northing": 258320.2,
+        "lat": 52.199155,
+        "lon": 0.376742,
+        "os_grid_ref": "TL 62530 58320",
+        "confidence": 0.9591,
+        "peak_prob": 0.9707,
+        "mean_prob": 0.9244,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 482.0,
+        "elongation": 1.46,
+        "est_local_relief_m": 2.01,
+        "max_positive_relief_m": 2.01,
+        "centroid_local_relief_m": 1.89,
+        "patch_min_relief_m": -0.44,
+        "est_surface_prominence_m": 4.76,
+        "mean_slope_tangent": 0.237,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/184767873",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 7.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=4.8m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9244,
+        "raw_tile_logit": 2.584,
+        "window_bbox": [
+          562384,
+          258192,
+          562640,
+          258448
+        ],
+        "region_name": "null_test_E562000_N258000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E562000_N258000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020059,
+            "name": "Medieval moated site 160m north east of The Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2930.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1015012,
+            "name": "Bowl barrow 160m south west of the National Stud clubhouse",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3184.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 4
+        },
+        "county": "Cambridgeshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 482 m\u00b2 topographic anomaly (+2.01 m local relief, 0.237 / 13.3\u00b0 mean scarp slope, nDSM 4.76 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Medieval moated site 160m north east of The Hall (NHLE #1020059, 2930 m SSE) and Bowl barrow 160m south west of the National Stud clubhouse (NHLE #1015012, 3184 m NNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9591,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.379569,
+          52.197625
+        ]
+      },
+      "properties": {
+        "easting": 562728.5,
+        "northing": 258156.4,
+        "lat": 52.197625,
+        "lon": 0.379569,
+        "os_grid_ref": "TL 62728 58156",
+        "confidence": 0.868,
+        "peak_prob": 0.8717,
+        "mean_prob": 0.8569,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 92.0,
+        "elongation": 1.05,
+        "est_local_relief_m": 1.62,
+        "max_positive_relief_m": 1.62,
+        "centroid_local_relief_m": 1.39,
+        "patch_min_relief_m": -0.15,
+        "est_surface_prominence_m": 2.51,
+        "mean_slope_tangent": 0.208,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/184767873",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=2.51m, slope=0.21)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.811,
+        "raw_tile_logit": 1.4966,
+        "window_bbox": [
+          562576,
+          258000,
+          562832,
+          258256
+        ],
+        "region_name": "null_test_E562000_N258000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E562000_N258000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1020059,
+            "name": "Medieval moated site 160m north east of The Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2705.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1015012,
+            "name": "Bowl barrow 160m south west of the National Stud clubhouse",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3416.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 3
+        },
+        "county": "Cambridgeshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 92 m\u00b2 topographic anomaly (+1.62 m local relief, 0.208 / 11.7\u00b0 mean scarp slope, nDSM 2.51 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Medieval moated site 160m north east of The Hall (NHLE #1020059, 2705 m SSE) and Bowl barrow 160m south west of the National Stud clubhouse (NHLE #1015012, 3416 m NNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.868,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.754437,
+          55.546147
+        ]
+      },
+      "properties": {
+        "easting": 415593.0,
+        "northing": 628076.1,
+        "lat": 55.546147,
+        "lon": -1.754437,
+        "os_grid_ref": "NU 15593 28076",
+        "confidence": 0.9714,
+        "peak_prob": 0.9817,
+        "mean_prob": 0.9405,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 566.0,
+        "elongation": 1.39,
+        "est_local_relief_m": 0.81,
+        "max_positive_relief_m": 0.81,
+        "centroid_local_relief_m": 0.8,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.058,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.9413,
+        "raw_tile_logit": 2.8672,
+        "window_bbox": [
+          415536,
+          628000,
+          415792,
+          628256
+        ],
+        "region_name": "test_landscape_E414000_N628000",
+        "diagnostic_png": "test_landscape_E414000_N628000_unidentified_01_E415536_N628000_conf971.png",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E414000_N628000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006478,
+            "name": "Defended settlement, 1.05 km north west of North Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1497.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1006472,
+            "name": "Isabella's Mount camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2288.0,
+            "bearing": "WSW"
+          },
+          {
+            "list_entry": 1006560,
+            "name": "Cup and ring marked rocks on Wandylaw Moor, 1km west of Wandylaw",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3473.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1006612,
+            "name": "Preston Tower",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3835.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated on the North Pennine sandstone/whin uplands, this candidate lies 1,497m northwest of the North Farm defended settlement (NHLE #1006478) and 2,288m east of Isabella's Mount camp (NHLE #1006472). The 1m LiDAR close-up reveals a smooth, continuous circular earthwork footprint (566m\u00b2) with a pronounced central raised mound (+0.81m) and a shallow, low-gradient scarp (3.3\u00b0), lacking the axial elongation or rectilinear geometry required for a long barrow. Given the distinct lack of a surrounding ditch and the smooth, unbroken morphology, this is most likely a natural glacial erratic or peat-covered knoll; a Historic Environment Record search and physical field inspection are required to rule out a heavily ploughed ring cairn.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+        "raw_unet_confidence": 0.9714,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.767648,
+          55.55292
+        ]
+      },
+      "properties": {
+        "easting": 414756.9,
+        "northing": 628827.0,
+        "lat": 55.55292,
+        "lon": -1.767648,
+        "os_grid_ref": "NU 14757 28827",
+        "confidence": 0.941,
+        "peak_prob": 0.9518,
+        "mean_prob": 0.9088,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 408.0,
+        "elongation": 1.21,
+        "est_local_relief_m": 0.56,
+        "max_positive_relief_m": 0.56,
+        "centroid_local_relief_m": 0.56,
+        "patch_min_relief_m": -0.06,
+        "est_surface_prominence_m": 0.04,
+        "mean_slope_tangent": 0.031,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8976,
+        "raw_tile_logit": 2.2383,
+        "window_bbox": [
+          414576,
+          628768,
+          414832,
+          629024
+        ],
+        "region_name": "test_landscape_E414000_N628000",
+        "diagnostic_png": "test_landscape_E414000_N628000_unidentified_02_E414576_N628768_conf941.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E414000_N628000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006478,
+            "name": "Defended settlement, 1.05 km north west of North Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 408.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1006472,
+            "name": "Isabella's Mount camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1882.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1003656,
+            "name": "Roundabouts camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2743.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1006444,
+            "name": "Sandyfold Burn settlement",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3412.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (2 scheduled monuments within 2 km and 10 within 5 km, closest being Defended settlement, 1.05 km north west of North Farm (NHLE #1006478, 408 m NNW) and Isabella's Mount camp (NHLE #1006472, 1882 m SW)), the 1 m DTM isolates an elongated or oval mound (1.21\u00d7 axial elongation, 408 m\u00b2 footprint, ~23 m equivalent span) rising +0.56 m above its 16 m local trend surface with weathered scarp gradients of 0.031 (1.8\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.04 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.941,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.774866,
+          55.553788
+        ]
+      },
+      "properties": {
+        "easting": 414301.2,
+        "northing": 628922.2,
+        "lat": 55.553788,
+        "lon": -1.774866,
+        "os_grid_ref": "NU 14301 28922",
+        "confidence": 0.9365,
+        "peak_prob": 0.9465,
+        "mean_prob": 0.9064,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 311.0,
+        "elongation": 1.19,
+        "est_local_relief_m": 0.64,
+        "max_positive_relief_m": 0.64,
+        "centroid_local_relief_m": 0.56,
+        "patch_min_relief_m": -0.09,
+        "est_surface_prominence_m": 0.05,
+        "mean_slope_tangent": 0.037,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/665003390",
+            "subtype": "barrier=hedge",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 10.1,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.911,
+        "raw_tile_logit": 2.4004,
+        "window_bbox": [
+          414192,
+          628768,
+          414448,
+          629024
+        ],
+        "region_name": "test_landscape_E414000_N628000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E414000_N628000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006478,
+            "name": "Defended settlement, 1.05 km north west of North Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 427.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1006472,
+            "name": "Isabella's Mount camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1652.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1003656,
+            "name": "Roundabouts camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2422.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1006444,
+            "name": "Sandyfold Burn settlement",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2982.0,
+            "bearing": "WSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 11,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 311 m\u00b2 topographic anomaly (+0.64 m local relief, 0.037 / 2.1\u00b0 mean scarp slope, nDSM 0.05 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'barrier=hedge'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Defended settlement, 1.05 km north west of North Farm (NHLE #1006478, 427 m NE) and Isabella's Mount camp (NHLE #1006472, 1652 m SW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9365,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.764838,
+          55.556313
+        ]
+      },
+      "properties": {
+        "easting": 414932.8,
+        "northing": 629205.2,
+        "lat": 55.556313,
+        "lon": -1.764838,
+        "os_grid_ref": "NU 14933 29205",
+        "confidence": 0.9345,
+        "peak_prob": 0.945,
+        "mean_prob": 0.9029,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 248.0,
+        "elongation": 1.08,
+        "est_local_relief_m": 0.39,
+        "max_positive_relief_m": 0.39,
+        "centroid_local_relief_m": 0.36,
+        "patch_min_relief_m": 0.13,
+        "est_surface_prominence_m": 0.04,
+        "mean_slope_tangent": 0.036,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8998,
+        "raw_tile_logit": 2.2637,
+        "window_bbox": [
+          414768,
+          629152,
+          415024,
+          629408
+        ],
+        "region_name": "test_landscape_E414000_N628000",
+        "diagnostic_png": "test_landscape_E414000_N628000_unidentified_03_E414768_N629152_conf934.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E414000_N628000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006478,
+            "name": "Defended settlement, 1.05 km north west of North Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 317.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1006472,
+            "name": "Isabella's Mount camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2272.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1003656,
+            "name": "Roundabouts camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2562.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1006444,
+            "name": "Sandyfold Burn settlement",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3662.0,
+            "bearing": "WSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 10 within 5 km, closest being Defended settlement, 1.05 km north west of North Farm (NHLE #1006478, 317 m W) and Isabella's Mount camp (NHLE #1006472, 2272 m SW)), the 1 m DTM isolates an elongated or oval mound (1.08\u00d7 axial elongation, 248 m\u00b2 footprint, ~18 m equivalent span) rising +0.39 m above its 16 m local trend surface with weathered scarp gradients of 0.036 (2.1\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.04 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9345,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.763352,
+          55.553221
+        ]
+      },
+      "properties": {
+        "easting": 415027.7,
+        "northing": 628861.4,
+        "lat": 55.553221,
+        "lon": -1.763352,
+        "os_grid_ref": "NU 15028 28861",
+        "confidence": 0.8854,
+        "peak_prob": 0.8915,
+        "mean_prob": 0.8672,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 103.0,
+        "elongation": 1.03,
+        "est_local_relief_m": 0.3,
+        "max_positive_relief_m": 0.3,
+        "centroid_local_relief_m": 0.28,
+        "patch_min_relief_m": 0.02,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.026,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8406,
+        "raw_tile_logit": 1.7109,
+        "window_bbox": [
+          414960,
+          628768,
+          415216,
+          629024
+        ],
+        "region_name": "test_landscape_E414000_N628000",
+        "diagnostic_png": "test_landscape_E414000_N628000_unidentified_04_E414960_N628768_conf885.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E414000_N628000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006478,
+            "name": "Defended settlement, 1.05 km north west of North Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 539.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1006472,
+            "name": "Isabella's Mount camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2111.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1003656,
+            "name": "Roundabouts camp",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2882.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1006444,
+            "name": "Sandyfold Burn settlement",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3685.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (1 scheduled monuments within 2 km and 10 within 5 km, closest being Defended settlement, 1.05 km north west of North Farm (NHLE #1006478, 539 m NW) and Isabella's Mount camp (NHLE #1006472, 2111 m SW)), the 1 m DTM isolates an elongated or oval mound (1.03\u00d7 axial elongation, 103 m\u00b2 footprint, ~11 m equivalent span) rising +0.30 m above its 16 m local trend surface with weathered scarp gradients of 0.026 (1.5\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8854,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.148767,
+          53.743833
+        ]
+      },
+      "properties": {
+        "easting": 456238.5,
+        "northing": 427831.1,
+        "lat": 53.743833,
+        "lon": -1.148767,
+        "os_grid_ref": "SE 56239 27831",
+        "confidence": 0.9866,
+        "peak_prob": 0.9938,
+        "mean_prob": 0.9649,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 496.0,
+        "elongation": 1.13,
+        "est_local_relief_m": 2.63,
+        "max_positive_relief_m": 2.63,
+        "centroid_local_relief_m": 1.88,
+        "patch_min_relief_m": -0.25,
+        "est_surface_prominence_m": 1.36,
+        "mean_slope_tangent": 0.229,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/520605583",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.36m, slope=0.23)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9654,
+        "raw_tile_logit": 3.4414,
+        "window_bbox": [
+          456192,
+          427728,
+          456448,
+          427984
+        ],
+        "region_name": "null_test_E456000_N426000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E456000_N426000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017822,
+            "name": "Roman fort 600m west of Roall Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2596.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 496 m\u00b2 topographic anomaly (+2.63 m local relief, 0.229 / 12.9\u00b0 mean scarp slope, nDSM 1.36 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Roman fort 600m west of Roall Hall (NHLE #1017822, 2596 m S).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9866,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.147492,
+          53.742067
+        ]
+      },
+      "properties": {
+        "easting": 456325.0,
+        "northing": 427635.6,
+        "lat": 53.742067,
+        "lon": -1.147492,
+        "os_grid_ref": "SE 56325 27636",
+        "confidence": 0.8788,
+        "peak_prob": 0.8844,
+        "mean_prob": 0.8618,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 80.0,
+        "elongation": 1.04,
+        "est_local_relief_m": 0.19,
+        "max_positive_relief_m": 0.19,
+        "centroid_local_relief_m": 0.17,
+        "patch_min_relief_m": -0.05,
+        "est_surface_prominence_m": 0.05,
+        "mean_slope_tangent": 0.007,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=+0.19m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8319,
+        "raw_tile_logit": 1.6445,
+        "window_bbox": [
+          456192,
+          427536,
+          456448,
+          427792
+        ],
+        "region_name": "null_test_E456000_N426000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E456000_N426000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017822,
+            "name": "Roman fort 600m west of Roall Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2396.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 80 m\u00b2 topographic anomaly (+0.19 m local relief, 0.007 / 0.4\u00b0 mean scarp slope, nDSM 0.05 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Negative-relief pit, pond, or marl scoop'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Roman fort 600m west of Roall Hall (NHLE #1017822, 2396 m S).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8788,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.391364,
+          52.689644
+        ]
+      },
+      "properties": {
+        "easting": 629292.8,
+        "northing": 315614.3,
+        "lat": 52.689644,
+        "lon": 1.391364,
+        "os_grid_ref": "TG 29293 15614",
+        "confidence": 0.9298,
+        "peak_prob": 0.9355,
+        "mean_prob": 0.9129,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 69.0,
+        "elongation": 1.07,
+        "est_local_relief_m": 0.87,
+        "max_positive_relief_m": 0.87,
+        "centroid_local_relief_m": 0.63,
+        "patch_min_relief_m": -0.15,
+        "est_surface_prominence_m": 0.57,
+        "mean_slope_tangent": 0.123,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/213166728",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.57m, slope=0.12)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8666,
+        "raw_tile_logit": 1.9277,
+        "window_bbox": [
+          629152,
+          315536,
+          629408,
+          315792
+        ],
+        "region_name": "null_test_E628000_N314000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E628000_N314000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003966,
+            "name": "Wroxham Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2705.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 1,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Norfolk",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 69 m\u00b2 topographic anomaly (+0.87 m local relief, 0.123 / 7.0\u00b0 mean scarp slope, nDSM 0.57 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Wroxham Bridge (NHLE #1003966, 2705 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9298,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.658077,
+          54.703551
+        ]
+      },
+      "properties": {
+        "easting": 357690.9,
+        "northing": 534479.8,
+        "lat": 54.703551,
+        "lon": -2.658077,
+        "os_grid_ref": "NY 57691 34480",
+        "confidence": 0.956,
+        "peak_prob": 0.9705,
+        "mean_prob": 0.9126,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 651.0,
+        "elongation": 1.11,
+        "est_local_relief_m": 1.89,
+        "max_positive_relief_m": 1.89,
+        "centroid_local_relief_m": 1.85,
+        "patch_min_relief_m": 0.2,
+        "est_surface_prominence_m": 0.07,
+        "mean_slope_tangent": 0.116,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.9246,
+        "raw_tile_logit": 2.5879,
+        "window_bbox": [
+          357536,
+          534384,
+          357792,
+          534640
+        ],
+        "region_name": "null_test_E356000_N534000",
+        "diagnostic_png": "null_test_E356000_N534000_unidentified_01_E357536_N534384_conf956.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E356000_N534000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019726,
+            "name": "Edenhall Cross 230m north west of St Cuthbert's Church",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2432.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1007866,
+            "name": "Long Meg and Her Daughters stone circle, associated cursus and prehistoric enclosure",
+            "cls_id": 2,
+            "cls_label": "Henge / stone circle / ceremonial alignment",
+            "distance_m": 2814.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1016756,
+            "name": "Dolphenby medieval settlement and part of its associated open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2990.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1007627,
+            "name": "Little Meg round cairn",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2997.0,
+            "bearing": "N"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Eden Valley & North Cumbrian upland fringe (Cumbria)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 3
+        },
+        "county": "Cumbria",
+        "arch_context_note": "Situated on the Eden Valley upland fringe, this candidate lies 2432 m SSW of Edenhall Cross (NHLE #1019726) and 2814 m NNW of Long Meg and Her Daughters (NHLE #1007866). The 1m LiDAR close-up reveals a smooth, circular positive anomaly with a pronounced yellow central mound (+1.89 m) and a faint peripheral scarp (6.6 deg), showing minimal axial elongation (1.11x). The morphology strongly supports a prehistoric round barrow or cairn, though a natural glacial moraine knoll cannot be entirely excluded without targeted HER consultation and ground-truthing.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+        "raw_unet_confidence": 0.956,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.665498,
+          54.70092
+        ]
+      },
+      "properties": {
+        "easting": 357210.0,
+        "northing": 534191.5,
+        "lat": 54.70092,
+        "lon": -2.665498,
+        "os_grid_ref": "NY 57210 34192",
+        "confidence": 0.9411,
+        "peak_prob": 0.9518,
+        "mean_prob": 0.909,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 209.0,
+        "elongation": 1.81,
+        "est_local_relief_m": 1.43,
+        "max_positive_relief_m": 1.43,
+        "centroid_local_relief_m": 0.29,
+        "patch_min_relief_m": -0.03,
+        "est_surface_prominence_m": 1.88,
+        "mean_slope_tangent": 0.138,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/32661986",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 28.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.88m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8785,
+        "raw_tile_logit": 2.0391,
+        "window_bbox": [
+          357152,
+          534000,
+          357408,
+          534256
+        ],
+        "region_name": "null_test_E356000_N534000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E356000_N534000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019726,
+            "name": "Edenhall Cross 230m north west of St Cuthbert's Church",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2011.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1016756,
+            "name": "Dolphenby medieval settlement and part of its associated open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2685.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1007866,
+            "name": "Long Meg and Her Daughters stone circle, associated cursus and prehistoric enclosure",
+            "cls_id": 2,
+            "cls_label": "Henge / stone circle / ceremonial alignment",
+            "distance_m": 2995.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1007627,
+            "name": "Little Meg round cairn",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3320.0,
+            "bearing": "N"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Eden Valley & North Cumbrian upland fringe (Cumbria)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 2
+        },
+        "county": "Cumbria",
+        "arch_context_note": "Located in the Eden Valley & North Cumbrian upland fringe (Cumbria), this 209 m\u00b2 topographic anomaly (+1.43 m local relief, 0.138 / 7.9\u00b0 mean scarp slope, nDSM 1.88 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Edenhall Cross 230m north west of St Cuthbert's Church (NHLE #1019726, 2011 m SSW) and Dolphenby medieval settlement and part of its associated open field system (NHLE #1016756, 2685 m S).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9411,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     }
