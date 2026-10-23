@@ -627,9 +627,9 @@
 <body>
   <header>
     <div>
-      <h1>UK 1 m LiDAR Prehistoric Monument Survey</h1>
+      <h1>UK 1 m LiDAR &amp; Aerial Cropmark Monument Survey</h1>
       <div class="sub">
-        Automated terrain screening for unrecorded barrows, henges, and megalithic earthworks in Environment Agency 1 m LiDAR
+        Multi-domain scale-space terrain &amp; 16 m aerial cropmark screening for unrecorded Prehistoric, Iron Age, and Roman earthworks across England
       </div>
     </div>
     <div class="sub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -653,11 +653,11 @@
       </div>
       <div class="guide-step">
         <strong>2. Click Any Row or Map Pin to Inspect (Right Panel)</strong>
-        <span>Selecting a site zooms the map to its British National Grid coordinates and displays its 4-panel 1 m LiDAR elevation breakdown on the right, with a direct link to inspect it on OpenStreetMap.</span>
+        <span>Selecting a site zooms the map to its British National Grid coordinates and displays its 6-panel 1 m LiDAR &amp; 16 m Aerial Cropmark/Soilmark breakdown on the right, with a direct link to inspect it on OpenStreetMap.</span>
       </div>
       <div class="guide-step">
         <strong>3. Check the National Coverage Map (Right Panel)</strong>
-        <span><strong>Important:</strong> This is a statistically sampled survey, <em>not</em> a full wall-to-wall scan of Britain. The national map shows the exact <strong>2 km × 2 km sample squares</strong> (<span id="guideAreaSpan">408 km²</span>, ~0.31% of England) scanned so far; blank areas of the country have not yet been processed.</span>
+        <span><strong>Important:</strong> This is a statistically sampled out-of-sample survey, <em>not</em> a full wall-to-wall scan of Britain. The national map shows the exact <strong>2 km × 2 km sample squares</strong> (<span id="guideAreaSpan">5,224.0 km² across 1,306 squares</span>, ~4.01% of England) scanned across all three detectors.</span>
       </div>
     </div>
   </div>
@@ -815,7 +815,7 @@
           <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Zoom Out to Full England Overview</button>
         </div>
         <div style="background:rgba(255, 214, 0, 0.08);border:1px solid rgba(255, 214, 0, 0.35);border-radius:4px;padding:8px 10px;margin-bottom:8px;font-size:12.5px;">
-          <strong>Coverage Note:</strong> Only the marked <strong>2 km × 2 km sample squares</strong> (<span id="mapCoverageSummary">102 squares = 408.0 km², or 0.31% of England</span>) have been scanned so far. Any region outside these boxes has <strong>not</strong> yet been evaluated by the model.
+          <strong>Coverage Note:</strong> Only the marked <strong>2 km × 2 km sample squares</strong> (<span id="mapCoverageSummary">1,306 squares = 5,224.0 km², or 4.01% of England</span>) have been scanned across all three detectors. Any region outside these boxes has <strong>not</strong> yet been evaluated by the models.
         </div>
         <div class="controls" style="margin-bottom:8px;justify-content:space-between;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
@@ -915,7 +915,7 @@
       unidentified:
         "<strong>What this list shows:</strong> Unrecorded prehistoric monument candidates — locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric barrows, henges, or chambered mounds, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.",
       roman:
-        "<strong>What this list shows:</strong> Unrecorded Roman &amp; Romano-British candidates — locations where our dedicated <strong>RomanUNet</strong> detector (trained on 2,211 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) detects candidate villa platforms, enclosures, or linear road aggers that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
+        "<strong>What this list shows:</strong> Unrecorded Roman &amp; Romano-British candidates — locations where our dedicated <strong>RomanUNet</strong> detector (trained on 3,928 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) detects candidate villa platforms, enclosures, or linear road aggers that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
       enclosure:
         "<strong>What this list shows:</strong> Unrecorded Iron Age enclosures, banjo enclosures, prehistoric hut circle settlements, and cross-ridge dykes — locations where our dedicated 8-channel <strong>EnclosureUNet v3</strong> detector (trained on 4,323 tiles combining 1 m LiDAR + 16 m scale-space aerial cropmarks; held-out Test ROC-AUC = <strong>0.8654</strong>, uniform national null ROC-AUC = <strong>0.8941</strong>, trackside/field-boundary ROC-AUC = <strong>0.9614</strong>, Strict 1% Op LR+ = <strong>54.8×</strong>) detects candidate stone/turf hut rings, pound/round settlements, univallate/multivallate enclosures, or coaxial field boundaries that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology.",
       known:
