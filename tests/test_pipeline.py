@@ -215,6 +215,21 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
             "max_positive_relief_m": 0.08,
             "is_known_monument": False,
         },
+        {
+            "easting": 354734.0,
+            "northing": 576498.0,
+            "confidence": 0.9718,
+            "area_m2": 427.0,
+            "elongation": 1.45,
+            "est_local_relief_m": 1.06,
+            "max_positive_relief_m": 1.06,
+            "centroid_local_relief_m": 0.67,
+            "patch_min_relief_m": -0.25,
+            "ridge_continuation_span_m": 138.2,
+            "ridge_continuation_elongation": 6.64,
+            "adjacent_channel_span_m": 111.0,
+            "is_known_monument": False,
+        },
     ]
     annotate_candidates_with_spatial_context(cands, idx)
 
@@ -228,6 +243,8 @@ def test_osm_context_annotation_does_not_mutate_probabilities():
     assert cands[3]["confidence"] == 0.9650
     assert cands[4]["context_category"] == "flagged_modern_or_karst_confounder"
     assert cands[5]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert cands[6]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert cands[6]["osm_confounder_matches"][0]["osm_id"] == "lidar/meander_scroll_bar"
 
 
 def test_roman_taxonomy_and_sub_canopy_context():

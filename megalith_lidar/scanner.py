@@ -72,6 +72,11 @@ def extract_candidates_from_tile(
     slope_std = np.sqrt(np.maximum(uniform_filter(slope_arr * slope_arr, size=9) - slope_mean * slope_mean, 0.0))
     tile_tin_px = int(np.sum((slope_arr > 0.03) & (slope_std < 0.0022)))
 
+    full_rel_16 = raw_features[0] + raw_features[1]
+    labeled_bar, _ = label(full_rel_16 >= 0.18)
+    labeled_ch, _ = label(full_rel_16 <= -0.18)
+    yy_grid, xx_grid = np.ogrid[:h, :w]
+
     candidates: List[Dict] = []
     for comp_id in range(1, num_comp + 1):
         ys, xs = np.where(labeled == comp_id)
@@ -113,7 +118,6 @@ def extract_candidates_from_tile(
 
         # Descriptive physical observables from raw (unstandardized) features:
         # band_fine_4m + band_med_16m = z - G_16(z) in metres
-        full_rel_16 = raw_features[0] + raw_features[1]
         local_relief_16m = full_rel_16[ys, xs]
         signed_relief_m = float(local_relief_16m[np.argmax(np.abs(local_relief_16m))])
         max_pos_relief_m = float(np.max(local_relief_16m))
@@ -126,10 +130,36 @@ def extract_candidates_from_tile(
         grad_vals = raw_features[3, ys, xs]
         ndsm_m = float(np.expm1(np.max(raw_features[5, ys, xs])))
 
+        # Underlying terrain ridge & channel continuity observables (detects river meander scroll-bars / palaeochannels)
+        dist_sq = (yy_grid - cy_i) ** 2 + (xx_grid - cx_i) ** 2
+        bar_ids = set(np.unique(labeled_bar[dist_sq <= 144])) - {0}
+        ridge_span_m = 0.0
+        ridge_elong = 1.0
+        for bid in bar_ids:
+            by_px, bx_px = np.where(labeled_bar == bid)
+            b_span = float(np.hypot((bx_px.max() - bx_px.min()) * scale_e, (by_px.max() - by_px.min()) * scale_n))
+            if len(by_px) >= 16:
+                b_cov = np.cov(bx_px.astype(float), by_px.astype(float))
+                b_ev = np.linalg.eigvalsh(b_cov)
+                b_el = float(np.sqrt(max(b_ev[1], 1e-3) / max(b_ev[0], 1e-3)))
+            else:
+                b_el = 1.0
+            if b_span > ridge_span_m:
+                ridge_span_m = b_span
+                ridge_elong = b_el
+
+        ch_ids = set(np.unique(labeled_ch[dist_sq <= 576])) - {0}
+        channel_span_m = 0.0
+        for cid in ch_ids:
+            chy_px, chx_px = np.where(labeled_ch == cid)
+            c_span = float(np.hypot((chx_px.max() - chx_px.min()) * scale_e, (chy_px.max() - chy_px.min()) * scale_n))
+            if c_span > channel_span_m:
+                channel_span_m = c_span
+
         # Condition subtype class assignment on 2D component footprint geometry:
-        # A circular/sub-circular mound (elongation < 1.45) cannot physically be a Long Barrow.
+        # A circular/sub-circular mound (elongation < 1.65) cannot physically be a Long Barrow.
         if target_domain == "prehistoric" and best_cls_idx == 1:
-            if elongation < 1.45 or area_m2 < 200.0:
+            if elongation < 1.65 or area_m2 < 220.0:
                 if centroid_relief_m < 0.25 * max(max_pos_relief_m, 0.1) and area_m2 >= 260.0:
                     best_cls_idx = 2  # stone_circle_henge
                 else:
@@ -198,6 +228,9 @@ def extract_candidates_from_tile(
                 "patch_min_relief_m": round(patch_min_relief_m, 2),
                 "est_surface_prominence_m": round(ndsm_m, 2),
                 "mean_slope_tangent": round(float(np.mean(grad_vals)), 3),
+                "ridge_continuation_span_m": round(ridge_span_m, 1),
+                "ridge_continuation_elongation": round(ridge_elong, 2),
+                "adjacent_channel_span_m": round(channel_span_m, 1),
                 "has_lidar_tin_facet": has_tin_facet,
                 "is_known_monument": is_known,
                 "matched_monument": matched_info,

@@ -623,6 +623,9 @@ def annotate_candidates_with_spatial_context(
         slope_m = float(cand.get("mean_slope_tangent", 0.08))
         area_m2 = float(cand.get("area_m2", 400.0))
         elong_m = float(cand.get("elongation", 1.2))
+        ridge_span_m = float(cand.get("ridge_continuation_span_m", 0.0))
+        ridge_elong = float(cand.get("ridge_continuation_elongation", 1.0))
+        channel_span_m = float(cand.get("adjacent_channel_span_m", 0.0))
         has_tin_facet = bool(cand.get("has_lidar_tin_facet", False))
 
         if is_enclosure:
@@ -719,6 +722,26 @@ def annotate_candidates_with_spatial_context(
                     "osm_id": "lidar/cut_fill_bund",
                     "subtype": f"cut_and_fill_u_bund_or_pit (bank={rel_m:+.2f}m, pit={patch_min_rel_m:+.2f}m, center={centroid_rel_m:+.2f}m)",
                     "name": "Cut-and-fill U-bund, military gun-pit, or quarry scoop embankment",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
+        elif not is_roman and (
+            area_m2 <= 950.0
+            and elong_m < 2.2
+            and ridge_span_m >= 95.0
+            and ridge_elong >= 4.0
+            and channel_span_m >= 85.0
+        ):
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/meander_scroll_bar",
+                    "subtype": (
+                        f"fluvial_meander_or_palaeochannel_scroll_bar "
+                        f"(ridge={ridge_span_m:.0f}m, elong={ridge_elong:.1f}x, channel={channel_span_m:.0f}m)"
+                    ),
+                    "name": "Fluvial meander scroll-bar, levee ridge, or palaeochannel bank",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,
