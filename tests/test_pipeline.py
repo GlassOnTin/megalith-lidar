@@ -412,6 +412,46 @@ def test_v4_d4_geometric_moments_and_legacy_checkpoint_compat():
     model.load_state_dict(legacy_sd, strict=True)
 
 
+def test_scale_space_cropmark_features_d4_and_ring_ditch():
+    from megalith_lidar.aerial_cropmarks import (
+        compute_candidate_cropmark_metrics,
+        compute_cropmark_features,
+        render_cropmark_false_color,
+    )
+
+    # Synthetic arable field with a greener concentric ring-ditch cropmark around a parched central mound
+    yy, xx = np.ogrid[:256, :256]
+    dist = np.hypot(xx - 128.0, yy - 128.0)
+    rgb = np.full((256, 256, 3), 110, dtype=np.uint8)
+    # Central chalk/parched mound (r <= 6m): brighter red/green
+    core = dist <= 6.0
+    rgb[core, 0] = 145
+    rgb[core, 1] = 135
+    rgb[core, 2] = 105
+    # Surrounding humic ring-ditch cropmark (7m <= r <= 12m): higher Excess-Green (ExG)
+    ring = (dist >= 7.0) & (dist <= 12.0)
+    rgb[ring, 0] = 85
+    rgb[ring, 1] = 140
+    rgb[ring, 2] = 75
+
+    feats = compute_cropmark_features(rgb)
+    assert feats.shape == (2, 256, 256)
+
+    # Verify exact D4 rotational equivariance
+    rgb_rot = np.rot90(rgb, k=1, axes=(0, 1))
+    feats_rot = compute_cropmark_features(rgb_rot)
+    assert np.allclose(feats_rot, np.rot90(feats, k=1, axes=(1, 2)), atol=1e-5)
+
+    # Verify positive ring-ditch ΔExG anomaly and positive core ΔL soilmark contrast
+    metrics = compute_candidate_cropmark_metrics(rgb, cx_px=128.0, cy_px=128.0, area_m2=333.0)
+    assert metrics["cropmark_ring_exg_diff"] > 0.02
+    assert metrics["soilmark_core_lum_diff"] > 0.01
+
+    vis = render_cropmark_false_color(rgb)
+    assert vis.shape == (256, 256, 3) and vis.dtype == np.uint8
+
+
+
 
 
 

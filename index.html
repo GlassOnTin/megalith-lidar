@@ -823,6 +823,10 @@
               <input type="checkbox" id="chkShowScannedSquares" checked />
               Show scanned 2 km × 2 km squares
             </label>
+            <label>
+              <input type="checkbox" id="chkAerialBasemap" />
+              Aerial / Cropmark Orthophoto basemap
+            </label>
             <span class="muted" style="font-size:12px;">
               <span class="dot" style="background:#00e676;border-radius:2px;"></span> Held-Out Monument Landscape Square ·
               <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Uniform National Null Square ·
@@ -846,10 +850,14 @@
   ></script>
   <script>
     const map = L.map("map").setView([52.8, -1.7], 6);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    const osmBaseLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
+    const aerialBaseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
+      attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    });
 
     map.createPane("squaresPane");
     map.getPane("squaresPane").style.zIndex = 380;
@@ -1006,6 +1014,166 @@
       return false;
     }
 
+    let currentAerialReqId = 0;
+
+    function boxBlurSeparable(src, w, h, radius) {
+      if (radius < 1) return new Float32Array(src);
+      let cur = new Float32Array(src);
+      let tmp = new Float32Array(w * h);
+      const diam = 2 * radius + 1;
+      for (let pass = 0; pass < 2; pass++) {
+        // Horizontal pass
+        for (let y = 0; y < h; y++) {
+          const rowOff = y * w;
+          let sum = cur[rowOff] * (radius + 1);
+          for (let x = 1; x <= radius; x++) sum += cur[rowOff + Math.min(w - 1, x)];
+          for (let x = 0; x < w; x++) {
+            tmp[rowOff + x] = sum / diam;
+            const xSub = Math.max(0, x - radius);
+            const xAdd = Math.min(w - 1, x + radius + 1);
+            sum += cur[rowOff + xAdd] - cur[rowOff + xSub];
+          }
+        }
+        // Vertical pass
+        for (let x = 0; x < w; x++) {
+          let sum = tmp[x] * (radius + 1);
+          for (let y = 1; y <= radius; y++) sum += tmp[Math.min(h - 1, y) * w + x];
+          for (let y = 0; y < h; y++) {
+            cur[y * w + x] = sum / diam;
+            const ySub = Math.max(0, y - radius);
+            const yAdd = Math.min(h - 1, y + radius + 1);
+            sum += tmp[yAdd * w + x] - tmp[ySub * w + x];
+          }
+        }
+      }
+      return cur;
+    }
+
+    function renderAerialAndCropmarkCanvases(p) {
+      const reqId = ++currentAerialReqId;
+      const wb = (Array.isArray(p.window_bbox) && p.window_bbox.length === 4)
+        ? p.window_bbox
+        : [Math.round(p.easting - 128), Math.round(p.northing - 128), Math.round(p.easting + 128), Math.round(p.northing + 128)];
+      const [eMin, nMin, eMax, nMax] = wb;
+      const w = 256, h = 256;
+      const cx = ((p.easting - eMin) / Math.max(eMax - eMin, 1)) * w;
+      const cy = ((nMax - p.northing) / Math.max(nMax - nMin, 1)) * h;
+      const rPx = Math.max(10.0, Math.sqrt(Math.max(p.area_m2 || 16.0, 16.0) / Math.PI) + 6.0);
+      const ringColor = categoryColor(p.context_category);
+
+      const url = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${eMin},${nMin},${eMax},${nMax}&bboxSR=27700&imageSR=27700&size=512,512&format=png32&f=image`;
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        if (reqId !== currentAerialReqId) return;
+        const off = document.createElement("canvas");
+        off.width = w;
+        off.height = h;
+        const octx = off.getContext("2d");
+        octx.drawImage(img, 0, 0, w, h);
+        const imData = octx.getImageData(0, 0, w, h);
+        const rgba = imData.data;
+
+        const rArr = new Float32Array(w * h);
+        const gArr = new Float32Array(w * h);
+        const bArr = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+          rArr[i] = rgba[i * 4] / 255.0;
+          gArr[i] = rgba[i * 4 + 1] / 255.0;
+          bArr[i] = rgba[i * 4 + 2] / 255.0;
+        }
+
+        const rSm = boxBlurSeparable(rArr, w, h, 1);
+        const gSm = boxBlurSeparable(gArr, w, h, 1);
+        const bSm = boxBlurSeparable(bArr, w, h, 1);
+
+        const exg = new Float32Array(w * h);
+        const lum = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+          const denom = rSm[i] + gSm[i] + bSm[i] + 1e-4;
+          exg[i] = (2.0 * gSm[i] - rSm[i] - bSm[i]) / denom;
+          lum[i] = 0.299 * rSm[i] + 0.587 * gSm[i] + 0.114 * bSm[i];
+        }
+
+        const exg16 = boxBlurSeparable(exg, w, h, 16);
+        const lum16 = boxBlurSeparable(lum, w, h, 16);
+
+        const dexg = new Float32Array(w * h);
+        const dlum = new Float32Array(w * h);
+        const absExg = new Float32Array(w * h);
+        const absLum = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+          dexg[i] = exg[i] - exg16[i];
+          dlum[i] = lum[i] - lum16[i];
+          absExg[i] = Math.abs(dexg[i]);
+          absLum[i] = Math.abs(dlum[i]);
+        }
+        absExg.sort();
+        absLum.sort();
+        const p96Idx = Math.floor(0.96 * w * h);
+        const sExg = Math.max(absExg[p96Idx] * 1.4, 0.015);
+        const sLum = Math.max(absLum[p96Idx] * 1.4, 0.025);
+
+        const cropIm = octx.createImageData(w, h);
+        const cData = cropIm.data;
+        const clampU8 = (v, s) => Math.max(0, Math.min(255, Math.round(((v / s) * 0.5 + 0.5) * 255.0)));
+
+        let coreExgSum = 0, coreCnt = 0, ringExgSum = 0, ringCnt = 0, coreLumSum = 0;
+        const rEq = Math.max(4.0, Math.sqrt(Math.max(p.area_m2 || 16.0, 16.0) / Math.PI));
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const idx = y * w + x;
+            const de = dexg[idx];
+            const dl = dlum[idx];
+            cData[idx * 4]     = clampU8(dl - 0.40 * de, sLum);
+            cData[idx * 4 + 1] = clampU8(de + 0.25 * dl, sExg);
+            cData[idx * 4 + 2] = clampU8(-dl - 0.20 * de, sLum);
+            cData[idx * 4 + 3] = 255;
+
+            const dist = Math.hypot(x - cx, y - cy);
+            if (dist <= 0.65 * rEq) {
+              coreExgSum += de;
+              coreLumSum += dl;
+              coreCnt++;
+            } else if (dist > 0.70 * rEq && dist <= 1.35 * rEq) {
+              ringExgSum += de;
+              ringCnt++;
+            }
+          }
+        }
+
+        const drawOverlay = (canvasEl, baseImageSource, isImageData) => {
+          if (!canvasEl) return;
+          const ctx = canvasEl.getContext("2d");
+          if (isImageData) {
+            ctx.putImageData(baseImageSource, 0, 0);
+          } else {
+            ctx.drawImage(baseImageSource, 0, 0, w, h);
+          }
+          ctx.beginPath();
+          ctx.arc(cx, cy, rPx, 0, 2 * Math.PI);
+          ctx.strokeStyle = ringColor;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        };
+
+        drawOverlay(document.getElementById("desktopAerialCanvas"), img, false);
+        drawOverlay(document.getElementById("mobileAerialCanvas"), img, false);
+        drawOverlay(document.getElementById("desktopCropmarkCanvas"), cropIm, true);
+        drawOverlay(document.getElementById("mobileCropmarkCanvas"), cropIm, true);
+
+        const ringDiff = (ringCnt ? ringExgSum / ringCnt : 0) - (coreCnt ? coreExgSum / coreCnt : 0);
+        const coreLum = coreCnt ? coreLumSum / coreCnt : 0;
+        const readoutStr = `Ring ΔExG: ${ringDiff >= 0 ? "+" : ""}${(ringDiff * 100).toFixed(1)}% · Core ΔL: ${coreLum >= 0 ? "+" : ""}${(coreLum * 100).toFixed(1)}%`;
+        const dReadout = document.getElementById("desktopCropmarkReadout");
+        if (dReadout) dReadout.textContent = readoutStr;
+        const mReadout = document.getElementById("mobileCropmarkReadout");
+        if (mReadout) mReadout.textContent = `Cropmark Bandpass (16 m) — ${readoutStr}`;
+      };
+      img.src = url;
+    }
+
     function selectCandidate(p, zoomMap = true, scrollRow = false) {
       selectedFeatureKey = featureKey(p);
       let matchedRowEl = null;
@@ -1086,90 +1254,127 @@
       }
 
       const mobileDock = document.getElementById("tableBottomLidarDock");
-      if (p.diagnostic_png) {
-        const panelOffsetsPct = [0, -25.048, -50.096, -75.144];
-        const curOff = panelOffsetsPct[activeMobilePanel] || 0;
-        const radioLabels = [
-          "1. Slope",
-          "2. 16 m Relief",
-          "3. Canopy",
-          "4. Model Prob"
-        ];
-        const radiosHtml = radioLabels.map((lbl, idx) => `
-          <label class="mobile-panel-radio ${idx === activeMobilePanel ? "active-radio" : ""}" data-panel-idx="${idx}">
-            <input type="radio" name="mobileLidarPanel" value="${idx}" ${idx === activeMobilePanel ? "checked" : ""} />
+      const hasPng = Boolean(p.diagnostic_png);
+      const effectivePanel = (!hasPng && activeMobilePanel < 4) ? 4 : activeMobilePanel;
+      const panelOffsetsPct = [0, -25.048, -50.096, -75.144];
+      const curOff = panelOffsetsPct[effectivePanel] || 0;
+      const radioLabels = [
+        "1. Slope",
+        "2. 16 m Relief",
+        "3. Canopy",
+        "4. Model Prob",
+        "5. Aerial RGB",
+        "6. Cropmark ΔExG"
+      ];
+      const radiosHtml = radioLabels.map((lbl, idx) => {
+        const disabled = (!hasPng && idx < 4) ? "disabled" : "";
+        return `
+          <label class="mobile-panel-radio ${idx === effectivePanel ? "active-radio" : ""}" data-panel-idx="${idx}" style="${disabled ? 'opacity:0.45;' : ''}">
+            <input type="radio" name="mobileLidarPanel" value="${idx}" ${idx === effectivePanel ? "checked" : ""} ${disabled} />
             <span>${lbl}</span>
           </label>
-        `).join("");
-
-        const legendItemsHtml = `
-          <div data-panel-desc="0" class="${activeMobilePanel === 0 ? "active-panel-desc" : ""}">
-            <strong>Panel 1 (Left): Bare-Earth Slope</strong>
-            Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
-          </div>
-          <div data-panel-desc="1" class="${activeMobilePanel === 1 ? "active-panel-desc" : ""}">
-            <strong>Panel 2: 16 m Local Relief</strong>
-            Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
-          </div>
-          <div data-panel-desc="2" class="${activeMobilePanel === 2 ? "active-panel-desc" : ""}">
-            <strong>Panel 3: Surface Canopy (nDSM)</strong>
-            Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
-          </div>
-          <div data-panel-desc="3" class="${activeMobilePanel === 3 ? "active-panel-desc" : ""}">
-            <strong>Panel 4 (Right): Model Probability</strong>
-            Pink/red highlight shows where the neural network detects monument geometry.
-          </div>
         `;
+      }).join("");
 
-        if (mobileDock) {
-          mobileDock.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13.5px;">
-              <div><strong>${p.os_grid_ref}</strong> · <span class="muted">${formatClass(p.predicted_class)}</span></div>
-              <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong></div>
-            </div>
-            <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
-              ${radiosHtml}
-            </div>
-            <div class="diag-viewport">
-              <img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
-            </div>
-            <div class="panel-legend" id="panelLegendBox">
-              ${legendItemsHtml}
-            </div>
-          `;
-        }
+      const legendItemsHtml = `
+        <div data-panel-desc="0" class="${effectivePanel === 0 ? "active-panel-desc" : ""}">
+          <strong>Panel 1 (Left): Bare-Earth Slope</strong>
+          Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
+        </div>
+        <div data-panel-desc="1" class="${effectivePanel === 1 ? "active-panel-desc" : ""}">
+          <strong>Panel 2: 16 m Local Relief</strong>
+          Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
+        </div>
+        <div data-panel-desc="2" class="${effectivePanel === 2 ? "active-panel-desc" : ""}">
+          <strong>Panel 3: Surface Canopy (nDSM)</strong>
+          Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
+        </div>
+        <div data-panel-desc="3" class="${effectivePanel === 3 ? "active-panel-desc" : ""}">
+          <strong>Panel 4 (Right): Model Probability</strong>
+          Pink/red highlight shows where the neural network detects monument geometry.
+        </div>
+        <div data-panel-desc="4" class="${effectivePanel === 4 ? "active-panel-desc" : ""}">
+          <strong>Panel 5: Aerial Orthophoto (256 m × 256 m BNG)</strong>
+          Pixel-aligned 1:1 EPSG:27700 vertical aerial photograph with candidate footprint circle.
+        </div>
+        <div data-panel-desc="5" class="${effectivePanel === 5 ? "active-panel-desc" : ""}">
+          <strong>Panel 6: 16 m Scale-Space Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
+          Green = +ΔExG moisture-retaining ring-ditch cropmark; Red/Magenta = +ΔL chalk/gravel soilmark or parched bank.
+        </div>
+      `;
 
-        html += `
-          <div class="desktop-only-lidar-dock">
-            <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
-            <div class="panel-legend">
-              ${legendItemsHtml}
-            </div>
+      if (mobileDock) {
+        mobileDock.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13.5px;">
+            <div><strong>${p.os_grid_ref}</strong> · <span class="muted">${formatClass(p.predicted_class)}</span></div>
+            <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong></div>
           </div>
-        `;
-      } else {
-        const noPngHtml = `
-          <div style="margin-top:8px;padding:8px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:13px;" class="muted">
-            No 4-panel PNG was cached for this lower-ranked window in the square. Check "Only show sites with 4-panel LiDAR image rendered" above or use the OpenStreetMap / Aerial Satellite buttons below.
+          <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
+            ${radiosHtml}
           </div>
+          <div class="diag-viewport">
+            ${hasPng ? `<img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;display:${effectivePanel < 4 ? 'block' : 'none'};" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />` : ""}
+            <canvas id="mobileAerialCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 4 ? 'block' : 'none'};"></canvas>
+            <canvas id="mobileCropmarkCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 5 ? 'block' : 'none'};"></canvas>
+          </div>
+          <div class="panel-legend" id="panelLegendBox">
+            ${legendItemsHtml}
+          </div>
+          <div id="mobileCropmarkReadout" class="muted" style="margin-top:5px;font-size:12px;"></div>
         `;
-        if (mobileDock) {
-          mobileDock.innerHTML = noPngHtml;
-        }
-        html += `<div class="desktop-only-lidar-dock">${noPngHtml}</div>`;
       }
+
+      html += `
+        <div class="desktop-only-lidar-dock">
+          ${hasPng ? `
+            <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
+          ` : `
+            <div style="margin-top:8px;padding:8px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:13px;" class="muted">
+              No 4-panel LiDAR PNG was cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto &amp; 16 m Scale-Space Cropmark panels below.
+            </div>
+          `}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
+                <strong>Panel 5: Aerial Orthophoto (RGB, 256 m × 256 m BNG)</strong>
+                <span class="muted">EPSG:27700</span>
+              </div>
+              <canvas id="desktopAerialCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
+            </div>
+            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
+                <strong>Panel 6: 16 m Scale-Space Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
+                <span id="desktopCropmarkReadout" class="muted" style="font-size:11px;">Computing...</span>
+              </div>
+              <canvas id="desktopCropmarkCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
+            </div>
+          </div>
+          <div class="panel-legend" style="grid-template-columns:repeat(3, 1fr);">
+            ${legendItemsHtml}
+          </div>
+        </div>
+      `;
+
       card.innerHTML = html;
       const switcher = document.getElementById("mobilePanelSwitcher");
       if (switcher) {
-        const panelOffsetsPct = [0, -25.048, -50.096, -75.144];
         switcher.querySelectorAll('input[name="mobileLidarPanel"]').forEach((inp) => {
           inp.addEventListener("change", (ev) => {
             const idx = parseInt(ev.target.value, 10) || 0;
             activeMobilePanel = idx;
             const imgEl = document.getElementById("diagImgEl");
+            const mobAer = document.getElementById("mobileAerialCanvas");
+            const mobCrop = document.getElementById("mobileCropmarkCanvas");
             if (imgEl) {
-              imgEl.style.setProperty("--mobile-panel-offset", `${panelOffsetsPct[idx]}%`);
+              if (idx < 4) {
+                imgEl.style.display = "block";
+                imgEl.style.setProperty("--mobile-panel-offset", `${panelOffsetsPct[idx]}%`);
+              } else {
+                imgEl.style.display = "none";
+              }
             }
+            if (mobAer) mobAer.style.display = idx === 4 ? "block" : "none";
+            if (mobCrop) mobCrop.style.display = idx === 5 ? "block" : "none";
             switcher.querySelectorAll(".mobile-panel-radio").forEach((lbl) => {
               lbl.classList.toggle("active-radio", parseInt(lbl.dataset.panelIdx, 10) === idx);
             });
@@ -1179,6 +1384,7 @@
           });
         });
       }
+      renderAerialAndCropmarkCanvases(p);
       const copyBtn = document.getElementById("btnCopyCoords");
       if (copyBtn && navigator.clipboard) {
         copyBtn.addEventListener("click", () => {
@@ -1692,6 +1898,18 @@
       document.getElementById("opSelect").addEventListener("change", () => renderActiveView(true));
       document.getElementById("countySelect").addEventListener("change", () => renderActiveView(true, true));
       document.getElementById("chkOnlyDiag").addEventListener("change", () => renderActiveView(true));
+      const chkAerial = document.getElementById("chkAerialBasemap");
+      if (chkAerial) {
+        chkAerial.addEventListener("change", () => {
+          if (chkAerial.checked) {
+            if (map.hasLayer(osmBaseLayer)) map.removeLayer(osmBaseLayer);
+            if (!map.hasLayer(aerialBaseLayer)) aerialBaseLayer.addTo(map);
+          } else {
+            if (map.hasLayer(aerialBaseLayer)) map.removeLayer(aerialBaseLayer);
+            if (!map.hasLayer(osmBaseLayer)) osmBaseLayer.addTo(map);
+          }
+        });
+      }
 
       const btnCopyAll = document.getElementById("btnCopyVisibleRows");
       if (btnCopyAll && navigator.clipboard) {
