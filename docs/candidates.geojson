@@ -289261,7 +289261,7 @@
         "lat": 52.406779,
         "lon": -1.104232,
         "os_grid_ref": "SP 61034 79130",
-        "confidence": 0.9631,
+        "confidence": 0.809,
         "peak_prob": 0.9736,
         "mean_prob": 0.9315,
         "predicted_class_id": 1,
@@ -289337,10 +289337,12 @@
           "prehistoric_within_5km": 1
         },
         "county": "Northamptonshire",
-        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (0 scheduled monuments within 2 km and 7 within 5 km, closest being Medieval village of Stanford (NHLE #1003877, 2091 m WSW) and Moated site and fishponds south-west of Highfields Farm (NHLE #1009172, 2395 m NNW)), the 1 m DTM isolates an elongated or oval mound (1.05\u00d7 axial elongation, 325 m\u00b2 footprint, ~20 m equivalent span) rising +0.39 m above its 16 m local trend surface with weathered scarp gradients of 0.041 (2.3\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.04 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
-        "arch_context_source": "nhle_grounded_synthesis",
+        "arch_context_note": "Situated in an English lowland river terrace landscape, this candidate lies isolated from the nearest designated assets, specifically the Medieval village of Stanford (NHLE #1003877) 2091m WSW and the Prehistoric settlement site (NHLE #1005062) 2608m NNW. The 1m LiDAR close-up reveals a smooth, continuous circular footprint with a +0.39m raised bank and a shallow central depression, exhibiting an axial elongation of 1.05x that contradicts the model's proposed long barrow classification. Given the low scarp slope and lack of a defined ditch, this likely represents a natural terrace knoll or modern agricultural feature, requiring a Historic Environment Record review and targeted fieldwalking to rule out a degraded ring ditch.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
         "raw_unet_confidence": 0.9631,
-        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
       }
     },
     {
@@ -291139,6 +291141,4797 @@
         "arch_context_note": "Situated in the North Pennine & Northumberland sandstone/whin upland within an active monument landscape (2 scheduled monuments within 2 km and 8 within 5 km, closest being Preston Tower (NHLE #1006612, 1221 m NW) and Defended settlement on Dunstan Hill 400m north of Doxford Farm (NHLE #1014486, 1377 m SW)), the 1 m DTM isolates an elongated or oval mound (1.08\u00d7 axial elongation, 52 m\u00b2 footprint, ~8 m equivalent span) rising +0.42 m above its 16 m local trend surface with weathered scarp gradients of 0.021 (1.2\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.8522,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.802692,
+          52.018601
+        ]
+      },
+      "properties": {
+        "easting": 413636.9,
+        "northing": 235593.7,
+        "lat": 52.018601,
+        "lon": -1.802692,
+        "os_grid_ref": "SP 13637 35594",
+        "confidence": 0.9873,
+        "peak_prob": 0.9954,
+        "mean_prob": 0.9628,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 647.0,
+        "elongation": 1.33,
+        "est_local_relief_m": 3.44,
+        "max_positive_relief_m": 3.44,
+        "centroid_local_relief_m": 3.38,
+        "patch_min_relief_m": -0.41,
+        "est_surface_prominence_m": 6.64,
+        "mean_slope_tangent": 0.328,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/970138076",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 9.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/181891409",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 16.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=6.6m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9719,
+        "raw_tile_logit": 3.6641,
+        "window_bbox": [
+          413536,
+          235536,
+          413792,
+          235792
+        ],
+        "region_name": "test_landscape_E412000_N234000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E412000_N234000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003327,
+            "name": "Willersey Hill Camp See also WORCESTERSHIRE 344",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3312.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1003815,
+            "name": "Willersey Hill Camp See also GLOUCESTERSHIRE 117",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3312.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1003590,
+            "name": "Kiftsgate Stone",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3399.0,
+            "bearing": "N"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 5,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Gloucestershire",
+        "arch_context_note": "Located in the Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire), this 647 m\u00b2 topographic anomaly (+3.44 m local relief, 0.328 / 18.2\u00b0 mean scarp slope, nDSM 6.64 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Willersey Hill Camp See also WORCESTERSHIRE 344 (NHLE #1003327, 3312 m NW) and Willersey Hill Camp See also GLOUCESTERSHIRE 117 (NHLE #1003815, 3312 m NW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9873,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.798579,
+          52.008878
+        ]
+      },
+      "properties": {
+        "easting": 413922.1,
+        "northing": 234513.0,
+        "lat": 52.008878,
+        "lon": -1.798579,
+        "os_grid_ref": "SP 13922 34513",
+        "confidence": 0.9491,
+        "peak_prob": 0.9608,
+        "mean_prob": 0.9141,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 514.0,
+        "elongation": 1.56,
+        "est_local_relief_m": 2.57,
+        "max_positive_relief_m": 2.57,
+        "centroid_local_relief_m": 1.96,
+        "patch_min_relief_m": -0.59,
+        "est_surface_prominence_m": 0.67,
+        "mean_slope_tangent": 0.254,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/970662310",
+            "subtype": "landuse=farmyard",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/970662309",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 11.9,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.67m, slope=0.25)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9053,
+        "raw_tile_logit": 2.3284,
+        "window_bbox": [
+          413744,
+          234384,
+          414000,
+          234640
+        ],
+        "region_name": "test_landscape_E412000_N234000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E412000_N234000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1016079,
+            "name": "Bourton Clump long barrow",
+            "cls_id": 1,
+            "cls_label": "Neolithic long barrow / chambered tomb",
+            "distance_m": 3580.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 10,
+          "prehistoric_within_5km": 6
+        },
+        "county": "Gloucestershire",
+        "arch_context_note": "Located in the Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire), this 514 m\u00b2 topographic anomaly (+2.57 m local relief, 0.254 / 14.3\u00b0 mean scarp slope, nDSM 0.67 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=farmyard'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bourton Clump long barrow (NHLE #1016079, 3580 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9491,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.558295,
+          52.125857
+        ]
+      },
+      "properties": {
+        "easting": 575223.2,
+        "northing": 250591.6,
+        "lat": 52.125857,
+        "lon": 0.558295,
+        "os_grid_ref": "TL 75223 50592",
+        "confidence": 0.9557,
+        "peak_prob": 0.9641,
+        "mean_prob": 0.9303,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 165.0,
+        "elongation": 1.08,
+        "est_local_relief_m": 0.87,
+        "max_positive_relief_m": 0.87,
+        "centroid_local_relief_m": 0.78,
+        "patch_min_relief_m": -0.09,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.107,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.9097,
+        "raw_tile_logit": 2.3828,
+        "window_bbox": [
+          575152,
+          250384,
+          575408,
+          250640
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "diagnostic_png": "null_test_E574000_N250000_unidentified_01_E575152_N250384_conf955.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3044.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3325.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3517.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (0 scheduled monuments within 2 km and 7 within 5 km, closest being Moated site immediately south of Pinhoe Hall (NHLE #1019816, 3044 m SW) and Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 3325 m NNE)), the 1 m DTM isolates an elongated or oval mound (1.08\u00d7 axial elongation, 165 m\u00b2 footprint, ~14 m equivalent span) rising +0.87 m above its 16 m local trend surface with weathered scarp gradients of 0.107 (6.1\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9557,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.557095,
+          52.126782
+        ]
+      },
+      "properties": {
+        "easting": 575137.4,
+        "northing": 250691.7,
+        "lat": 52.126782,
+        "lon": 0.557095,
+        "os_grid_ref": "TL 75137 50692",
+        "confidence": 0.9225,
+        "peak_prob": 0.9291,
+        "mean_prob": 0.9029,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 119.0,
+        "elongation": 1.23,
+        "est_local_relief_m": 0.81,
+        "max_positive_relief_m": 0.81,
+        "centroid_local_relief_m": 0.7,
+        "patch_min_relief_m": -0.14,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.138,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8674,
+        "raw_tile_logit": 1.9346,
+        "window_bbox": [
+          574960,
+          250576,
+          575216,
+          250832
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "diagnostic_png": "null_test_E574000_N250000_unidentified_02_E574960_N250576_conf922.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3076.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3247.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3467.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (0 scheduled monuments within 2 km and 7 within 5 km, closest being Moated site immediately south of Pinhoe Hall (NHLE #1019816, 3076 m SW) and Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 3247 m NNE)), the 1 m DTM isolates a sub-circular mound (1.23\u00d7 elongation, 119 m\u00b2 footprint, ~12 m diameter) rising +0.81 m above its 16 m local trend surface with weathered scarp gradients of 0.138 (7.9\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9225,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.555733,
+          52.13263
+        ]
+      },
+      "properties": {
+        "easting": 575021.3,
+        "northing": 251338.6,
+        "lat": 52.13263,
+        "lon": 0.555733,
+        "os_grid_ref": "TL 75021 51339",
+        "confidence": 0.9191,
+        "peak_prob": 0.9266,
+        "mean_prob": 0.8966,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 155.0,
+        "elongation": 1.23,
+        "est_local_relief_m": 0.66,
+        "max_positive_relief_m": 0.66,
+        "centroid_local_relief_m": 0.66,
+        "patch_min_relief_m": -0.25,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.101,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/503531842",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 14.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8709,
+        "raw_tile_logit": 1.9668,
+        "window_bbox": [
+          574960,
+          251152,
+          575216,
+          251408
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2660.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2980.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3575.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1019524,
+            "name": "Moated site at Cowlinge Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3828.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 155 m\u00b2 topographic anomaly (+0.66 m local relief, 0.101 / 5.8\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 2660 m NNE) and Moated site W of Gifford's Hall (NHLE #1005990, 2980 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9191,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.554636,
+          52.127386
+        ]
+      },
+      "properties": {
+        "easting": 574966.7,
+        "northing": 250752.9,
+        "lat": 52.127386,
+        "lon": 0.554636,
+        "os_grid_ref": "TL 74967 50753",
+        "confidence": 0.8954,
+        "peak_prob": 0.9,
+        "mean_prob": 0.8815,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 70.0,
+        "elongation": 1.28,
+        "est_local_relief_m": 0.72,
+        "max_positive_relief_m": 0.72,
+        "centroid_local_relief_m": 0.6,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.118,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8415,
+        "raw_tile_logit": 1.7178,
+        "window_bbox": [
+          574768,
+          250576,
+          575024,
+          250832
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "diagnostic_png": "null_test_E574000_N250000_unidentified_03_E574768_N250576_conf895.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3035.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3233.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3498.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1019524,
+            "name": "Moated site at Cowlinge Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3991.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (0 scheduled monuments within 2 km and 7 within 5 km, closest being Moated site immediately south of Pinhoe Hall (NHLE #1019816, 3035 m SSW) and Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 3233 m NNE)), the 1 m DTM isolates a sub-circular mound (1.28\u00d7 elongation, 70 m\u00b2 footprint, ~9 m diameter) rising +0.72 m above its 16 m local trend surface with weathered scarp gradients of 0.118 (6.7\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8954,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.55832,
+          52.126129
+        ]
+      },
+      "properties": {
+        "easting": 575223.8,
+        "northing": 250622.0,
+        "lat": 52.126129,
+        "lon": 0.55832,
+        "os_grid_ref": "TL 75224 50622",
+        "confidence": 0.8922,
+        "peak_prob": 0.8969,
+        "mean_prob": 0.8782,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 52.0,
+        "elongation": 1.07,
+        "est_local_relief_m": 0.67,
+        "max_positive_relief_m": 0.67,
+        "centroid_local_relief_m": 0.59,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.089,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8421,
+        "raw_tile_logit": 1.7227,
+        "window_bbox": [
+          575152,
+          250576,
+          575408,
+          250832
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "diagnostic_png": "null_test_E574000_N250000_unidentified_04_E575152_N250576_conf892.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3069.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3295.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3489.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Situated in the English lowland / river terrace landscape within an active monument landscape (0 scheduled monuments within 2 km and 7 within 5 km, closest being Moated site immediately south of Pinhoe Hall (NHLE #1019816, 3069 m SW) and Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 3295 m NNE)), the 1 m DTM isolates an elongated or oval mound (1.07\u00d7 axial elongation, 52 m\u00b2 footprint, ~8 m equivalent span) rising +0.67 m above its 16 m local trend surface with weathered scarp gradients of 0.089 (5.1\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.00 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8922,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.553114,
+          52.131867
+        ]
+      },
+      "properties": {
+        "easting": 574845.0,
+        "northing": 251247.5,
+        "lat": 52.131867,
+        "lon": 0.553114,
+        "os_grid_ref": "TL 74845 51247",
+        "confidence": 0.8748,
+        "peak_prob": 0.8777,
+        "mean_prob": 0.866,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 34.0,
+        "elongation": 1.2,
+        "est_local_relief_m": 0.59,
+        "max_positive_relief_m": 0.59,
+        "centroid_local_relief_m": 0.56,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.097,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/108019309",
+            "subtype": "power=minor_line",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "node/6269748315",
+            "subtype": "power=pole",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.2,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.852,
+        "raw_tile_logit": 1.8018,
+        "window_bbox": [
+          574768,
+          251152,
+          575024,
+          251408
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2808.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3159.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3416.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1019524,
+            "name": "Moated site at Cowlinge Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3689.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 34 m\u00b2 topographic anomaly (+0.59 m local relief, 0.097 / 5.5\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'power=minor_line'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 2808 m NNE) and Moated site W of Gifford's Hall (NHLE #1005990, 3159 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8748,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.554226,
+          52.130773
+        ]
+      },
+      "properties": {
+        "easting": 574925.4,
+        "northing": 251128.5,
+        "lat": 52.130773,
+        "lon": 0.554226,
+        "os_grid_ref": "TL 74925 51128",
+        "confidence": 0.861,
+        "peak_prob": 0.8635,
+        "mean_prob": 0.8533,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 55.0,
+        "elongation": 1.28,
+        "est_local_relief_m": 0.73,
+        "max_positive_relief_m": 0.73,
+        "centroid_local_relief_m": 0.64,
+        "patch_min_relief_m": -0.26,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.119,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/108019309",
+            "subtype": "power=minor_line",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 4.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "node/6269748316",
+            "subtype": "power=pole",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 7.5,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8268,
+        "raw_tile_logit": 1.6074,
+        "window_bbox": [
+          574768,
+          250960,
+          575024,
+          251216
+        ],
+        "region_name": "null_test_E574000_N250000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N250000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1018040,
+            "name": "Bowl barrow 135m south of Waterhall Cottage, Wickham Street",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2890.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005990,
+            "name": "Moated site W of Gifford's Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3206.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1019816,
+            "name": "Moated site immediately south of Pinhoe Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3344.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1019524,
+            "name": "Moated site at Cowlinge Hall",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3806.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Suffolk",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 55 m\u00b2 topographic anomaly (+0.73 m local relief, 0.119 / 6.8\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'power=minor_line'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bowl barrow 135m south of Waterhall Cottage, Wickham Street (NHLE #1018040, 2890 m NNE) and Moated site W of Gifford's Hall (NHLE #1005990, 3206 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.861,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.912178,
+          51.03999
+        ]
+      },
+      "properties": {
+        "easting": 406253.7,
+        "northing": 126740.8,
+        "lat": 51.03999,
+        "lon": -1.912178,
+        "os_grid_ref": "SU 06254 26741",
+        "confidence": 0.9768,
+        "peak_prob": 0.9865,
+        "mean_prob": 0.9479,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 465.0,
+        "elongation": 1.18,
+        "est_local_relief_m": 1.51,
+        "max_positive_relief_m": 1.51,
+        "centroid_local_relief_m": 1.2,
+        "patch_min_relief_m": -0.51,
+        "est_surface_prominence_m": 3.29,
+        "mean_slope_tangent": 0.163,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/97729549",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 17.9,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=3.3m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9545,
+        "raw_tile_logit": 3.1465,
+        "window_bbox": [
+          406192,
+          126576,
+          406448,
+          126832
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 920.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1021.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1520.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1004728,
+            "name": "Two barrows W of Stoke Down",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1595.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 5,
+          "prehistoric_within_2km": 3,
+          "nhle_within_5km": 26,
+          "prehistoric_within_5km": 13
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 465 m\u00b2 topographic anomaly (+1.51 m local relief, 0.163 / 9.3\u00b0 mean scarp slope, nDSM 3.29 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=service'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 920 m NNW) and Field system on Stoke Down (NHLE #1004710, 1021 m W).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9768,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.889029,
+          51.048425
+        ]
+      },
+      "properties": {
+        "easting": 407875.4,
+        "northing": 127680.9,
+        "lat": 51.048425,
+        "lon": -1.889029,
+        "os_grid_ref": "SU 07875 27681",
+        "confidence": 0.9631,
+        "peak_prob": 0.9735,
+        "mean_prob": 0.9318,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 263.0,
+        "elongation": 1.22,
+        "est_local_relief_m": 0.4,
+        "max_positive_relief_m": 0.4,
+        "centroid_local_relief_m": 0.38,
+        "patch_min_relief_m": 0.02,
+        "est_surface_prominence_m": 0.02,
+        "mean_slope_tangent": 0.048,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9273,
+        "raw_tile_logit": 2.6289,
+        "window_bbox": [
+          407744,
+          127536,
+          408000,
+          127792
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1041.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1224.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1417594,
+            "name": "Hare Warren Control Station",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1336.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2050.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 26,
+          "prehistoric_within_5km": 14
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 263 m\u00b2 topographic anomaly (+0.40 m local relief, 0.048 / 2.7\u00b0 mean scarp slope, nDSM 0.02 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'LiDAR coverage boundary or interpolated TIN facet'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Round barrows S of Hare Warren (NHLE #1005626, 1041 m NE) and Neale's Barrow, round barrow (NHLE #1004696, 1224 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9631,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.894259,
+          51.039648
+        ]
+      },
+      "properties": {
+        "easting": 407510.2,
+        "northing": 126704.4,
+        "lat": 51.039648,
+        "lon": -1.894259,
+        "os_grid_ref": "SU 07510 26704",
+        "confidence": 0.9208,
+        "peak_prob": 0.9297,
+        "mean_prob": 0.894,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 116.0,
+        "elongation": 1.59,
+        "est_local_relief_m": 0.76,
+        "max_positive_relief_m": 0.76,
+        "centroid_local_relief_m": 0.2,
+        "patch_min_relief_m": -0.03,
+        "est_surface_prominence_m": 0.77,
+        "mean_slope_tangent": 0.113,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.77m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8891,
+        "raw_tile_logit": 2.1455,
+        "window_bbox": [
+          407344,
+          126576,
+          407600,
+          126832
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_05_E407344_N126576_conf858.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1098.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1885.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2038.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2265.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 28,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 116 m\u00b2 topographic anomaly (+0.76 m local relief, 0.113 / 6.4\u00b0 mean scarp slope, nDSM 0.77 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 1098 m SSW) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1885 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9208,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.906811,
+          51.042419
+        ]
+      },
+      "properties": {
+        "easting": 406629.7,
+        "northing": 127011.4,
+        "lat": 51.042419,
+        "lon": -1.906811,
+        "os_grid_ref": "SU 06630 27011",
+        "confidence": 0.9104,
+        "peak_prob": 0.9192,
+        "mean_prob": 0.8841,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 214.0,
+        "elongation": 1.24,
+        "est_local_relief_m": 1.8,
+        "max_positive_relief_m": 1.8,
+        "centroid_local_relief_m": 1.4,
+        "patch_min_relief_m": -0.33,
+        "est_surface_prominence_m": 3.6,
+        "mean_slope_tangent": 0.18,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=3.6m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8616,
+        "raw_tile_logit": 1.8835,
+        "window_bbox": [
+          406576,
+          126960,
+          406832,
+          127216
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 969.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1382.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1532.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1004728,
+            "name": "Two barrows W of Stoke Down",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1844.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 4,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 26,
+          "prehistoric_within_5km": 14
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 214 m\u00b2 topographic anomaly (+1.80 m local relief, 0.180 / 10.2\u00b0 mean scarp slope, nDSM 3.60 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Tall tree canopy or standing structure'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 969 m NW) and Field system on Stoke Down (NHLE #1004710, 1382 m W).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9104,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.894309,
+          51.041018
+        ]
+      },
+      "properties": {
+        "easting": 407506.4,
+        "northing": 126856.7,
+        "lat": 51.041018,
+        "lon": -1.894309,
+        "os_grid_ref": "SU 07506 26857",
+        "confidence": 0.9045,
+        "peak_prob": 0.909,
+        "mean_prob": 0.891,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 87.0,
+        "elongation": 1.53,
+        "est_local_relief_m": 0.83,
+        "max_positive_relief_m": 0.83,
+        "centroid_local_relief_m": 0.69,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 0.4,
+        "mean_slope_tangent": 0.13,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8882,
+        "raw_tile_logit": 2.1367,
+        "window_bbox": [
+          407344,
+          126768,
+          407600,
+          127024
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_01_E407344_N126768_conf904.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1247.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1818.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1913.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2127.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 30,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (3 scheduled monuments within 2 km and 30 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 1247 m S) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1818 m WNW)), the 1 m DTM isolates an elongated or oval mound (1.53\u00d7 axial elongation, 87 m\u00b2 footprint, ~11 m equivalent span) rising +0.83 m above its 16 m local trend surface with weathered scarp gradients of 0.130 (7.4\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.40 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9045,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.888446,
+          51.040687
+        ]
+      },
+      "properties": {
+        "easting": 407917.5,
+        "northing": 126820.4,
+        "lat": 51.040687,
+        "lon": -1.888446,
+        "os_grid_ref": "SU 07918 26820",
+        "confidence": 0.8947,
+        "peak_prob": 0.9002,
+        "mean_prob": 0.8783,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 157.0,
+        "elongation": 1.87,
+        "est_local_relief_m": 0.92,
+        "max_positive_relief_m": 0.92,
+        "centroid_local_relief_m": 0.25,
+        "patch_min_relief_m": 0.13,
+        "est_surface_prominence_m": 0.6,
+        "mean_slope_tangent": 0.132,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.60m, slope=0.13)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8649,
+        "raw_tile_logit": 1.9121,
+        "window_bbox": [
+          407744,
+          126768,
+          408000,
+          127024
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1347.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1744.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2032.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1417594,
+            "name": "Hare Warren Control Station",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2094.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 157 m\u00b2 topographic anomaly (+0.92 m local relief, 0.132 / 7.5\u00b0 mean scarp slope, nDSM 0.60 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 1347 m SSW) and Round barrows S of Hare Warren (NHLE #1005626, 1744 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8947,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.894973,
+          51.040927
+        ]
+      },
+      "properties": {
+        "easting": 407459.9,
+        "northing": 126846.5,
+        "lat": 51.040927,
+        "lon": -1.894973,
+        "os_grid_ref": "SU 07460 26847",
+        "confidence": 0.8934,
+        "peak_prob": 0.8989,
+        "mean_prob": 0.8771,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 91.0,
+        "elongation": 2.09,
+        "est_local_relief_m": 0.79,
+        "max_positive_relief_m": 0.79,
+        "centroid_local_relief_m": 0.6,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.51,
+        "mean_slope_tangent": 0.11,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.51m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8882,
+        "raw_tile_logit": 2.1367,
+        "window_bbox": [
+          407344,
+          126768,
+          407600,
+          127024
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_01_E407344_N126768_conf904.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1229.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1779.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1949.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2155.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 30,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 91 m\u00b2 topographic anomaly (+0.79 m local relief, 0.110 / 6.3\u00b0 mean scarp slope, nDSM 0.51 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 1229 m S) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1779 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8934,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.897505,
+          51.039845
+        ]
+      },
+      "properties": {
+        "easting": 407282.5,
+        "northing": 126725.9,
+        "lat": 51.039845,
+        "lon": -1.897505,
+        "os_grid_ref": "SU 07283 26726",
+        "confidence": 0.8912,
+        "peak_prob": 0.895,
+        "mean_prob": 0.8799,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 59.0,
+        "elongation": 1.32,
+        "est_local_relief_m": 0.81,
+        "max_positive_relief_m": 0.81,
+        "centroid_local_relief_m": 0.79,
+        "patch_min_relief_m": -0.11,
+        "est_surface_prominence_m": 0.71,
+        "mean_slope_tangent": 0.136,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.71m, slope=0.14)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8723,
+        "raw_tile_logit": 1.9795,
+        "window_bbox": [
+          407152,
+          126576,
+          407408,
+          126832
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_06_E407152_N126576_conf857.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1097.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1674.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2043.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2152.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 30,
+          "prehistoric_within_5km": 18
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 59 m\u00b2 topographic anomaly (+0.81 m local relief, 0.136 / 7.7\u00b0 mean scarp slope, nDSM 0.71 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 1097 m S) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1674 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8912,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.897209,
+          51.038195
+        ]
+      },
+      "properties": {
+        "easting": 407303.5,
+        "northing": 126542.4,
+        "lat": 51.038195,
+        "lon": -1.897209,
+        "os_grid_ref": "SU 07304 26542",
+        "confidence": 0.8829,
+        "peak_prob": 0.8884,
+        "mean_prob": 0.8662,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 142.0,
+        "elongation": 1.82,
+        "est_local_relief_m": 0.96,
+        "max_positive_relief_m": 0.96,
+        "centroid_local_relief_m": 0.82,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 0.51,
+        "mean_slope_tangent": 0.147,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.51m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8369,
+        "raw_tile_logit": 1.6826,
+        "window_bbox": [
+          407152,
+          126384,
+          407408,
+          126640
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 913.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1790.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2089.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2287.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 18
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 142 m\u00b2 topographic anomaly (+0.96 m local relief, 0.147 / 8.4\u00b0 mean scarp slope, nDSM 0.51 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 913 m S) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1790 m NW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8829,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.893859,
+          51.03768
+        ]
+      },
+      "properties": {
+        "easting": 407538.5,
+        "northing": 126485.5,
+        "lat": 51.03768,
+        "lon": -1.893859,
+        "os_grid_ref": "SU 07538 26485",
+        "confidence": 0.8725,
+        "peak_prob": 0.8753,
+        "mean_prob": 0.8644,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 21.0,
+        "elongation": 1.0,
+        "est_local_relief_m": 0.71,
+        "max_positive_relief_m": 0.71,
+        "centroid_local_relief_m": 0.71,
+        "patch_min_relief_m": -0.14,
+        "est_surface_prominence_m": 0.46,
+        "mean_slope_tangent": 0.142,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8474,
+        "raw_tile_logit": 1.7646,
+        "window_bbox": [
+          407344,
+          126384,
+          407600,
+          126640
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_02_E407344_N126384_conf872.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 892.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2018.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2212.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2331.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 18
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (1 scheduled monuments within 2 km and 29 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 892 m SSW) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 2018 m WNW)), the 1 m DTM isolates an elongated or oval mound (1.00\u00d7 axial elongation, 21 m\u00b2 footprint, ~5 m equivalent span) rising +0.71 m above its 16 m local trend surface with weathered scarp gradients of 0.142 (8.1\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.46 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8725,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.897561,
+          51.040466
+        ]
+      },
+      "properties": {
+        "easting": 407278.5,
+        "northing": 126795.0,
+        "lat": 51.040466,
+        "lon": -1.897561,
+        "os_grid_ref": "SU 07278 26795",
+        "confidence": 0.866,
+        "peak_prob": 0.8703,
+        "mean_prob": 0.8531,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 120.0,
+        "elongation": 2.04,
+        "est_local_relief_m": 0.84,
+        "max_positive_relief_m": 0.84,
+        "centroid_local_relief_m": 0.63,
+        "patch_min_relief_m": -0.2,
+        "est_surface_prominence_m": 0.48,
+        "mean_slope_tangent": 0.087,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8171,
+        "raw_tile_logit": 1.5381,
+        "window_bbox": [
+          407152,
+          126768,
+          407408,
+          127024
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_03_E407152_N126768_conf866.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1166.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1638.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1004710,
+            "name": "Field system on Stoke Down",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2033.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2100.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 30,
+          "prehistoric_within_5km": 18
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (2 scheduled monuments within 2 km and 30 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 1166 m S) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1638 m WNW)), the 1 m DTM isolates a sub-circular mound (2.04\u00d7 elongation, 120 m\u00b2 footprint, ~12 m diameter) rising +0.84 m above its 16 m local trend surface with weathered scarp gradients of 0.087 (5.0\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Moderate surface roughness (nDSM 0.48 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.866,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.892247,
+          51.041402
+        ]
+      },
+      "properties": {
+        "easting": 407650.9,
+        "northing": 126899.6,
+        "lat": 51.041402,
+        "lon": -1.892247,
+        "os_grid_ref": "SU 07651 26900",
+        "confidence": 0.864,
+        "peak_prob": 0.8676,
+        "mean_prob": 0.8534,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 119.0,
+        "elongation": 1.23,
+        "est_local_relief_m": 1.03,
+        "max_positive_relief_m": 1.03,
+        "centroid_local_relief_m": 0.88,
+        "patch_min_relief_m": 0.07,
+        "est_surface_prominence_m": 0.49,
+        "mean_slope_tangent": 0.107,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8683,
+        "raw_tile_logit": 1.9424,
+        "window_bbox": [
+          407536,
+          126768,
+          407792,
+          127024
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_04_E407536_N126768_conf864.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1321.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1798.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1937.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2032.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 16
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (3 scheduled monuments within 2 km and 29 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 1321 m SSW) and Round barrows S of Hare Warren (NHLE #1005626, 1798 m NNE)), the 1 m DTM isolates a sub-circular mound (1.23\u00d7 elongation, 119 m\u00b2 footprint, ~12 m diameter) rising +1.03 m above its 16 m local trend surface with weathered scarp gradients of 0.107 (6.1\u00b0), morphologically consistent with a Bronze Age bowl/bell barrow or upland funerary cairn. Moderate surface roughness (nDSM 0.49 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.864,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.891797,
+          51.037812
+        ]
+      },
+      "properties": {
+        "easting": 407683.0,
+        "northing": 126500.4,
+        "lat": 51.037812,
+        "lon": -1.891797,
+        "os_grid_ref": "SU 07683 26500",
+        "confidence": 0.861,
+        "peak_prob": 0.8629,
+        "mean_prob": 0.8553,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 22.0,
+        "elongation": 1.1,
+        "est_local_relief_m": 0.74,
+        "max_positive_relief_m": 0.74,
+        "centroid_local_relief_m": 0.69,
+        "patch_min_relief_m": -0.09,
+        "est_surface_prominence_m": 0.5,
+        "mean_slope_tangent": 0.15,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.50m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8439,
+        "raw_tile_logit": 1.7363,
+        "window_bbox": [
+          407536,
+          126384,
+          407792,
+          126640
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 956.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2133.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2134.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2401.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 18
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 22 m\u00b2 topographic anomaly (+0.74 m local relief, 0.150 / 8.5\u00b0 mean scarp slope, nDSM 0.50 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Faulston pigeon house (NHLE #1003000, 956 m SSW) and Round barrows S of Hare Warren (NHLE #1005626, 2133 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.861,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.893897,
+          51.040209
+        ]
+      },
+      "properties": {
+        "easting": 407535.4,
+        "northing": 126766.8,
+        "lat": 51.040209,
+        "lon": -1.893897,
+        "os_grid_ref": "SU 07535 26767",
+        "confidence": 0.8589,
+        "peak_prob": 0.8604,
+        "mean_prob": 0.8545,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 15.0,
+        "elongation": 1.23,
+        "est_local_relief_m": 0.77,
+        "max_positive_relief_m": 0.77,
+        "centroid_local_relief_m": 0.77,
+        "patch_min_relief_m": -0.07,
+        "est_surface_prominence_m": 0.29,
+        "mean_slope_tangent": 0.11,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8891,
+        "raw_tile_logit": 2.1455,
+        "window_bbox": [
+          407344,
+          126576,
+          407600,
+          126832
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "diagnostic_png": "test_landscape_E406000_N126000_unidentified_05_E407344_N126576_conf858.png",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1164.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1017169,
+            "name": "Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1880.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1972.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2198.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (3 scheduled monuments within 2 km and 29 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 1164 m SSW) and Two bowl barrows on Stoke Down 650m south west of Foxhole Cottage (NHLE #1017169, 1880 m WNW)), the 1 m DTM isolates an elongated or oval mound (1.23\u00d7 axial elongation, 15 m\u00b2 footprint, ~4 m equivalent span) rising +0.77 m above its 16 m local trend surface with weathered scarp gradients of 0.110 (6.3\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.29 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8589,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.888807,
+          51.040054
+        ]
+      },
+      "properties": {
+        "easting": 407892.3,
+        "northing": 126750.1,
+        "lat": 51.040054,
+        "lon": -1.888807,
+        "os_grid_ref": "SU 07892 26750",
+        "confidence": 0.852,
+        "peak_prob": 0.8537,
+        "mean_prob": 0.8468,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 22.0,
+        "elongation": 1.21,
+        "est_local_relief_m": 0.81,
+        "max_positive_relief_m": 0.81,
+        "centroid_local_relief_m": 0.56,
+        "patch_min_relief_m": -0.04,
+        "est_surface_prominence_m": 0.25,
+        "mean_slope_tangent": 0.15,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8659,
+        "raw_tile_logit": 1.9209,
+        "window_bbox": [
+          407728,
+          126576,
+          407984,
+          126832
+        ],
+        "region_name": "test_landscape_E406000_N126000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E406000_N126000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003000,
+            "name": "Faulston pigeon house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1273.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1005626,
+            "name": "Round barrows S of Hare Warren",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1819.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1004696,
+            "name": "Neale's Barrow, round barrow",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2106.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1417594,
+            "name": "Hare Warren Control Station",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2169.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 29,
+          "prehistoric_within_5km": 17
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Situated in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire) within an active monument landscape (2 scheduled monuments within 2 km and 29 within 5 km, closest being Faulston pigeon house (NHLE #1003000, 1273 m SSW) and Round barrows S of Hare Warren (NHLE #1005626, 1819 m NNE)), the 1 m DTM isolates an elongated or oval mound (1.21\u00d7 axial elongation, 22 m\u00b2 footprint, ~5 m equivalent span) rising +0.81 m above its 16 m local trend surface with weathered scarp gradients of 0.150 (8.5\u00b0), morphologically consistent with a ploughed-down Neolithic long barrow, oval barrow, or bank-and-ditch mortuary enclosure. Moderate surface roughness (nDSM 0.25 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.852,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.293915,
+          53.960924
+        ]
+      },
+      "properties": {
+        "easting": 446425.6,
+        "northing": 451879.5,
+        "lat": 53.960924,
+        "lon": -1.293915,
+        "os_grid_ref": "SE 46426 51879",
+        "confidence": 0.9166,
+        "peak_prob": 0.9268,
+        "mean_prob": 0.8859,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 309.0,
+        "elongation": 1.18,
+        "est_local_relief_m": 2.2,
+        "max_positive_relief_m": 2.2,
+        "centroid_local_relief_m": 1.72,
+        "patch_min_relief_m": -0.48,
+        "est_surface_prominence_m": 0.61,
+        "mean_slope_tangent": 0.232,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/944321432",
+            "subtype": "landuse=construction",
+            "name": "Regency Place (Evans Homes)",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/1524469313",
+            "subtype": "building=detached",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 4.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469312",
+            "subtype": "building=detached",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469314",
+            "subtype": "building=detached",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469328",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469329",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 14.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469327",
+            "subtype": "building=house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469330",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 22.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469311",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 25.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469326",
+            "subtype": "building=house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 26.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469331",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 27.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469315",
+            "subtype": "building=detached",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 29.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469310",
+            "subtype": "building=semidetached_house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 31.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1524469334",
+            "subtype": "building=house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 33.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/29102603",
+            "subtype": "highway=unclassified",
+            "name": "South Field Lane",
+            "wikidata": null,
+            "distance_m": 33.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.61m, slope=0.23)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8644,
+        "raw_tile_logit": 1.9077,
+        "window_bbox": [
+          446384,
+          451744,
+          446640,
+          452000
+        ],
+        "region_name": "null_test_E446000_N450000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E446000_N450000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1021018,
+            "name": "Cattal Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2683.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1018133,
+            "name": "Site of medieval hall 130m south of Manor Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3776.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Northern England upland / valley terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 2,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the Northern England upland / valley terrace landscape, this 309 m\u00b2 topographic anomaly (+2.20 m local relief, 0.232 / 13.1\u00b0 mean scarp slope, nDSM 0.61 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Regency Place (Evans Homes)'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Cattal Bridge (NHLE #1021018, 2683 m NW) and Site of medieval hall 130m south of Manor Farm (NHLE #1018133, 3776 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9166,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.292973,
+          53.958255
+        ]
+      },
+      "properties": {
+        "easting": 446490.3,
+        "northing": 451583.0,
+        "lat": 53.958255,
+        "lon": -1.292973,
+        "os_grid_ref": "SE 46490 51583",
+        "confidence": 0.8839,
+        "peak_prob": 0.8906,
+        "mean_prob": 0.8639,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 171.0,
+        "elongation": 1.37,
+        "est_local_relief_m": 2.53,
+        "max_positive_relief_m": 2.53,
+        "centroid_local_relief_m": 1.71,
+        "patch_min_relief_m": -0.54,
+        "est_surface_prominence_m": 0.97,
+        "mean_slope_tangent": 0.302,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1524575607",
+            "subtype": "landuse=industrial",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/690712775",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.97m, slope=0.30)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8127,
+        "raw_tile_logit": 1.5078,
+        "window_bbox": [
+          446384,
+          451536,
+          446640,
+          451792
+        ],
+        "region_name": "null_test_E446000_N450000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E446000_N450000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1021018,
+            "name": "Cattal Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2960.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1018133,
+            "name": "Site of medieval hall 130m south of Manor Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3946.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Northern England upland / valley terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 2,
+          "prehistoric_within_5km": 0
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the Northern England upland / valley terrace landscape, this 171 m\u00b2 topographic anomaly (+2.53 m local relief, 0.302 / 16.8\u00b0 mean scarp slope, nDSM 0.97 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=industrial'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Cattal Bridge (NHLE #1021018, 2960 m NW) and Site of medieval hall 130m south of Manor Farm (NHLE #1018133, 3946 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8839,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.818787,
+          50.848309
+        ]
+      },
+      "properties": {
+        "easting": 483252.8,
+        "northing": 106085.5,
+        "lat": 50.848309,
+        "lon": -0.818787,
+        "os_grid_ref": "SU 83253 06085",
+        "confidence": 0.9798,
+        "peak_prob": 0.988,
+        "mean_prob": 0.955,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 505.0,
+        "elongation": 1.85,
+        "est_local_relief_m": 1.12,
+        "max_positive_relief_m": 1.12,
+        "centroid_local_relief_m": 1.08,
+        "patch_min_relief_m": -0.24,
+        "est_surface_prominence_m": 0.76,
+        "mean_slope_tangent": 0.151,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=0.76m, slope=0.15)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9552,
+        "raw_tile_logit": 3.1621,
+        "window_bbox": [
+          483152,
+          106000,
+          483408,
+          106256
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005833,
+            "name": "Chichester Dyke, sections in Little Cotfield Plantation",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 438.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1005857,
+            "name": "Chichester Dyke, Broyle earthwork, section extending 360yds (330m) SW of Broyle House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1215.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1003783,
+            "name": "Chichester Dyke: section 200yds (180m) long in Mouthey's Plantation, section 245yds (220m) long in Oakwood and section 100yds (90m) long SW of Oakwood House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1359.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1365.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 10,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 35,
+          "prehistoric_within_5km": 2
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 505 m\u00b2 topographic anomaly (+1.12 m local relief, 0.151 / 8.6\u00b0 mean scarp slope, nDSM 0.76 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke, sections in Little Cotfield Plantation (NHLE #1005833, 438 m NW) and Chichester Dyke, Broyle earthwork, section extending 360yds (330m) SW of Broyle House (NHLE #1005857, 1215 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9798,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.8295,
+          50.850865
+        ]
+      },
+      "properties": {
+        "easting": 482494.2,
+        "northing": 106357.7,
+        "lat": 50.850865,
+        "lon": -0.8295,
+        "os_grid_ref": "SU 82494 06358",
+        "confidence": 0.9716,
+        "peak_prob": 0.9792,
+        "mean_prob": 0.9489,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 208.0,
+        "elongation": 1.04,
+        "est_local_relief_m": 1.1,
+        "max_positive_relief_m": 1.1,
+        "centroid_local_relief_m": 0.8,
+        "patch_min_relief_m": -0.17,
+        "est_surface_prominence_m": 8.95,
+        "mean_slope_tangent": 0.114,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "relation/15994384(way/111804690)",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 1.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1182742808",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 12.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1182742806",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 16.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "node/10982836083",
+            "subtype": "natural=tree",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 17.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=8.9m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9383,
+        "raw_tile_logit": 2.8105,
+        "window_bbox": [
+          482384,
+          106192,
+          482640,
+          106448
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005833,
+            "name": "Chichester Dyke, sections in Little Cotfield Plantation",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 502.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1003783,
+            "name": "Chichester Dyke: section 200yds (180m) long in Mouthey's Plantation, section 245yds (220m) long in Oakwood and section 100yds (90m) long SW of Oakwood House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 553.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1094.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005858,
+            "name": "Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1383.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 8,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 40,
+          "prehistoric_within_5km": 5
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 208 m\u00b2 topographic anomaly (+1.10 m local relief, 0.114 / 6.5\u00b0 mean scarp slope, nDSM 8.95 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke, sections in Little Cotfield Plantation (NHLE #1005833, 502 m E) and Chichester Dyke: section 200yds (180m) long in Mouthey's Plantation, section 245yds (220m) long in Oakwood and section 100yds (90m) long SW of Oakwood House (NHLE #1003783, 553 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9716,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.814783,
+          50.859341
+        ]
+      },
+      "properties": {
+        "easting": 483515.0,
+        "northing": 107316.7,
+        "lat": 50.859341,
+        "lon": -0.814783,
+        "os_grid_ref": "SU 83515 07317",
+        "confidence": 0.9534,
+        "peak_prob": 0.9649,
+        "mean_prob": 0.919,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 362.0,
+        "elongation": 1.89,
+        "est_local_relief_m": 0.93,
+        "max_positive_relief_m": 0.93,
+        "centroid_local_relief_m": 0.39,
+        "patch_min_relief_m": -0.31,
+        "est_surface_prominence_m": 1.33,
+        "mean_slope_tangent": 0.09,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1182830489",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 10.8,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/128404889",
+            "subtype": "highway=track",
+            "name": "Chapel Lane",
+            "wikidata": null,
+            "distance_m": 31.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.33m, slope=0.09)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9143,
+        "raw_tile_logit": 2.4434,
+        "window_bbox": [
+          483344,
+          107152,
+          483600,
+          107408
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005858,
+            "name": "Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 386.0,
+            "bearing": "NW"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 666.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1005880,
+            "name": "Devil's Ditch, section extending 200yds (180m) E from Chapel Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 689.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005881,
+            "name": "A 362m length of Devil's Ditch running WNW from Chapel Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 746.0,
+            "bearing": "N"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 13,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 45,
+          "prehistoric_within_5km": 6
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 362 m\u00b2 topographic anomaly (+0.93 m local relief, 0.090 / 5.1\u00b0 mean scarp slope, nDSM 1.33 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse (NHLE #1005858, 386 m NW) and Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House (NHLE #1005859, 666 m W).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9534,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.829048,
+          50.865147
+        ]
+      },
+      "properties": {
+        "easting": 482500.8,
+        "northing": 107946.4,
+        "lat": 50.865147,
+        "lon": -0.829048,
+        "os_grid_ref": "SU 82501 07946",
+        "confidence": 0.9476,
+        "peak_prob": 0.9548,
+        "mean_prob": 0.9262,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 147.0,
+        "elongation": 1.19,
+        "est_local_relief_m": 1.12,
+        "max_positive_relief_m": 1.12,
+        "centroid_local_relief_m": 1.12,
+        "patch_min_relief_m": -0.16,
+        "est_surface_prominence_m": 0.22,
+        "mean_slope_tangent": 0.145,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1528296123",
+            "subtype": "barrier=fence",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.5,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8989,
+        "raw_tile_logit": 2.2539,
+        "window_bbox": [
+          482384,
+          107744,
+          482640,
+          108000
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005882,
+            "name": "Devil's Ditch, section extending 900yds (820m), Lye Wood, West Stoke",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 373.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 658.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1005858,
+            "name": "Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 810.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1005881,
+            "name": "A 362m length of Devil's Ditch running WNW from Chapel Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 899.0,
+            "bearing": "E"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 10,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 45,
+          "prehistoric_within_5km": 7
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 147 m\u00b2 topographic anomaly (+1.12 m local relief, 0.145 / 8.3\u00b0 mean scarp slope, nDSM 0.22 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'barrier=fence'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Devil's Ditch, section extending 900yds (820m), Lye Wood, West Stoke (NHLE #1005882, 373 m NNE) and Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House (NHLE #1005859, 658 m SSE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9476,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.834741,
+          50.855432
+        ]
+      },
+      "properties": {
+        "easting": 482117.2,
+        "northing": 106859.7,
+        "lat": 50.855432,
+        "lon": -0.834741,
+        "os_grid_ref": "SU 82117 06860",
+        "confidence": 0.9429,
+        "peak_prob": 0.9504,
+        "mean_prob": 0.9205,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 110.0,
+        "elongation": 1.11,
+        "est_local_relief_m": 1.22,
+        "max_positive_relief_m": 1.22,
+        "centroid_local_relief_m": 1.08,
+        "patch_min_relief_m": -0.31,
+        "est_surface_prominence_m": 1.19,
+        "mean_slope_tangent": 0.182,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "relation/15994384(way/111804690)",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/1182731022",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 10.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.19m, slope=0.18)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8928,
+        "raw_tile_logit": 2.1855,
+        "window_bbox": [
+          482000,
+          106768,
+          482256,
+          107024
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003783,
+            "name": "Chichester Dyke: section 200yds (180m) long in Mouthey's Plantation, section 245yds (220m) long in Oakwood and section 100yds (90m) long SW of Oakwood House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 320.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 908.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1005833,
+            "name": "Chichester Dyke, sections in Little Cotfield Plantation",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 970.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1005858,
+            "name": "Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1285.0,
+            "bearing": "ENE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 8,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 40,
+          "prehistoric_within_5km": 5
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 110 m\u00b2 topographic anomaly (+1.22 m local relief, 0.182 / 10.3\u00b0 mean scarp slope, nDSM 1.19 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke: section 200yds (180m) long in Mouthey's Plantation, section 245yds (220m) long in Oakwood and section 100yds (90m) long SW of Oakwood House (NHLE #1003783, 320 m SSW) and Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House (NHLE #1005859, 908 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9429,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.81437,
+          50.860723
+        ]
+      },
+      "properties": {
+        "easting": 483541.6,
+        "northing": 107470.9,
+        "lat": 50.860723,
+        "lon": -0.81437,
+        "os_grid_ref": "SU 83542 07471",
+        "confidence": 0.8847,
+        "peak_prob": 0.8883,
+        "mean_prob": 0.8738,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 57.0,
+        "elongation": 1.03,
+        "est_local_relief_m": 0.89,
+        "max_positive_relief_m": 0.89,
+        "centroid_local_relief_m": 0.89,
+        "patch_min_relief_m": -0.16,
+        "est_surface_prominence_m": 0.09,
+        "mean_slope_tangent": 0.154,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/828004740",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 11.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8077,
+        "raw_tile_logit": 1.4741,
+        "window_bbox": [
+          483344,
+          107344,
+          483600,
+          107600
+        ],
+        "region_name": "test_landscape_E482000_N106000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E482000_N106000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005858,
+            "name": "Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 346.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1005880,
+            "name": "Devil's Ditch, section extending 200yds (180m) E from Chapel Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 533.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005881,
+            "name": "A 362m length of Devil's Ditch running WNW from Chapel Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 601.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1005859,
+            "name": "Chichester Dyke, earthwork extending 300yds (270m) W of Densworth House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 693.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 13,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 48,
+          "prehistoric_within_5km": 7
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 57 m\u00b2 topographic anomaly (+0.89 m local relief, 0.154 / 8.8\u00b0 mean scarp slope, nDSM 0.09 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke, earthwork extending 250yds (230m) in Densworth Copse (NHLE #1005858, 346 m WNW) and Devil's Ditch, section extending 200yds (180m) E from Chapel Lane (NHLE #1005880, 533 m NNE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8847,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.37584,
+          50.927128
+        ]
+      },
+      "properties": {
+        "easting": 567064.2,
+        "northing": 116873.6,
+        "lat": 50.927128,
+        "lon": 0.37584,
+        "os_grid_ref": "TQ 67064 16874",
+        "confidence": 0.9499,
+        "peak_prob": 0.9617,
+        "mean_prob": 0.9145,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 532.0,
+        "elongation": 1.39,
+        "est_local_relief_m": 1.72,
+        "max_positive_relief_m": 1.72,
+        "centroid_local_relief_m": 0.47,
+        "patch_min_relief_m": -0.36,
+        "est_surface_prominence_m": 1.29,
+        "mean_slope_tangent": 0.107,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.29m, slope=0.11)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9229,
+        "raw_tile_logit": 2.5625,
+        "window_bbox": [
+          566960,
+          116768,
+          567216,
+          117024
+        ],
+        "region_name": "null_test_E566000_N116000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E566000_N116000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002219,
+            "name": "Ashburnam iron furnace site",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1498.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1002252,
+            "name": "Panningridge iron furnace site",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1794.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1002246,
+            "name": "Holy Trinity Priory",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3170.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 532 m\u00b2 topographic anomaly (+1.72 m local relief, 0.107 / 6.1\u00b0 mean scarp slope, nDSM 1.29 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Ashburnam iron furnace site (NHLE #1002219, 1498 m E) and Panningridge iron furnace site (NHLE #1002252, 1794 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9499,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.538794,
+          54.260588
+        ]
+      },
+      "properties": {
+        "easting": 430141.3,
+        "northing": 485089.2,
+        "lat": 54.260588,
+        "lon": -1.538794,
+        "os_grid_ref": "SE 30141 85089",
+        "confidence": 0.9518,
+        "peak_prob": 0.9625,
+        "mean_prob": 0.9197,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 307.0,
+        "elongation": 1.17,
+        "est_local_relief_m": 2.33,
+        "max_positive_relief_m": 2.33,
+        "centroid_local_relief_m": 2.21,
+        "patch_min_relief_m": -0.05,
+        "est_surface_prominence_m": 8.92,
+        "mean_slope_tangent": 0.216,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/430858444",
+            "subtype": "landuse=farmyard",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=8.9m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9145,
+        "raw_tile_logit": 2.4453,
+        "window_bbox": [
+          430000,
+          484960,
+          430256,
+          485216
+        ],
+        "region_name": "test_landscape_E430000_N484000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E430000_N484000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1021211,
+            "name": "Healam Bridge Roman fort and vicus",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2543.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1021137,
+            "name": "Swainby medieval settlement, Premonstratensian abbey, grange and field system, immediately east of Swainby Grove",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3475.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1002881,
+            "name": "Roman buildings and field system in Snape",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3608.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Ure Valley & Mowbray / Masham fluvio-glacial terrace (North Yorkshire)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 1
+        },
+        "county": "North Yorkshire",
+        "arch_context_note": "Located in the Ure Valley & Mowbray / Masham fluvio-glacial terrace (North Yorkshire), this 307 m\u00b2 topographic anomaly (+2.33 m local relief, 0.216 / 12.2\u00b0 mean scarp slope, nDSM 8.92 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=farmyard'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Healam Bridge Roman fort and vicus (NHLE #1021211, 2543 m SE) and Swainby medieval settlement, Premonstratensian abbey, grange and field system, immediately east of Swainby Grove (NHLE #1021137, 3475 m E).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9518,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.745386,
+          52.005973
+        ]
+      },
+      "properties": {
+        "easting": 417574.4,
+        "northing": 234201.3,
+        "lat": 52.005973,
+        "lon": -1.745386,
+        "os_grid_ref": "SP 17574 34201",
+        "confidence": 0.9514,
+        "peak_prob": 0.9598,
+        "mean_prob": 0.9263,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 250.0,
+        "elongation": 1.15,
+        "est_local_relief_m": 1.66,
+        "max_positive_relief_m": 1.66,
+        "centroid_local_relief_m": 1.5,
+        "patch_min_relief_m": -0.11,
+        "est_surface_prominence_m": 0.37,
+        "mean_slope_tangent": 0.214,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/136880263",
+            "subtype": "landuse=farmyard",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+1.66m, slope=0.21)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9092,
+        "raw_tile_logit": 2.377,
+        "window_bbox": [
+          417344,
+          234000,
+          417600,
+          234256
+        ],
+        "region_name": "test_landscape_E416000_N234000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E416000_N234000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1003427,
+            "name": "Tithe barn",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1787.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1016079,
+            "name": "Bourton Clump long barrow",
+            "cls_id": 1,
+            "cls_label": "Neolithic long barrow / chambered tomb",
+            "distance_m": 1950.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1014397,
+            "name": "Wayside cross at Aston Magna",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2908.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1016081,
+            "name": "Moated site at Aston Magna",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3029.0,
+            "bearing": "ENE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire)",
+          "nhle_within_2km": 2,
+          "prehistoric_within_2km": 1,
+          "nhle_within_5km": 11,
+          "prehistoric_within_5km": 4
+        },
+        "county": "Gloucestershire",
+        "arch_context_note": "Located in the Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire), this 250 m\u00b2 topographic anomaly (+1.66 m local relief, 0.214 / 12.1\u00b0 mean scarp slope, nDSM 0.37 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=farmyard'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Tithe barn (NHLE #1003427, 1787 m S) and Bourton Clump long barrow (NHLE #1016079, 1950 m SSW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9514,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.745669,
+          52.015726
+        ]
+      },
+      "properties": {
+        "easting": 417551.2,
+        "northing": 235286.1,
+        "lat": 52.015726,
+        "lon": -1.745669,
+        "os_grid_ref": "SP 17551 35286",
+        "confidence": 0.9359,
+        "peak_prob": 0.9464,
+        "mean_prob": 0.9044,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 195.0,
+        "elongation": 1.12,
+        "est_local_relief_m": 0.34,
+        "max_positive_relief_m": 0.34,
+        "centroid_local_relief_m": 0.32,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.044,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8599,
+        "raw_tile_logit": 1.8682,
+        "window_bbox": [
+          417344,
+          235152,
+          417600,
+          235408
+        ],
+        "region_name": "test_landscape_E416000_N234000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E416000_N234000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014397,
+            "name": "Wayside cross at Aston Magna",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2563.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1016081,
+            "name": "Moated site at Aston Magna",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2724.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1018137,
+            "name": "Upper Ditchford medieval settlement",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2843.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1003427,
+            "name": "Tithe barn",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2869.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 12,
+          "prehistoric_within_5km": 3
+        },
+        "county": "Gloucestershire",
+        "arch_context_note": "Located in the Cotswold oolitic limestone dip-slope (Gloucestershire / West Oxfordshire), this 195 m\u00b2 topographic anomaly (+0.34 m local relief, 0.044 / 2.5\u00b0 mean scarp slope, nDSM 0.01 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'LiDAR coverage boundary or interpolated TIN facet'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Wayside cross at Aston Magna (NHLE #1014397, 2563 m E) and Moated site at Aston Magna (NHLE #1016081, 2724 m E).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9359,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.764585,
+          55.065231
+        ]
+      },
+      "properties": {
+        "easting": 415133.2,
+        "northing": 574553.9,
+        "lat": 55.065231,
+        "lon": -1.764585,
+        "os_grid_ref": "NZ 15133 74554",
+        "confidence": 0.9837,
+        "peak_prob": 0.9929,
+        "mean_prob": 0.9562,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 649.0,
+        "elongation": 1.32,
+        "est_local_relief_m": 3.09,
+        "max_positive_relief_m": 3.09,
+        "centroid_local_relief_m": 2.77,
+        "patch_min_relief_m": -0.48,
+        "est_surface_prominence_m": 1.13,
+        "mean_slope_tangent": 0.317,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/clamp_or_scrub",
+            "subtype": "surface_vegetation_or_clamp (nDSM=1.13m, slope=0.32)",
+            "name": "Surface vegetation scrub, felled timber, or agricultural clamp",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9636,
+        "raw_tile_logit": 3.3867,
+        "window_bbox": [
+          414960,
+          574384,
+          415216,
+          574640
+        ],
+        "region_name": "null_test_E414000_N574000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E414000_N574000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017042,
+            "name": "Vicar's Pele: a medieval tower house on north side of Main Street",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2176.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 649 m\u00b2 topographic anomaly (+3.09 m local relief, 0.317 / 17.6\u00b0 mean scarp slope, nDSM 1.13 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Surface vegetation scrub, felled timber, or agricultural clamp'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Vicar's Pele: a medieval tower house on north side of Main Street (NHLE #1017042, 2176 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9837,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.761249,
+          55.064777
+        ]
+      },
+      "properties": {
+        "easting": 415346.5,
+        "northing": 574504.1,
+        "lat": 55.064777,
+        "lon": -1.761249,
+        "os_grid_ref": "NZ 15346 74504",
+        "confidence": 0.9678,
+        "peak_prob": 0.9786,
+        "mean_prob": 0.9352,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 159.0,
+        "elongation": 1.07,
+        "est_local_relief_m": 0.27,
+        "max_positive_relief_m": 0.27,
+        "centroid_local_relief_m": 0.17,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 0.43,
+        "mean_slope_tangent": 0.034,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/228452919",
+            "subtype": "power=line",
+            "name": "National Grid Blyth-Heddon Tee",
+            "wikidata": null,
+            "distance_m": 2.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "node/1818769116",
+            "subtype": "power=tower",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 4.2,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9276,
+        "raw_tile_logit": 2.6328,
+        "window_bbox": [
+          415152,
+          574384,
+          415408,
+          574640
+        ],
+        "region_name": "null_test_E414000_N574000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E414000_N574000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017042,
+            "name": "Vicar's Pele: a medieval tower house on north side of Main Street",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2010.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 159 m\u00b2 topographic anomaly (+0.27 m local relief, 0.034 / 1.9\u00b0 mean scarp slope, nDSM 0.43 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'National Grid Blyth-Heddon Tee'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Vicar's Pele: a medieval tower house on north side of Main Street (NHLE #1017042, 2010 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9678,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.77173,
+          55.073118
+        ]
+      },
+      "properties": {
+        "easting": 414674.0,
+        "northing": 575430.1,
+        "lat": 55.073118,
+        "lon": -1.77173,
+        "os_grid_ref": "NZ 14674 75430",
+        "confidence": 0.9474,
+        "peak_prob": 0.9569,
+        "mean_prob": 0.9188,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 197.0,
+        "elongation": 1.13,
+        "est_local_relief_m": 1.69,
+        "max_positive_relief_m": 1.69,
+        "centroid_local_relief_m": 1.52,
+        "patch_min_relief_m": -0.31,
+        "est_surface_prominence_m": 6.62,
+        "mean_slope_tangent": 0.153,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/635528039",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=6.6m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.905,
+        "raw_tile_logit": 2.3252,
+        "window_bbox": [
+          414576,
+          575344,
+          414832,
+          575600
+        ],
+        "region_name": "null_test_E414000_N574000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E414000_N574000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017042,
+            "name": "Vicar's Pele: a medieval tower house on north side of Main Street",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3154.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1006421,
+            "name": "Middle Newham deserted village",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3621.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1017737,
+            "name": "Ogle moated site, medieval village and open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3811.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 197 m\u00b2 topographic anomaly (+1.69 m local relief, 0.153 / 8.7\u00b0 mean scarp slope, nDSM 6.62 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Vicar's Pele: a medieval tower house on north side of Main Street (NHLE #1017042, 3154 m SE) and Middle Newham deserted village (NHLE #1006421, 3621 m WNW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9474,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.78079,
+          55.077503
+        ]
+      },
+      "properties": {
+        "easting": 414094.0,
+        "northing": 575916.2,
+        "lat": 55.077503,
+        "lon": -1.78079,
+        "os_grid_ref": "NZ 14094 75916",
+        "confidence": 0.9307,
+        "peak_prob": 0.9413,
+        "mean_prob": 0.8987,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 340.0,
+        "elongation": 1.04,
+        "est_local_relief_m": 5.73,
+        "max_positive_relief_m": 5.73,
+        "centroid_local_relief_m": 5.6,
+        "patch_min_relief_m": -1.11,
+        "est_surface_prominence_m": 4.04,
+        "mean_slope_tangent": 0.503,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/137160037",
+            "subtype": "building=residential",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 19.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/137160076",
+            "subtype": "building=stable",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1055480829",
+            "subtype": "leisure=pitch",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 21.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=4.0m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8365,
+        "raw_tile_logit": 1.6792,
+        "window_bbox": [
+          414000,
+          575744,
+          414256,
+          576000
+        ],
+        "region_name": "null_test_E414000_N574000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E414000_N574000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1006421,
+            "name": "Middle Newham deserted village",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2951.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1017737,
+            "name": "Ogle moated site, medieval village and open field system",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3235.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1017042,
+            "name": "Vicar's Pele: a medieval tower house on north side of Main Street",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3890.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 340 m\u00b2 topographic anomaly (+5.73 m local relief, 0.503 / 26.7\u00b0 mean scarp slope, nDSM 4.04 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'building=residential'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Middle Newham deserted village (NHLE #1006421, 2951 m W) and Ogle moated site, medieval village and open field system (NHLE #1017737, 3235 m N).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9307,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.780025,
+          55.061452
+        ]
+      },
+      "properties": {
+        "easting": 414148.5,
+        "northing": 574130.1,
+        "lat": 55.061452,
+        "lon": -1.780025,
+        "os_grid_ref": "NZ 14148 74130",
+        "confidence": 0.9186,
+        "peak_prob": 0.9279,
+        "mean_prob": 0.8907,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 304.0,
+        "elongation": 1.45,
+        "est_local_relief_m": 0.99,
+        "max_positive_relief_m": 0.99,
+        "centroid_local_relief_m": 0.91,
+        "patch_min_relief_m": -0.47,
+        "est_surface_prominence_m": 0.1,
+        "mean_slope_tangent": 0.12,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/155292336",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/201338917",
+            "subtype": "highway=unclassified",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 19.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/272890844",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 32.5,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8677,
+        "raw_tile_logit": 1.9375,
+        "window_bbox": [
+          414000,
+          574000,
+          414256,
+          574256
+        ],
+        "region_name": "null_test_E414000_N574000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E414000_N574000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1017042,
+            "name": "Vicar's Pele: a medieval tower house on north side of Main Street",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2659.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1006421,
+            "name": "Middle Newham deserted village",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3725.0,
+            "bearing": "NW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "North Pennine & Northumberland sandstone/whin upland",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Northumberland",
+        "arch_context_note": "Located in the North Pennine & Northumberland sandstone/whin upland, this 304 m\u00b2 topographic anomaly (+0.99 m local relief, 0.120 / 6.8\u00b0 mean scarp slope, nDSM 0.10 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Vicar's Pele: a medieval tower house on north side of Main Street (NHLE #1017042, 2659 m ESE) and Middle Newham deserted village (NHLE #1006421, 3725 m NW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9186,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.888184,
+          51.154361
+        ]
+      },
+      "properties": {
+        "easting": 407916.7,
+        "northing": 139462.1,
+        "lat": 51.154361,
+        "lon": -1.888184,
+        "os_grid_ref": "SU 07917 39462",
+        "confidence": 0.9683,
+        "peak_prob": 0.9783,
+        "mean_prob": 0.9381,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 347.0,
+        "elongation": 2.47,
+        "est_local_relief_m": 1.73,
+        "max_positive_relief_m": 1.73,
+        "centroid_local_relief_m": 0.18,
+        "patch_min_relief_m": -0.16,
+        "est_surface_prominence_m": 15.97,
+        "mean_slope_tangent": 0.178,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "relation/7942496(way/38355261)",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=16.0m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9413,
+        "raw_tile_logit": 2.8672,
+        "window_bbox": [
+          407744,
+          139344,
+          408000,
+          139600
+        ],
+        "region_name": "test_landscape_E406000_N138000",
+        "passes_fpr_0_01": true,
+        "square_id": "test_landscape_E406000_N138000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1015223,
+            "name": "Bowl barrow 470m south east of Druid's Head Farm",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1623.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1015224,
+            "name": "Bowl barrow 540m south east of Druid's Head Farm",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 1685.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1005686,
+            "name": "Stapleford Castle",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1897.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1015019,
+            "name": "Winterbourne Stoke West round barrow cemetery, The Coniger enclosure and section of linear boundary earthwork",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 2516.0,
+            "bearing": "N"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire)",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 2,
+          "nhle_within_5km": 117,
+          "prehistoric_within_5km": 106
+        },
+        "county": "Wiltshire",
+        "arch_context_note": "Located in the Wessex Chalk \u2014 Salisbury Plain, Wylye & Bourne valleys (Wiltshire), this 347 m\u00b2 topographic anomaly (+1.73 m local relief, 0.178 / 10.1\u00b0 mean scarp slope, nDSM 15.97 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Bowl barrow 470m south east of Druid's Head Farm (NHLE #1015223, 1623 m SE) and Bowl barrow 540m south east of Druid's Head Farm (NHLE #1015224, 1685 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9683,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.508082,
+          51.331834
+        ]
+      },
+      "properties": {
+        "easting": 364698.7,
+        "northing": 159315.9,
+        "lat": 51.331834,
+        "lon": -2.508082,
+        "os_grid_ref": "ST 64699 59316",
+        "confidence": 0.9176,
+        "peak_prob": 0.9279,
+        "mean_prob": 0.887,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 342.0,
+        "elongation": 1.2,
+        "est_local_relief_m": 3.25,
+        "max_positive_relief_m": 3.25,
+        "centroid_local_relief_m": 2.39,
+        "patch_min_relief_m": -0.67,
+        "est_surface_prominence_m": 18.04,
+        "mean_slope_tangent": 0.162,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1358409614",
+            "subtype": "natural=wood",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/1241394404",
+            "subtype": "leisure=pitch",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 30.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/ndsm",
+            "subtype": "canopy_or_structure (nDSM=18.0m)",
+            "name": "Tall tree canopy or standing structure",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8548,
+        "raw_tile_logit": 1.8247,
+        "window_bbox": [
+          364576,
+          159152,
+          364832,
+          159408
+        ],
+        "region_name": "null_test_E364000_N158000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E364000_N158000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1004525,
+            "name": "Slight univallate hillfort 125m west of Tunley Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3650.0,
+            "bearing": "E"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Mendip Carboniferous limestone plateau (Somerset)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Somerset",
+        "arch_context_note": "Located in the Mendip Carboniferous limestone plateau (Somerset), this 342 m\u00b2 topographic anomaly (+3.25 m local relief, 0.162 / 9.2\u00b0 mean scarp slope, nDSM 18.04 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=wood'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Slight univallate hillfort 125m west of Tunley Farm (NHLE #1004525, 3650 m E).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9176,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -4.741996,
+          50.614835
+        ]
+      },
+      "properties": {
+        "easting": 206111.6,
+        "northing": 83047.7,
+        "lat": 50.614835,
+        "lon": -4.741996,
+        "os_grid_ref": "SX 06112 83048",
+        "confidence": 0.9087,
+        "peak_prob": 0.9151,
+        "mean_prob": 0.8893,
+        "predicted_class_id": 3,
+        "predicted_class": "round_barrow_cairn",
+        "target_domain": "prehistoric",
+        "area_m2": 132.0,
+        "elongation": 1.1,
+        "est_local_relief_m": 0.82,
+        "max_positive_relief_m": 0.82,
+        "centroid_local_relief_m": 0.72,
+        "patch_min_relief_m": -0.02,
+        "est_surface_prominence_m": 0.48,
+        "mean_slope_tangent": 0.089,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/142208062",
+            "subtype": "highway=secondary",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 20.4,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8179,
+        "raw_tile_logit": 1.5437,
+        "window_bbox": [
+          206000,
+          82960,
+          206256,
+          83216
+        ],
+        "region_name": "test_landscape_E206000_N82000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E206000_N82000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1004273,
+            "name": "Round 275m SSE of Little Delinuth",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2004.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1004274,
+            "name": "Round called Castle Goff",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2245.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1016155,
+            "name": "Churchyard cross in the cemetery at St Teath, 60m north west of the church",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2423.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1018207,
+            "name": "The Castle Goff Stone and Valley Truckle Cross in St Julitta's churchyard",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2797.0,
+            "bearing": "ESE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Bodmin Moor granite upland & moorland fringe (Cornwall)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 13,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Cornwall",
+        "arch_context_note": "Located in the Bodmin Moor granite upland & moorland fringe (Cornwall), this 132 m\u00b2 topographic anomaly (+0.82 m local relief, 0.089 / 5.1\u00b0 mean scarp slope, nDSM 0.48 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=secondary'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Round 275m SSE of Little Delinuth (NHLE #1004273, 2004 m E) and Round called Castle Goff (NHLE #1004274, 2245 m ESE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9087,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.806567,
+          50.846538
+        ]
+      },
+      "properties": {
+        "easting": 484116.2,
+        "northing": 105902.3,
+        "lat": 50.846538,
+        "lon": -0.806567,
+        "os_grid_ref": "SU 84116 05902",
+        "confidence": 0.9125,
+        "peak_prob": 0.9195,
+        "mean_prob": 0.8916,
+        "predicted_class_id": 1,
+        "predicted_class": "megalithic_tomb_long_barrow",
+        "target_domain": "prehistoric",
+        "area_m2": 91.0,
+        "elongation": 1.12,
+        "est_local_relief_m": 0.37,
+        "max_positive_relief_m": 0.37,
+        "centroid_local_relief_m": 0.29,
+        "patch_min_relief_m": -0.06,
+        "est_surface_prominence_m": 0.35,
+        "mean_slope_tangent": 0.054,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "node/11019722870",
+            "subtype": "natural=tree",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8566,
+        "raw_tile_logit": 1.8398,
+        "window_bbox": [
+          484000,
+          105744,
+          484256,
+          106000
+        ],
+        "region_name": "test_landscape_E484000_N104000",
+        "passes_fpr_0_01": false,
+        "square_id": "test_landscape_E484000_N104000",
+        "sampling_stream": "heldout_test_landscape",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1005857,
+            "name": "Chichester Dyke, Broyle earthwork, section extending 360yds (330m) SW of Broyle House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 801.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1005856,
+            "name": "Chichester Dyke, Broyle earthwork, section extending 360yds (330m) S of West Broyle House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 983.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1005855,
+            "name": "Chichester Dyke, section of Broyle earthwork, extending 150yds (140m) through Plain Wood",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1141.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1005829,
+            "name": "Fishbourne Roman site",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1152.0,
+            "bearing": "S"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "South Downs Upper Chalk escarpment & dip-slope (West Sussex)",
+          "nhle_within_2km": 9,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 31,
+          "prehistoric_within_5km": 0
+        },
+        "county": "West Sussex",
+        "arch_context_note": "Located in the South Downs Upper Chalk escarpment & dip-slope (West Sussex), this 91 m\u00b2 topographic anomaly (+0.37 m local relief, 0.054 / 3.1\u00b0 mean scarp slope, nDSM 0.35 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=tree'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Chichester Dyke, Broyle earthwork, section extending 360yds (330m) SW of Broyle House (NHLE #1005857, 801 m NNE) and Chichester Dyke, Broyle earthwork, section extending 360yds (330m) S of West Broyle House (NHLE #1005856, 983 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9125,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     }

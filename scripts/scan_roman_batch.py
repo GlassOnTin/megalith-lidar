@@ -54,7 +54,7 @@ def run_roman_scan(
     completed.sort(key=lambda q: (_sq_priority(q), q["square_id"]))
 
     device = torch.device(device_str if torch.cuda.is_available() else "cpu")
-    ckpt = torch.load(roman_ckpt_path, map_location=device, weights_only=False)
+    ckpt = torch.load(roman_ckpt_path, map_location="cpu", weights_only=False)
     model = MegalithUNet(in_channels=6, num_classes=4, pretrained=False).to(device)
     model.load_state_dict(ckpt["model_state_dict"])
     model.eval()
@@ -134,7 +134,9 @@ def run_roman_scan(
                         copied_pngs.add(diag_name)
                 all_roman_features.append(feat)
 
-    del model
+    import gc
+    del model, ckpt
+    gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 

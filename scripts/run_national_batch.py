@@ -772,7 +772,7 @@ def main() -> None:
         queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
+    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
 
     model = MegalithUNet(
         in_channels=int(ckpt.get("in_channels", 6)),
@@ -792,6 +792,7 @@ def main() -> None:
 
     channel_mean = np.array(ckpt["channel_mean"], dtype=np.float32)
     channel_std = np.array(ckpt["channel_std"], dtype=np.float32)
+    del ckpt
 
     if args.rescore_completed:
         completed_items = []
@@ -865,6 +866,7 @@ def main() -> None:
         if expand_national_queue_if_needed(queue_state, catalog):
             queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
+        model.to(device)
         scanned_now = 0
         for item in queue_state["queue"]:
             if args.rescore_completed:
@@ -955,6 +957,9 @@ def main() -> None:
         )
 
         if args.roman_enclosure_per_cycle > 0:
+            model.cpu()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
             if roman_ckpt.exists():
                 rom_sum = run_roman_scan(
                     data_dir=args.data_dir,
