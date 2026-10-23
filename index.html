@@ -828,10 +828,16 @@
               Aerial / Cropmark Orthophoto basemap
             </label>
             <span class="muted" style="font-size:12px;">
-              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Held-Out Monument Landscape Square ·
-              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Uniform National Null Square ·
-              <span class="dot" style="background:var(--gold);"></span> Detection in Active Tab
+              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Held-Out Monument Square ·
+              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> National Null Square
             </span>
+          </div>
+          <div id="mapScoreScaleLegend" style="display:flex;align-items:center;gap:6px;font-size:11.5px;" class="muted">
+            <span>Detection Score:</span>
+            <span id="scoreScaleMinLbl" style="font-variant-numeric:tabular-nums;">0.75</span>
+            <span style="display:inline-block;width:96px;height:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.22);background:linear-gradient(90deg, rgba(168,85,247,0.38) 0%, rgba(249,115,22,0.72) 50%, rgba(254,240,138,1.0) 100%);"></span>
+            <span id="scoreScaleMaxLbl" style="font-variant-numeric:tabular-nums;">0.99</span>
+            <span style="font-size:11px;">(size &amp; opacity scaled)</span>
           </div>
         </div>
         <div id="map"></div>
@@ -966,6 +972,32 @@
       if (cat === "rediscovered_osm_archaeology") return "#00d2ff";
       if (cat === "flagged_modern_or_karst_confounder") return "#ff6e40";
       return "#ffd600";
+    }
+
+    function scoreScaledStyle(score, sMin, sMax) {
+      const span = Math.max(sMax - sMin, 0.02);
+      const t = Math.max(0.0, Math.min(1.0, ((score || 0) - sMin) / span));
+      // Smooth 4-stop perceptual ramp: violet (#9333ea) -> coral-red (#f97316) -> gold (#facc15) -> incandescent yellow-white (#fef08a)
+      const stops = [
+        [147, 51, 234],
+        [249, 115, 22],
+        [250, 204, 21],
+        [254, 240, 138]
+      ];
+      const pos = t * (stops.length - 1);
+      const i0 = Math.min(stops.length - 2, Math.floor(pos));
+      const f = pos - i0;
+      const r = Math.round(stops[i0][0] + f * (stops[i0 + 1][0] - stops[i0][0]));
+      const g = Math.round(stops[i0][1] + f * (stops[i0 + 1][1] - stops[i0][1]));
+      const b = Math.round(stops[i0][2] + f * (stops[i0 + 1][2] - stops[i0][2]));
+      return {
+        fillColor: `rgb(${r}, ${g}, ${b})`,
+        fillOpacity: +(0.34 + 0.64 * Math.pow(t, 0.85)).toFixed(2),
+        radius: +(4.5 + 5.0 * Math.pow(t, 1.15)).toFixed(1),
+        strokeColor: t >= 0.82 ? "#ffffff" : "#0f1217",
+        weight: t >= 0.82 ? 1.8 : 1.1,
+        normT: t
+      };
     }
 
     function categoryBadge(cat) {
@@ -1603,26 +1635,48 @@
         }
       });
 
-      filtered.forEach((f) => {
+      let sMin = 0.70;
+      let sMax = 0.99;
+      if (filtered.length > 0) {
+        const scores = filtered.map((f) => Number(f.properties.confidence || 0)).sort((a, b) => a - b);
+        sMin = scores[Math.floor(scores.length * 0.02)];
+        sMax = scores[Math.min(scores.length - 1, Math.ceil(scores.length * 0.98))];
+        if (sMax - sMin < 0.03) {
+          sMin = Math.max(0.0, sMax - 0.10);
+        }
+      }
+      const minLbl = document.getElementById("scoreScaleMinLbl");
+      const maxLbl = document.getElementById("scoreScaleMaxLbl");
+      if (minLbl) minLbl.textContent = sMin.toFixed(2);
+      if (maxLbl) maxLbl.textContent = sMax.toFixed(2);
+
+      // Draw markers on the map in ascending confidence order so highest-score markers always sit on top
+      const mapOrdered = filtered.slice().sort((a, b) => (a.properties.confidence || 0) - (b.properties.confidence || 0));
+      mapOrdered.forEach((f) => {
         const p = f.properties;
-        const key = featureKey(p);
-        const color = categoryColor(p.context_category);
+        const st = scoreScaledStyle(p.confidence, sMin, sMax);
         const marker = L.circleMarker([p.lat, p.lon], {
           pane: "candidatesPane",
-          radius: 8,
-          color: "#0f1217",
-          weight: 1.5,
-          fillColor: color,
-          fillOpacity: 0.95
+          radius: st.radius,
+          color: st.strokeColor,
+          weight: st.weight,
+          fillColor: st.fillColor,
+          fillOpacity: st.fillOpacity
         });
         marker.bindTooltip(
-          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: ${p.confidence.toFixed(3)} · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m<br/><em>Click to select row &amp; view 4-panel LiDAR</em>`
+          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m<br/><em>Click to select row &amp; view 6-panel LiDAR + Cropmarks</em>`
         );
         marker.on("click", (ev) => {
           L.DomEvent.stopPropagation(ev);
           selectCandidate(p, true, true);
         });
         marker.addTo(markersLayer);
+      });
+
+      filtered.forEach((f) => {
+        const p = f.properties;
+        const key = featureKey(p);
+        const st = scoreScaledStyle(p.confidence, sMin, sMax);
 
         const rowCopyText = `${p.os_grid_ref} (${p.county || "England"}) | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
         const tr = document.createElement("tr");
@@ -1638,7 +1692,7 @@
             ${p.county ? `<div class="muted" style="font-size:11px;margin-top:2px;">${p.county}</div>` : ""}
           </td>
           <td>${formatClass(p.predicted_class)}</td>
-          <td><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && Math.abs(p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : ""}</td>
+          <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${st.fillColor};opacity:${Math.max(0.45, st.fillOpacity)};margin-right:6px;vertical-align:middle;border:1px solid rgba(255,255,255,0.28);"></span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && Math.abs(p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : ""}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
           <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}</td>
