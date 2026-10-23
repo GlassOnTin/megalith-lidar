@@ -62,7 +62,7 @@ def run_enclosure_scan(
     calibrator = PlattCalibrator.from_dict(ckpt["calibrator"])
     op_points = ckpt["val_thresholds"]
     th_005 = float(op_points["fpr_0.05"]["threshold"])
-    th_001 = float(op_points["fpr_0.01"]["threshold"])
+    th_001 = min(float(op_points["fpr_0.01"]["threshold"]), 0.72)
     pixel_th_005 = min(float(ckpt.get("val_pixel_threshold_fpr05", 0.72)), 0.78)
     pixel_th_001 = max(pixel_th_005, 0.82)
 

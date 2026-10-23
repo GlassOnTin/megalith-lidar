@@ -621,9 +621,51 @@ def annotate_candidates_with_spatial_context(
         centroid_rel_m = float(cand.get("centroid_local_relief_m", rel_m))
         patch_min_rel_m = float(cand.get("patch_min_relief_m", 0.0))
         slope_m = float(cand.get("mean_slope_tangent", 0.08))
+        area_m2 = float(cand.get("area_m2", 400.0))
+        elong_m = float(cand.get("elongation", 1.2))
         has_tin_facet = bool(cand.get("has_lidar_tin_facet", False))
 
-        if not is_roman and ndsm_m >= max_canopy_ndsm_m:
+        if is_enclosure:
+            if area_m2 > 8500.0 or area_m2 < 300.0:
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/whole_tile_blob",
+                        "subtype": f"oversized_floodplain_or_moorland_blob (area={area_m2:.0f}m2)",
+                        "name": "Oversized floodplain terrace or whole-tile texture blob",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+            elif (
+                slope_m > 0.115
+                or max_pos_rel_m > 1.90
+                or abs(rel_m) > 1.90
+                or patch_min_rel_m <= -0.60
+                or elong_m > 1.55
+            ):
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/scarp_or_meander",
+                        "subtype": f"river_meander_or_lynchet_scarp (relief={rel_m:+.2f}m, slope={slope_m:.3f}, elong={elong_m:.2f})",
+                        "name": "River meander bank, quarry scarp, or linear field lynchet",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+            elif ndsm_m > 0.45:
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/ndsm",
+                        "subtype": f"canopy_or_structure (nDSM={ndsm_m:.2f}m)",
+                        "name": "Tree canopy or standing structure",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+        elif not is_roman and ndsm_m >= max_canopy_ndsm_m:
             osm_conf.append(
                 {
                     "osm_id": "lidar/ndsm",
@@ -645,9 +687,7 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif (not is_enclosure and (rel_m >= 2.20 or (slope_m >= 0.165 and rel_m >= 1.65))) or (
-            is_enclosure and (rel_m >= 3.80 or (slope_m >= 0.26 and rel_m >= 2.60))
-        ):
+        elif not is_enclosure and (rel_m >= 2.20 or (slope_m >= 0.165 and rel_m >= 1.65)):
             osm_conf.append(
                 {
                     "osm_id": "lidar/reservoir_or_bund",
@@ -658,7 +698,11 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
-        elif not is_roman and (rel_m >= 2.00 or (slope_m >= 0.145 and rel_m >= 1.50)):
+        elif not is_roman and (
+            rel_m >= 1.85
+            or (slope_m >= 0.145 and rel_m >= 1.50)
+            or (max_pos_rel_m >= 0.95 and slope_m >= 0.105 and ndsm_m >= 0.20)
+        ):
             osm_conf.append(
                 {
                     "osm_id": "lidar/reservoir_or_bund",

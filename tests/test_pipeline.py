@@ -311,4 +311,107 @@ def test_roman_taxonomy_and_sub_canopy_context():
     assert mult3 == 1.0
 
 
+def test_footprint_geometry_class_conditioning_and_enclosure_blob_gate():
+    # 1. Circular prehistoric mound (elongation < 1.45) must not be classified as megalithic_tomb_long_barrow
+    prob_map = np.zeros((256, 256), dtype=np.float32)
+    yy, xx = np.ogrid[:256, :256]
+    circle_mask = (yy - 128) ** 2 + (xx - 128) ** 2 <= 9**2
+    prob_map[circle_mask] = 0.96
+
+    # Force pixel class head to prefer class 1 (long barrow) even though footprint is circular
+    cls_prob_map = np.zeros((4, 256, 256), dtype=np.float32)
+    cls_prob_map[1] = 0.80
+    cls_prob_map[3] = 0.15
+
+    raw_features = np.zeros((NUM_TERRAIN_CHANNELS, 256, 256), dtype=np.float32)
+    raw_features[0, circle_mask] = 0.45  # +0.45m mound relief
+    raw_features[3, circle_mask] = 0.06  # gentle slope
+
+    cat = MonumentCatalog([])
+    cands = extract_candidates_from_tile(
+        prob_map=prob_map,
+        cls_prob_map=cls_prob_map,
+        raw_features=raw_features,
+        e_min=400000.0,
+        e_max=400256.0,
+        n_min=130000.0,
+        n_max=130256.0,
+        catalog=cat,
+        prob_threshold=0.70,
+        target_domain="prehistoric",
+    )
+    assert len(cands) == 1
+    assert cands[0]["elongation"] < 1.25
+    assert cands[0]["predicted_class"] == "round_barrow_cairn"
+
+    # 2. Oversized whole-tile enclosure blob (> 8,500 m^2) must be flagged as confounder
+    enc_cands = [
+        {
+            "easting": 341344.0,
+            "northing": 347344.0,
+            "confidence": 0.97,
+            "area_m2": 32708.0,
+            "elongation": 1.33,
+            "est_local_relief_m": 2.02,
+            "max_positive_relief_m": 2.02,
+            "est_surface_prominence_m": 0.1,
+            "mean_slope_tangent": 0.045,
+            "is_known_monument": False,
+        },
+        {
+            "easting": 286384.0,
+            "northing": 109152.0,
+            "confidence": 0.86,
+            "area_m2": 4712.0,
+            "elongation": 1.03,
+            "est_local_relief_m": 0.83,
+            "max_positive_relief_m": 0.83,
+            "patch_min_relief_m": -0.20,
+            "est_surface_prominence_m": 0.27,
+            "mean_slope_tangent": 0.045,
+            "is_known_monument": False,
+        },
+    ]
+    annotate_candidates_with_spatial_context(enc_cands, None, target_domain="enclosure")
+    assert enc_cands[0]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert enc_cands[1]["context_category"] == "unidentified_candidate"
+
+
+def test_v4_d4_geometric_moments_and_legacy_checkpoint_compat():
+    # 1. Verify D4 invariance and shape discrimination of _compute_d4_geometric_moments
+    yy, xx = np.ogrid[:256, :256]
+    circle_logits = np.full((1, 1, 256, 256), -8.0, dtype=np.float32)
+    circle_logits[0, 0, (yy - 128) ** 2 + (xx - 128) ** 2 <= 14**2] = 6.0
+
+    elong_logits = np.full((1, 1, 256, 256), -8.0, dtype=np.float32)
+    elong_logits[0, 0, ((yy - 128) / 32.0) ** 2 + ((xx - 128) / 7.0) ** 2 <= 1.0] = 6.0
+
+    ring_logits = np.full((1, 1, 256, 256), -8.0, dtype=np.float32)
+    r2 = (yy - 128) ** 2 + (xx - 128) ** 2
+    ring_logits[0, 0, (r2 >= 18**2) & (r2 <= 26**2)] = 6.0
+
+    t_circle = torch.from_numpy(circle_logits)
+    t_elong = torch.from_numpy(elong_logits)
+    t_ring = torch.from_numpy(ring_logits)
+
+    g_circle = MegalithUNet._compute_d4_geometric_moments(t_circle)
+    g_elong = MegalithUNet._compute_d4_geometric_moments(t_elong)
+    g_elong_rot = MegalithUNet._compute_d4_geometric_moments(torch.rot90(t_elong, 1, [2, 3]))
+    g_ring = MegalithUNet._compute_d4_geometric_moments(t_ring)
+
+    # Exact D4 rotational invariance on all 4 geometric moments
+    assert torch.allclose(g_elong, g_elong_rot, atol=1e-4)
+    # Elongated long barrow has significantly higher log_elongation than circular barrow
+    assert float(g_elong[0, 1]) > float(g_circle[0, 1]) + 0.5
+    # Hollow ring-work has higher ring_hollowness than solid circular mound
+    assert float(g_ring[0, 2]) > float(g_circle[0, 2])
+
+    # 2. Verify legacy v3 state_dict (without geom_* keys) loads cleanly with strict=True
+    model = MegalithUNet(in_channels=NUM_TERRAIN_CHANNELS, num_classes=4, pretrained=False)
+    legacy_sd = {k: v for k, v in model.state_dict().items() if not k.startswith("geom_")}
+    model.load_state_dict(legacy_sd, strict=True)
+
+
+
+
 

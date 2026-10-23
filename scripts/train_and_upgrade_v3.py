@@ -498,6 +498,15 @@ def train_and_evaluate_v3_domain(
     )
 
     model = MegalithUNet(pretrained=True).to(device)
+    prod_ckpt_path = ckpt_dir / prod_ckpt_name
+    if prod_ckpt_path.exists():
+        try:
+            init_ckpt = torch.load(prod_ckpt_path, map_location="cpu", weights_only=False)
+            model.load_state_dict(init_ckpt["model_state_dict"])
+            del init_ckpt
+            print(f"  [{target_domain}] Warm-started from {prod_ckpt_path.name}")
+        except Exception as exc:
+            print(f"  [{target_domain}] Fresh init (warm-start skipped: {exc})")
     criterion = MegalithLoss(pos_pixel_weight=2.5, pos_tile_weight=pos_tile_weight).to(device)
 
     enc_modules = (model.stem, model.enc1, model.enc2, model.enc3, model.enc4)
@@ -645,9 +654,17 @@ def train_and_evaluate_v3_domain(
     v3_metrics_path = ckpt_dir / prod_metrics_name.replace(".json", "_v3.json")
     v3_metrics_path.write_text(json.dumps(new_summary, indent=2), encoding="utf-8")
 
-    # Promote v3 if Held-Out Test ROC-AUC improves (or stays within 0.001 while improving Strict 1% Op LR+)
-    improved = (new_test_auc > old_test_auc + 0.001) or (
-        new_test_auc >= old_test_auc - 0.001 and new_lr01 > old_lr01 * 1.05
+    old_dice = float(old_metrics.get("model_test_pos_seg_dice", 0.0))
+    new_dice = float(test_d4["pos_seg_dice"])
+    print(
+        f"  [{target_domain} Segmentation Dice on Positives] {old_dice:.4f} -> {new_dice:.4f}"
+    )
+
+    # Promote if Held-Out Test ROC-AUC improves, or Strict 1% Op LR+ improves, or segmentation Dice improves cleanly
+    improved = (
+        (new_test_auc > old_test_auc + 0.001)
+        or (new_test_auc >= old_test_auc - 0.001 and new_lr01 > old_lr01 * 1.05)
+        or (new_test_auc >= old_test_auc - 0.008 and new_dice > old_dice + 0.015)
     )
     if improved:
         prod_ckpt_path = ckpt_dir / prod_ckpt_name
@@ -670,6 +687,9 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--grad-accum", type=int, default=4)
+    parser.add_argument("--lr", type=float, default=3.5e-4)
+    parser.add_argument("--domains", type=str, default="enclosure,roman,prehistoric")
+    parser.add_argument("--skip-rescan", action="store_true")
     args = parser.parse_args()
 
     catalog = download_or_load_nhle_catalog(args.data_dir / "catalog" / "nhle_scheduled_monuments_27700.json")
@@ -710,7 +730,10 @@ def main() -> None:
         ),
     ]
 
+    active_domains = {d.strip() for d in args.domains.split(",") if d.strip()}
     for domain, base_mp, v3_mp, ckpt_name, metrics_name, cls_names in configs:
+        if domain not in active_domains:
+            continue
         manifest_v3 = expand_train_split_manifest(
             base_manifest_path=base_mp,
             out_manifest_path=v3_mp,
@@ -733,8 +756,9 @@ def main() -> None:
             epochs=args.epochs,
             batch_size=args.batch_size,
             grad_accum=args.grad_accum,
+            lr=args.lr,
         )
-        if improved:
+        if improved and not args.skip_rescan:
             if domain == "enclosure":
                 # Wipe existing enclosure_survey geojsons so next scan cycle re-scores all completed squares with v3
                 for gj in (args.data_dir / "enclosure_survey").glob("*/*_candidates.geojson"):

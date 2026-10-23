@@ -135,6 +135,84 @@ class MegalithUNet(nn.Module):
         self.tile_presence_out = nn.Linear(64, 1)
         self.tile_type_out = nn.Linear(64, num_classes)
 
+        # Differentiable D4-invariant 2D footprint geometry head (area_frac, log_elongation,
+        # ring_hollowness, boundary_compactness). Zero-initialized output layer preserves exact
+        # backwards compatibility when loading pre-v4 checkpoints with strict=False.
+        self.geom_mlp = nn.Sequential(
+            nn.Linear(4, 16),
+            nn.LayerNorm(16),
+            nn.GELU(),
+        )
+        self.geom_tile_out = nn.Linear(16, 1)
+        self.geom_type_out = nn.Linear(16, num_classes)
+        nn.init.zeros_(self.geom_tile_out.weight)
+        nn.init.zeros_(self.geom_tile_out.bias)
+        nn.init.zeros_(self.geom_type_out.weight)
+        nn.init.zeros_(self.geom_type_out.bias)
+
+    def load_state_dict(self, state_dict: Dict[str, torch.Tensor], strict: bool = True, assign: bool = False):
+        own_state = self.state_dict()
+        merged = dict(state_dict)
+        for k, v in own_state.items():
+            if k.startswith("geom_") and k not in merged:
+                merged[k] = v
+        return super().load_state_dict(merged, strict=strict, assign=assign)
+
+    @staticmethod
+    def _compute_d4_geometric_moments(seg_logits: torch.Tensor) -> torch.Tensor:
+        """
+        Compute 4 differentiable D4-equivariant/invariant 2D shape descriptors from `seg_logits` (B, 1, H, W):
+          0. area_frac       : mean predicted foreground probability across the tile
+          1. log_elongation  : log(sqrt(lambda_1 / lambda_2)) from probability-weighted 2D covariance
+          2. ring_hollowness : outer-annulus probability minus central-core probability around centroid
+          3. compactness     : 4 * pi * area / (perimeter^2 + eps) via total variation |grad(p)|
+        """
+        probs = torch.sigmoid(seg_logits.float()).squeeze(1)  # (B, H, W)
+        b, h, w = probs.shape
+        device = probs.device
+        dtype = probs.dtype
+
+        ys = torch.linspace(-1.0, 1.0, h, device=device, dtype=dtype).view(1, h, 1)
+        xs = torch.linspace(-1.0, 1.0, w, device=device, dtype=dtype).view(1, 1, w)
+
+        area_frac = (probs.mean(dim=(1, 2))).unsqueeze(1)  # (B, 1)
+
+        # Thresholded foreground weight so background pixels (p < 0.35) do not dilute 2D moments
+        fg_w = F.relu(probs - 0.35).pow(2.0) + 1e-7
+        w_sum = fg_w.sum(dim=(1, 2), keepdim=True).clamp(min=1e-5)
+
+        cx = (fg_w * xs).sum(dim=(1, 2), keepdim=True) / w_sum
+        cy = (fg_w * ys).sum(dim=(1, 2), keepdim=True) / w_sum
+        dx = xs - cx
+        dy = ys - cy
+
+        cov_xx = (fg_w * dx * dx).sum(dim=(1, 2)) / w_sum.squeeze(-1).squeeze(-1) + 1e-5
+        cov_yy = (fg_w * dy * dy).sum(dim=(1, 2)) / w_sum.squeeze(-1).squeeze(-1) + 1e-5
+        cov_xy = (fg_w * dx * dy).sum(dim=(1, 2)) / w_sum.squeeze(-1).squeeze(-1)
+
+        trace = cov_xx + cov_yy
+        det = (cov_xx * cov_yy - cov_xy * cov_xy).clamp(min=1e-8)
+        disc = torch.sqrt((trace * trace - 4.0 * det).clamp(min=0.0))
+        lam1 = 0.5 * (trace + disc)
+        lam2 = (0.5 * (trace - disc)).clamp(min=1e-6)
+        log_elong = 0.5 * torch.log((lam1 / lam2).clamp(min=1.0, max=100.0)).unsqueeze(1)  # (B, 1)
+
+        r2 = dx * dx + dy * dy
+        mean_r2 = (cov_xx + cov_yy).view(b, 1, 1).clamp(min=1e-4)
+        core_kernel = torch.exp(-r2 / (0.35 * mean_r2))
+        ring_kernel = torch.exp(-((r2 - 1.0 * mean_r2) ** 2) / (0.5 * mean_r2 * mean_r2))
+        core_prob = (probs * core_kernel).sum(dim=(1, 2)) / (core_kernel.sum(dim=(1, 2)) + 1e-4)
+        ring_prob = (probs * ring_kernel).sum(dim=(1, 2)) / (ring_kernel.sum(dim=(1, 2)) + 1e-4)
+        ring_hollowness = (ring_prob - core_prob).unsqueeze(1)  # (B, 1)
+
+        gx = probs[:, :, 1:] - probs[:, :, :-1]
+        gy = probs[:, 1:, :] - probs[:, :-1, :]
+        perim = gx.abs().sum(dim=(1, 2)) + gy.abs().sum(dim=(1, 2)) + 1.0
+        area_px = probs.sum(dim=(1, 2))
+        compactness = (4.0 * 3.14159265 * area_px / (perim * perim)).clamp(0.0, 1.0).unsqueeze(1)  # (B, 1)
+
+        return torch.cat([area_frac, log_elong, ring_hollowness, compactness], dim=1).to(seg_logits.dtype)
+
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
         s0 = self.full_skip(x)
         s1 = self.stem(x)
@@ -172,8 +250,12 @@ class MegalithUNet(nn.Module):
 
         feat_vec = torch.cat([e4_vec, d0_vec, seg_q1, seg_q2, seg_q3, seg_mean, cls_peaks], dim=1)
         hidden = self.tile_mlp(feat_vec)
-        tile_logits = 0.55 * self.tile_presence_out(hidden) + 0.45 * seg_q2
-        type_logits = self.tile_type_out(hidden) + 0.35 * cls_peaks
+
+        geom_feats = self._compute_d4_geometric_moments(seg_logits)
+        geom_hidden = self.geom_mlp(geom_feats)
+
+        tile_logits = 0.55 * self.tile_presence_out(hidden) + 0.45 * seg_q2 + self.geom_tile_out(geom_hidden)
+        type_logits = self.tile_type_out(hidden) + 0.35 * cls_peaks + self.geom_type_out(geom_hidden)
 
         return {
             "seg_logits": seg_logits,
@@ -181,6 +263,7 @@ class MegalithUNet(nn.Module):
             "tile_logits": tile_logits,
             "type_logits": type_logits,
             "seg_peak_logit": seg_q2,
+            "geom_features": geom_feats,
         }
 
 
@@ -232,12 +315,28 @@ class MegalithLoss(nn.Module):
         else:
             dice_loss = probs.mean() * 0.0
 
-        # 3. Multiple-Instance Learning (MIL) Peak Suppression Loss:
-        # The top-64 spatial peak logit of a tile must match target_tile (0 on negative tiles, 1 on positive tiles)
+        # 3. Multiple-Instance Learning (MIL) Peak & Multi-Scale Extent Suppression Loss:
+        #    (a) Top-64 spatial peak logit must match target_tile (0 on negative tiles, 1 on positive tiles)
+        #    (b) Top-2048 broad-area logit on negative tiles is suppressed to prevent whole-tile river/moorland blobs
+        #    (c) Over-segmentation flood-fill penalty when predicted foreground area exceeds 2.2x ground-truth area
         flat_seg = seg_logits.view(seg_logits.shape[0], -1)
         topk_64 = torch.topk(flat_seg, k=min(64, flat_seg.shape[1]), dim=1)[0].mean(dim=1)
         ptw = torch.tensor(self.pos_tile_weight, device=seg_logits.device, dtype=seg_logits.dtype)
         mil_peak_loss = F.binary_cross_entropy_with_logits(topk_64, target_tile.float(), pos_weight=ptw)
+
+        neg_tile_mask = target_tile < 0.5
+        if torch.any(neg_tile_mask):
+            topk_2048_neg = torch.topk(flat_seg[neg_tile_mask], k=min(2048, flat_seg.shape[1]), dim=1)[0].mean(dim=1)
+            zeros_neg = torch.zeros_like(topk_2048_neg)
+            mil_extent_loss = F.binary_cross_entropy_with_logits(topk_2048_neg, zeros_neg)
+        else:
+            mil_extent_loss = probs.mean() * 0.0
+
+        pred_area = probs_valid.sum(dim=(1, 2))
+        gt_area = bin_mask.sum(dim=(1, 2))
+        valid_area = valid_f.sum(dim=(1, 2)).clamp(min=1.0)
+        overseg_spill = F.relu(pred_area - (2.2 * gt_area + 256.0)) / valid_area
+        overseg_loss = overseg_spill.mean()
 
         # 4. Multi-class segmentation cross-entropy with ignore_index=255
         cls_w = self.cls_weights.to(device=cls_seg_logits.device, dtype=cls_seg_logits.dtype)
@@ -250,12 +349,23 @@ class MegalithLoss(nn.Module):
         tw = self.type_weights.to(device=type_logits.device, dtype=type_logits.dtype)
         tile_ce = F.cross_entropy(type_logits, target_type.long(), weight=tw)
 
-        total = 1.0 * focal_loss + 0.8 * dice_loss + 0.7 * mil_peak_loss + 0.5 * ce_seg + 0.8 * tile_bce + 0.4 * tile_ce
+        total = (
+            1.0 * focal_loss
+            + 0.8 * dice_loss
+            + 0.7 * mil_peak_loss
+            + 0.4 * mil_extent_loss
+            + 0.5 * overseg_loss
+            + 0.5 * ce_seg
+            + 0.8 * tile_bce
+            + 0.4 * tile_ce
+        )
         metrics = {
             "loss": float(total.detach().item()),
             "focal": float(focal_loss.detach().item()),
             "dice": float(dice_loss.detach().item()),
             "mil_peak": float(mil_peak_loss.detach().item()),
+            "mil_extent": float(mil_extent_loss.detach().item()),
+            "overseg": float(overseg_loss.detach().item()),
             "tile_bce": float(tile_bce.detach().item()),
         }
         return total, metrics

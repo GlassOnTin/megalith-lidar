@@ -363,8 +363,10 @@ class MegalithLidarDataset(Dataset):
                 # For Roman villas/forts/roads and Iron Age hillforts/enclosures/hut circles/dykes:
                 # Many survive under woodland canopy (nDSM >= 2.5m) where bare-earth 1m DTM
                 # resolves the embankment/rampart/hut ring through the trees. Keep active bare-earth
-                # relief pixels (|z - G_16(z)| >= 0.16m or top 32% of polygon relief) as positive
-                # regardless of canopy height, and mark flat legal-buffer farmland as IGNORE (255).
+                # relief pixels (|z - G_16(z)| >= 0.16m or top 32% of polygon relief) as positive,
+                # mark a narrow 3m transition ring around the rampart as IGNORE (255), and supervise
+                # flat interior pasture (>3m from ramparts) as explicit background (0) so the decoder
+                # does not learn to flood-fill 20,000-45,000 m^2 interiors.
                 pos_px = mask > 0
                 if int(np.sum(pos_px)) > 500:
                     rel16 = np.abs(features[0] + features[1])
@@ -378,8 +380,9 @@ class MegalithLidarDataset(Dataset):
                         yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
                         core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 12.0**2) & pos_px
                         earthwork = earthwork | core
+                    transition_ring = binary_dilation(earthwork, iterations=3) & pos_px & (~earthwork)
                     refined = np.zeros_like(mask, dtype=np.uint8)
-                    refined[pos_px & (~earthwork)] = 255
+                    refined[transition_ring] = 255
                     refined[earthwork] = mask[earthwork]
                     mask = refined
             else:
@@ -392,9 +395,8 @@ class MegalithLidarDataset(Dataset):
                 )
                 # Refine oversized NHLE legal-buffer polygons (> 600 m^2):
                 # Keep active local-relief earthwork pixels as the positive monument class,
-                # mark tree canopy (nDSM >= 2.5m) as background (0), and mark flat legal-buffer
-                # pasture inside the polygon as IGNORE_INDEX (255) so the segmentation head does
-                # not learn to paint 40m x 40m halos over flat farmland.
+                # mark a 3m transition halo around the earthwork as IGNORE_INDEX (255), and mark
+                # flat legal-buffer pasture and tree canopy as explicit background (0).
                 pos_px = mask > 0
                 if int(np.sum(pos_px)) > 600:
                     rel16 = np.abs(features[0] + features[1])
@@ -408,8 +410,9 @@ class MegalithLidarDataset(Dataset):
                         yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
                         core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 10.0**2) & pos_px & (ndsm < 2.5)
                         earthwork = earthwork | core
+                    transition_ring = binary_dilation(earthwork, iterations=3) & pos_px & (~earthwork) & (ndsm < 2.5)
                     refined = np.zeros_like(mask, dtype=np.uint8)
-                    refined[pos_px & (~earthwork) & (ndsm < 2.5)] = 255
+                    refined[transition_ring] = 255
                     refined[earthwork] = mask[earthwork]
                     mask = refined
         else:
@@ -451,11 +454,20 @@ class MegalithLidarDataset(Dataset):
                 features = np.flip(features, axis=1).copy()
                 mask = np.flip(mask, axis=0).copy()
 
-            # 2. Random spatial shift (eliminates center-pixel spatial prior)
-            shift_y = int(np.random.randint(-48, 49))
-            shift_x = int(np.random.randint(-48, 49))
-            features = np.roll(features, shift=(shift_y, shift_x), axis=(1, 2))
-            mask = np.roll(mask, shift=(shift_y, shift_x), axis=(0, 1))
+            # 2. Seam-free reflection-padded spatial shift (eliminates center-pixel spatial prior
+            #    without introducing wrap-around step-scarp discontinuities from np.roll)
+            shift_y = int(np.random.randint(-40, 41))
+            shift_x = int(np.random.randint(-40, 41))
+            if shift_y != 0 or shift_x != 0:
+                pad = 40
+                _, h_f, w_f = features.shape
+                feat_pad = np.pad(features, ((0, 0), (pad, pad), (pad, pad)), mode="reflect")
+                mask_fill = 255 if spec["is_positive"] else 0
+                mask_pad = np.pad(mask, ((pad, pad), (pad, pad)), mode="constant", constant_values=mask_fill)
+                y0 = pad - shift_y
+                x0 = pad - shift_x
+                features = feat_pad[:, y0 : y0 + h_f, x0 : x0 + w_f].copy()
+                mask = mask_pad[y0 : y0 + h_f, x0 : x0 + w_f].copy()
 
         has_pos = float(spec["is_positive"])
         primary_cls = int(spec["primary_class"]) if has_pos > 0.5 else 0

@@ -126,6 +126,22 @@ def extract_candidates_from_tile(
         grad_vals = raw_features[3, ys, xs]
         ndsm_m = float(np.expm1(np.max(raw_features[5, ys, xs])))
 
+        # Condition subtype class assignment on 2D component footprint geometry:
+        # A circular/sub-circular mound (elongation < 1.45) cannot physically be a Long Barrow.
+        if target_domain == "prehistoric" and best_cls_idx == 1:
+            if elongation < 1.45 or area_m2 < 200.0:
+                if centroid_relief_m < 0.25 * max(max_pos_relief_m, 0.1) and area_m2 >= 260.0:
+                    best_cls_idx = 2  # stone_circle_henge
+                else:
+                    best_cls_idx = 3  # round_barrow_cairn
+        elif target_domain == "enclosure":
+            if area_m2 <= 950.0:
+                best_cls_idx = 1  # hut_circle_pound_settlement
+            elif elongation >= 2.20:
+                best_cls_idx = 3  # cross_ridge_dyke_field_system
+            else:
+                best_cls_idx = 2  # iron_age_hillfort_banjo_enclosure
+
         py0, py1 = max(0, int(cy_px) - 48), min(h, int(cy_px) + 48)
         px0, px1 = max(0, int(cx_px) - 48), min(w, int(cx_px) + 48)
         patch_tin_px = int(np.sum(slope_std[py0:py1, px0:px1] < 0.0018))
