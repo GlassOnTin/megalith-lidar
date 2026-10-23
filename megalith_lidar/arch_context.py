@@ -307,6 +307,42 @@ def classify_vlm_note_downrating(
             "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
         )
 
+    if is_roman:
+        area_m2 = float(cand.get("area_m2", 0.0))
+        max_pos_rel_m = float(cand.get("max_positive_relief_m", cand.get("est_local_relief_m", 0.0)))
+        centroid_rel_m = float(cand.get("centroid_local_relief_m", max_pos_rel_m))
+        ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))
+        lum_diff = float(cand.get("soilmark_core_lum_diff", 0.0))
+        ring_exg = float(cand.get("cropmark_ring_exg_diff", 0.0))
+        if (
+            area_m2 <= 14000.0
+            and max_pos_rel_m >= 0.90
+            and centroid_rel_m <= 0.35
+            and (max_pos_rel_m - centroid_rel_m) >= 0.85
+            and (
+                lum_diff <= -0.040
+                or (ndsm_m >= 0.85 and ring_exg >= 0.04)
+                or shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}
+                or any(
+                    phrase in low
+                    for phrase in (
+                        "is a false positive",
+                        "likely a modern",
+                        "likely represents a modern",
+                        "confounding the model",
+                        "modern agricultural",
+                        "modern field boundary",
+                        "building platform",
+                    )
+                )
+            )
+        ):
+            return (
+                "OBVIOUS_FALSE_POSITIVE",
+                0.35,
+                f"Embanked pond, slurry lagoon, gravel pit, or levelled court bund (bank={max_pos_rel_m:+.2f}m, basin={centroid_rel_m:+.2f}m)",
+            )
+
     for phrase in _VLM_OBVIOUS_CONFOUNDER_PAT:
         if phrase in low and ("more likely" in low or "strongly indicates" in low or "likely represents" in low):
             # If the note explicitly concludes it is a modern military emplacement, reservoir, or spoil/extraction pit
