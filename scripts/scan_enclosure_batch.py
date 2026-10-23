@@ -134,6 +134,10 @@ def run_enclosure_scan(
                         copied_pngs.add(diag_name)
                 all_enclosure_features.append(feat)
 
+    del model
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     extractor = NHLESpatialContextExtractor(catalog)
     cand_props = [f["properties"] for f in all_enclosure_features]
     enrich_candidates_with_archaeological_context(

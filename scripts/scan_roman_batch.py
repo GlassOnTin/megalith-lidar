@@ -134,6 +134,10 @@ def run_roman_scan(
                         copied_pngs.add(diag_name)
                 all_roman_features.append(feat)
 
+    del model
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     extractor = NHLESpatialContextExtractor(catalog)
     cand_props = [f["properties"] for f in all_roman_features]
     enrich_candidates_with_archaeological_context(
