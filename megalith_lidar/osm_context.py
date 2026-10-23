@@ -701,6 +701,31 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
+        elif (
+            not is_enclosure
+            and area_m2 <= 7500.0
+            and max_pos_rel_m >= 1.15
+            and centroid_rel_m <= 0.35
+            and (max_pos_rel_m - centroid_rel_m) >= 0.95
+            and (
+                float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.045
+                or (ndsm_m >= 0.85 and float(cand.get("cropmark_ring_exg_diff", 0.0)) >= 0.05)
+                or cand.get("vlm_shape_verdict") == "RECTILINEAR_OR_U_BUND"
+            )
+        ):
+            osm_conf.append(
+                {
+                    "osm_id": "lidar/slurry_lagoon_or_bund",
+                    "subtype": (
+                        f"embanked_slurry_lagoon_or_farm_reservoir "
+                        f"(bank={max_pos_rel_m:+.2f}m, basin={centroid_rel_m:+.2f}m, area={area_m2:.0f}m2)"
+                    ),
+                    "name": "Embanked slurry lagoon, lined farm reservoir, or hollow-interior bund",
+                    "wikidata": None,
+                    "distance_m": 0.0,
+                    "inside_polygon": True,
+                }
+            )
         elif not is_roman and (
             rel_m >= 1.85
             or (slope_m >= 0.145 and rel_m >= 1.50)
