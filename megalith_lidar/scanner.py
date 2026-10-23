@@ -417,21 +417,29 @@ def scan_region(
         e0, e1, n0, n1 = key
         dtm, dsm = loaded_tiles[key]
         raw_feats = compute_terrain_features(dtm, dsm)
-        if include_cropmarks:
-            from megalith_lidar.aerial_cropmarks import compute_cropmark_features, fetch_or_load_aerial_tile
+        # Fast Stage-1 LiDAR pre-screen: only fetch aerial orthophotos on windows that have
+        # non-trivial LiDAR terrain plausibility (or are already cached on disk).
+        std_lidar = (raw_feats - ch_mean[:NUM_TERRAIN_CHANNELS]) / ch_std[:NUM_TERRAIN_CHANNELS]
+        prob_map, cls_map, raw_tile_logit, cal_tile_prob = predict_tile_with_d4_tta(
+            model, std_lidar, device, calibrator=calibrator
+        )
+        if include_cropmarks and cal_tile_prob >= tile_prob_threshold * 0.45:
+            from megalith_lidar.aerial_cropmarks import (
+                compute_candidate_cropmark_metrics,
+                compute_cropmark_features,
+                fetch_or_load_aerial_tile,
+            )
 
             rgb = fetch_or_load_aerial_tile(e0, e1, n0, n1, cache_dir=aerial_cache_dir, size=dtm.shape[0])
             if rgb is not None:
                 crop_feats = compute_cropmark_features(rgb, dtm=dtm, dsm=dsm)
-            else:
-                crop_feats = np.zeros((2, dtm.shape[0], dtm.shape[1]), dtype=np.float32)
-            full_feats = np.concatenate([raw_feats, crop_feats], axis=0)
+                full_feats = np.concatenate([raw_feats, crop_feats], axis=0)
+                std_feats = (full_feats - ch_mean) / ch_std
+                prob_map, cls_map, raw_tile_logit, cal_tile_prob = predict_tile_with_d4_tta(
+                    model, std_feats, device, calibrator=calibrator
+                )
         else:
-            full_feats = raw_feats
-        std_feats = (full_feats - ch_mean) / ch_std
-        prob_map, cls_map, raw_tile_logit, cal_tile_prob = predict_tile_with_d4_tta(
-            model, std_feats, device, calibrator=calibrator
-        )
+            rgb = None
         if cal_tile_prob < tile_prob_threshold:
             continue
         windows_above_tile_th += 1
@@ -449,11 +457,23 @@ def scan_region(
             target_domain=target_domain,
         )
         annotate_candidates_with_spatial_context(cands, osm_index, target_domain=target_domain)
+        if rgb is None and cands:
+            from megalith_lidar.aerial_cropmarks import (
+                compute_candidate_cropmark_metrics,
+                fetch_or_load_aerial_tile,
+            )
+
+            rgb = fetch_or_load_aerial_tile(e0, e1, n0, n1, cache_dir=aerial_cache_dir, size=dtm.shape[0])
         for c in cands:
             c["calibrated_tile_prob"] = round(cal_tile_prob, 4)
             c["raw_tile_logit"] = round(raw_tile_logit, 4)
             c["window_bbox"] = [e0, n0, e1, n1]
             c["region_name"] = region_name
+            if rgb is not None:
+                cx_px = float((c["easting"] - e0) * (dtm.shape[1] / max(e1 - e0, 1.0)))
+                cy_px = float((n1 - c["northing"]) * (dtm.shape[0] / max(n1 - n0, 1.0)))
+                cm = compute_candidate_cropmark_metrics(rgb, cx_px=cx_px, cy_px=cy_px, area_m2=float(c.get("area_m2", 300.0)))
+                c.update(cm)
         raw_candidates.extend(cands)
         if cands:
             window_records[key] = (raw_feats, prob_map, cands)

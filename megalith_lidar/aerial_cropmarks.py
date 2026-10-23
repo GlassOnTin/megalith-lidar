@@ -233,8 +233,12 @@ def compute_candidate_cropmark_metrics(
     core_lum = float(np.mean(dlum[core_mask])) if np.any(core_mask) else 0.0
     ring_lum = float(np.mean(dlum[ring_mask])) if np.any(ring_mask) else 0.0
 
+    ring_exg_diff = round(ring_exg - core_exg, 4)
+    core_lum_diff = round(core_lum - ring_lum, 4)
+    has_distinct = bool(abs(ring_exg_diff) >= 0.012 or abs(core_lum_diff) >= 0.018 or abs(ring_exg) >= 0.012)
     return {
-        "cropmark_ring_exg_diff": round(ring_exg - core_exg, 4),
+        "cropmark_ring_exg_diff": ring_exg_diff,
         "cropmark_ring_exg_mean": round(ring_exg, 4),
-        "soilmark_core_lum_diff": round(core_lum - ring_lum, 4),
+        "soilmark_core_lum_diff": core_lum_diff,
+        "has_distinct_cropmark": has_distinct,
     }
