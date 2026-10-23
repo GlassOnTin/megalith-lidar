@@ -386,8 +386,10 @@ def scan_region(
         osm_cache_dir=osm_cache_dir,
     )
 
-    ch_mean = np.asarray(channel_mean, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
-    ch_std = np.asarray(channel_std, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+    ch_mean = np.asarray(channel_mean, dtype=np.float32).reshape(-1, 1, 1)
+    ch_std = np.asarray(channel_std, dtype=np.float32).reshape(-1, 1, 1)
+    include_cropmarks = ch_mean.shape[0] >= NUM_TERRAIN_CHANNELS + 2
+    aerial_cache_dir = Path(tile_cache_dir).parent / "aerial_tiles"
 
     es = list(range(e_min, max(e_min + 1, e_max - window_size + 1), stride))
     if es[-1] + window_size < e_max:
@@ -415,7 +417,18 @@ def scan_region(
         e0, e1, n0, n1 = key
         dtm, dsm = loaded_tiles[key]
         raw_feats = compute_terrain_features(dtm, dsm)
-        std_feats = (raw_feats - ch_mean) / ch_std
+        if include_cropmarks:
+            from megalith_lidar.aerial_cropmarks import compute_cropmark_features, fetch_or_load_aerial_tile
+
+            rgb = fetch_or_load_aerial_tile(e0, e1, n0, n1, cache_dir=aerial_cache_dir, size=dtm.shape[0])
+            if rgb is not None:
+                crop_feats = compute_cropmark_features(rgb, dtm=dtm, dsm=dsm)
+            else:
+                crop_feats = np.zeros((2, dtm.shape[0], dtm.shape[1]), dtype=np.float32)
+            full_feats = np.concatenate([raw_feats, crop_feats], axis=0)
+        else:
+            full_feats = raw_feats
+        std_feats = (full_feats - ch_mean) / ch_std
         prob_map, cls_map, raw_tile_logit, cal_tile_prob = predict_tile_with_d4_tta(
             model, std_feats, device, calibrator=calibrator
         )

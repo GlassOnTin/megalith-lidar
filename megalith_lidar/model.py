@@ -150,11 +150,57 @@ class MegalithUNet(nn.Module):
         nn.init.zeros_(self.geom_type_out.weight)
         nn.init.zeros_(self.geom_type_out.bias)
 
+        # Dual-stream 16m Scale-Space Cropmark & Soilmark branch (channels 6..7: ΔExG_16m, ΔL_16m).
+        # Accepts either 6-channel (LiDAR only) or 8-channel (LiDAR + Cropmarks) input tensors seamlessly.
+        # Output projections use residual logits on seg_logits/cls_seg_logits/tile_logits so gradients
+        # flow directly without disturbing frozen BatchNorm statistics inside dec0/dec1.
+        self.cropmark_skip = nn.Sequential(
+            nn.Conv2d(2, 16, kernel_size=3, padding=1, padding_mode="reflect", bias=False),
+            nn.BatchNorm2d(16),
+            nn.GELU(),
+            nn.Conv2d(16, 32, kernel_size=3, padding=1, padding_mode="reflect", bias=True),
+        )
+        self.cropmark_stem = nn.Sequential(
+            nn.Conv2d(2, 32, kernel_size=7, stride=2, padding=3, padding_mode="reflect", bias=False),
+            nn.BatchNorm2d(32),
+            nn.GELU(),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1, padding_mode="reflect", bias=True),
+        )
+        self.cropmark_seg_head = nn.Sequential(
+            nn.Conv2d(54, 24, kernel_size=5, padding=2, padding_mode="reflect", bias=False),
+            nn.BatchNorm2d(24),
+            nn.GELU(),
+            nn.Conv2d(24, 24, kernel_size=3, dilation=2, padding=2, padding_mode="reflect", bias=False),
+            nn.BatchNorm2d(24),
+            nn.GELU(),
+            nn.Conv2d(24, 1 + num_classes, kernel_size=1, bias=True),
+        )
+        self.cropmark_mlp = nn.Sequential(
+            nn.Linear(10, 24),
+            nn.LayerNorm(24),
+            nn.GELU(),
+            nn.Linear(24, 16),
+            nn.LayerNorm(16),
+            nn.GELU(),
+        )
+        self.cropmark_tile_out = nn.Linear(16, 1)
+        self.cropmark_type_out = nn.Linear(16, num_classes)
+        nn.init.zeros_(self.cropmark_skip[-1].weight)
+        nn.init.zeros_(self.cropmark_skip[-1].bias)
+        nn.init.zeros_(self.cropmark_stem[-1].weight)
+        nn.init.zeros_(self.cropmark_stem[-1].bias)
+        nn.init.zeros_(self.cropmark_seg_head[-1].weight)
+        nn.init.zeros_(self.cropmark_seg_head[-1].bias)
+        nn.init.zeros_(self.cropmark_tile_out.weight)
+        nn.init.zeros_(self.cropmark_tile_out.bias)
+        nn.init.zeros_(self.cropmark_type_out.weight)
+        nn.init.zeros_(self.cropmark_type_out.bias)
+
     def load_state_dict(self, state_dict: Dict[str, torch.Tensor], strict: bool = True, assign: bool = False):
         own_state = self.state_dict()
         merged = dict(state_dict)
         for k, v in own_state.items():
-            if k.startswith("geom_") and k not in merged:
+            if (k.startswith("geom_") or k.startswith("cropmark_")) and k not in merged:
                 merged[k] = v
         return super().load_state_dict(merged, strict=strict, assign=assign)
 
@@ -214,8 +260,10 @@ class MegalithUNet(nn.Module):
         return torch.cat([area_frac, log_elong, ring_hollowness, compactness], dim=1).to(seg_logits.dtype)
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
-        s0 = self.full_skip(x)
-        s1 = self.stem(x)
+        has_cropmarks = x.shape[1] >= (NUM_TERRAIN_CHANNELS + 2)
+        x_lidar = x[:, :NUM_TERRAIN_CHANNELS]
+        s0 = self.full_skip(x_lidar)
+        s1 = self.stem(x_lidar)
         e1 = self.enc1(self.maxpool(s1))
         e2 = self.enc2(e1)
         e3 = self.enc3(e2)
@@ -229,6 +277,19 @@ class MegalithUNet(nn.Module):
 
         seg_logits = self.seg_head(d0)
         cls_seg_logits = self.cls_seg_head(d0)
+
+        if has_cropmarks:
+            x_crop = x[:, NUM_TERRAIN_CHANNELS : NUM_TERRAIN_CHANNELS + 2]
+            # Gate spatial cropmark residual by the soft LiDAR candidate probability + halo
+            # so cropmarks sharpen/boost genuine low-relief LiDAR earthworks without creating
+            # false-positive pixel peaks on flat tractor tramlines or field boundaries.
+            lidar_prob = torch.sigmoid(seg_logits.detach())
+            lidar_halo = F.max_pool2d(lidar_prob, kernel_size=7, stride=1, padding=3)
+            lidar_gate = (0.10 + 0.90 * lidar_halo).clamp(0.0, 1.0)
+            crop_in = torch.cat([d0.detach(), x_lidar[:, :4].detach(), x_crop], dim=1)
+            crop_seg_out = torch.tanh(self.cropmark_seg_head(crop_in)) * 1.5
+            seg_logits = seg_logits + lidar_gate * crop_seg_out[:, 0:1]
+            cls_seg_logits = cls_seg_logits + lidar_gate * crop_seg_out[:, 1:]
 
         b = x.shape[0]
         e4_vec = self.e4_proj(F.adaptive_avg_pool2d(e4, 1).flatten(1))
@@ -256,6 +317,41 @@ class MegalithUNet(nn.Module):
 
         tile_logits = 0.55 * self.tile_presence_out(hidden) + 0.45 * seg_q2 + self.geom_tile_out(geom_hidden)
         type_logits = self.tile_type_out(hidden) + 0.35 * cls_peaks + self.geom_type_out(geom_hidden)
+
+        if has_cropmarks:
+            x_crop = x[:, NUM_TERRAIN_CHANNELS : NUM_TERRAIN_CHANNELS + 2]
+            fg_mask = torch.sigmoid(seg_logits.detach()).clamp(0.0, 1.0)
+            fg_sum = fg_mask.sum(dim=(2, 3)).clamp(min=1.0)
+            fg_exg = (x_crop[:, 0:1] * fg_mask).sum(dim=(2, 3)) / fg_sum
+            fg_lum = (x_crop[:, 1:2] * fg_mask).sum(dim=(2, 3)) / fg_sum
+            fg_exg_abs = (x_crop[:, 0:1].abs() * fg_mask).sum(dim=(2, 3)) / fg_sum
+            fg_lum_abs = (x_crop[:, 1:2].abs() * fg_mask).sum(dim=(2, 3)) / fg_sum
+            flat_exg = x_crop[:, 0].reshape(b, -1)
+            flat_lum = x_crop[:, 1].reshape(b, -1)
+            q_exg_pos = torch.topk(flat_exg, k=min(64, flat_exg.shape[1]), dim=1)[0].mean(dim=1, keepdim=True)
+            q_exg_neg = torch.topk(-flat_exg, k=min(64, flat_exg.shape[1]), dim=1)[0].mean(dim=1, keepdim=True)
+            q_lum_pos = torch.topk(flat_lum, k=min(64, flat_lum.shape[1]), dim=1)[0].mean(dim=1, keepdim=True)
+            q_lum_neg = torch.topk(-flat_lum, k=min(64, flat_lum.shape[1]), dim=1)[0].mean(dim=1, keepdim=True)
+            std_exg = flat_exg.std(dim=1, keepdim=True)
+            std_lum = flat_lum.std(dim=1, keepdim=True)
+            crop_vec = torch.cat(
+                [
+                    fg_exg,
+                    fg_lum,
+                    fg_exg_abs,
+                    fg_lum_abs,
+                    q_exg_pos,
+                    q_exg_neg,
+                    q_lum_pos,
+                    q_lum_neg,
+                    std_exg,
+                    std_lum,
+                ],
+                dim=1,
+            )
+            crop_hidden = self.cropmark_mlp(crop_vec)
+            tile_logits = tile_logits + self.cropmark_tile_out(crop_hidden)
+            type_logits = type_logits + self.cropmark_type_out(crop_hidden)
 
         return {
             "seg_logits": seg_logits,

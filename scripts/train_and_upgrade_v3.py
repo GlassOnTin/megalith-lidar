@@ -471,13 +471,31 @@ def train_and_evaluate_v3_domain(
     manifest_by_id = {m["sample_id"]: m for m in manifest_v3}
 
     train_ds = MegalithLidarDataset(
-        train_specs, catalog, tile_cache_dir, augment=True, feature_cache_dir=feat_cache_dir, target_domain=target_domain
+        train_specs,
+        catalog,
+        tile_cache_dir,
+        augment=True,
+        feature_cache_dir=feat_cache_dir,
+        target_domain=target_domain,
+        include_cropmarks=True,
     )
     val_ds = MegalithLidarDataset(
-        val_specs, catalog, tile_cache_dir, augment=False, feature_cache_dir=feat_cache_dir, target_domain=target_domain
+        val_specs,
+        catalog,
+        tile_cache_dir,
+        augment=False,
+        feature_cache_dir=feat_cache_dir,
+        target_domain=target_domain,
+        include_cropmarks=True,
     )
     test_ds = MegalithLidarDataset(
-        test_specs, catalog, tile_cache_dir, augment=False, feature_cache_dir=feat_cache_dir, target_domain=target_domain
+        test_specs,
+        catalog,
+        tile_cache_dir,
+        augment=False,
+        feature_cache_dir=feat_cache_dir,
+        target_domain=target_domain,
+        include_cropmarks=True,
     )
 
     ch_mean, ch_std = compute_train_channel_stats(train_ds)
@@ -502,33 +520,77 @@ def train_and_evaluate_v3_domain(
     if prod_ckpt_path.exists():
         try:
             init_ckpt = torch.load(prod_ckpt_path, map_location="cpu", weights_only=False)
-            model.load_state_dict(init_ckpt["model_state_dict"])
+            missing, unexpected = model.load_state_dict(init_ckpt["model_state_dict"], strict=False)
             del init_ckpt
-            print(f"  [{target_domain}] Warm-started from {prod_ckpt_path.name}")
+            print(
+                f"  [{target_domain}] Warm-started from {prod_ckpt_path.name} "
+                f"(new cropmark adapter params={len(missing)})"
+            )
         except Exception as exc:
             print(f"  [{target_domain}] Fresh init (warm-start skipped: {exc})")
     criterion = MegalithLoss(pos_pixel_weight=2.5, pos_tile_weight=pos_tile_weight).to(device)
 
+    crop_modules = (
+        model.cropmark_skip,
+        model.cropmark_stem,
+        model.cropmark_seg_head,
+        model.cropmark_mlp,
+        model.cropmark_tile_out,
+        model.cropmark_type_out,
+    )
+    crop_param_ids = {id(p) for m in crop_modules for p in m.parameters()}
     enc_modules = (model.stem, model.enc1, model.enc2, model.enc3, model.enc4)
     enc_param_ids = {id(p) for m in enc_modules for p in m.parameters()}
-    enc_params = [p for p in model.parameters() if id(p) in enc_param_ids]
-    dec_params = [p for p in model.parameters() if id(p) not in enc_param_ids]
+
+    crop_params = [p for p in model.parameters() if id(p) in crop_param_ids]
+    enc_params = [p for p in model.parameters() if id(p) in enc_param_ids and id(p) not in crop_param_ids]
+    dec_params = [p for p in model.parameters() if id(p) not in enc_param_ids and id(p) not in crop_param_ids]
     optimizer = torch.optim.AdamW(
         [
-            {"params": enc_params, "lr": lr * 0.25},
-            {"params": dec_params, "lr": lr},
+            {"params": crop_params, "lr": lr},
+            {"params": dec_params, "lr": lr * 0.05},
+            {"params": enc_params, "lr": lr * 0.01},
         ],
         weight_decay=5e-4,
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=5e-6)
 
     v3_ckpt_path = ckpt_dir / prod_ckpt_name.replace("_best.pt", "_v3_best.pt")
-    best_val_sel = -1.0
     history: List[Dict] = []
+
+    val_init = collect_split_predictions(model, val_loader, criterion, device, use_d4_tta=False)
+    val_auc_init = float(roc_auc_score(val_init["y_true"], val_init["raw_logits"]))
+    best_val_sel = val_auc_init
+    torch.save(
+        {
+            "epoch": 0,
+            "target_domain": target_domain,
+            "class_names": class_names,
+            "model_state_dict": model.state_dict(),
+            "channel_mean": ch_mean.tolist(),
+            "channel_std": ch_std.tolist(),
+        },
+        v3_ckpt_path,
+    )
+    print(
+        f"  [{target_domain} v3] Epoch 00 (zero-init warm-start) | "
+        f"val_auc={val_auc_init:.4f} dice={val_init['pos_seg_dice']:.4f}"
+    )
 
     for epoch in range(1, epochs + 1):
         t0 = time.time()
         model.train()
+        # Keep pretrained LiDAR backbone and segmentation heads frozen during cropmark adapter
+        # training so pixel segmentation Dice is 100% preserved while cropmark_mlp refines tile_logits.
+        for p in enc_params:
+            p.requires_grad_(False)
+        for p in dec_params:
+            p.requires_grad_(False)
+        for p in model.cropmark_seg_head.parameters():
+            p.requires_grad_(False)
+        for m in model.modules():
+            if isinstance(m, torch.nn.BatchNorm2d):
+                m.eval()
         loss_sum = 0.0
         steps = 0
         optimizer.zero_grad(set_to_none=True)
@@ -554,7 +616,7 @@ def train_and_evaluate_v3_domain(
         scheduler.step()
         val_out = collect_split_predictions(model, val_loader, criterion, device, use_d4_tta=False)
         val_auc = float(roc_auc_score(val_out["y_true"], val_out["raw_logits"]))
-        sel = val_auc + 0.15 * val_out["pos_seg_dice"]
+        sel = val_auc
         marker = ""
         if sel > best_val_sel:
             best_val_sel = sel
@@ -584,7 +646,7 @@ def train_and_evaluate_v3_domain(
             f"train_loss={loss_sum / max(steps, 1):.4f} | val_auc={val_auc:.4f} dice={val_out['pos_seg_dice']:.4f}{marker}"
         )
 
-    ckpt = torch.load(v3_ckpt_path, map_location=device, weights_only=False)
+    ckpt = torch.load(v3_ckpt_path, map_location="cpu", weights_only=False)
     model.load_state_dict(ckpt["model_state_dict"])
 
     val_d4 = collect_split_predictions(model, val_loader, criterion, device, use_d4_tta=True)
@@ -597,7 +659,9 @@ def train_and_evaluate_v3_domain(
     ckpt["calibrator"] = calibrator.to_dict()
     ckpt["val_thresholds"] = val_thresholds
     ckpt["val_pixel_threshold_fpr05"] = round(pixel_th_fpr05, 4)
+    best_epoch_num = int(ckpt["epoch"])
     torch.save(ckpt, v3_ckpt_path)
+    del ckpt
 
     test_d4 = collect_split_predictions(model, test_loader, criterion, device, use_d4_tta=True)
     val_stats = evaluate_predictions_statistically(val_d4["y_true"], val_d4["raw_logits"], calibrator, val_thresholds, n_boot=1000)
@@ -637,7 +701,7 @@ def train_and_evaluate_v3_domain(
             "split_counts": dict(split_counts),
             "class_counts": dict(cls_counts),
             "negative_null_counts": dict(neg_counts),
-            "best_epoch": int(ckpt["epoch"]),
+            "best_epoch": best_epoch_num,
             "train_channel_mean": ch_mean.tolist(),
             "train_channel_std": ch_std.tolist(),
             "platt_calibrator": calibrator.to_dict(),

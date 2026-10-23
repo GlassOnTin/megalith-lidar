@@ -451,6 +451,36 @@ def test_scale_space_cropmark_features_d4_and_ring_ditch():
     assert vis.shape == (256, 256, 3) and vis.dtype == np.uint8
 
 
+def test_megalith_unet_8channel_cropmark_branch():
+    """Verify 8-channel multi-modal forward/backward and exact 6-channel zero-init equivalence."""
+    torch.manual_seed(42)
+    model = MegalithUNet(pretrained=False)
+    model.eval()
+    x6 = torch.randn(2, 6, 128, 128)
+    x8_zero = torch.cat([x6, torch.zeros(2, 2, 128, 128)], dim=1)
+    with torch.no_grad():
+        out6 = model(x6)
+        out8_zero = model(x8_zero)
+    # At zero-initialization of the cropmark output projections, 6-channel and 8-channel outputs match
+    assert torch.allclose(out6["seg_logits"], out8_zero["seg_logits"], atol=1e-5)
+    assert torch.allclose(out6["tile_logits"], out8_zero["tile_logits"], atol=1e-5)
+
+    # Verify gradients flow through the cropmark branch during training
+    model.train()
+    x8 = torch.randn(2, 8, 128, 128, requires_grad=True)
+    mask = torch.zeros(2, 128, 128, dtype=torch.long)
+    mask[0, 48:64, 48:64] = 3
+    tile_label = torch.tensor([1.0, 0.0])
+    type_label = torch.tensor([3, 0], dtype=torch.long)
+    criterion = MegalithLoss()
+    out = model(x8)
+    loss, _ = criterion(out, mask, tile_label, type_label)
+    loss.backward()
+    assert model.cropmark_seg_head[-1].weight.grad is not None
+    assert model.cropmark_tile_out.weight.grad is not None
+
+
+
 
 
 

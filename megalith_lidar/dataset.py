@@ -251,8 +251,9 @@ def compute_train_channel_stats(dataset: "MegalithLidarDataset") -> Tuple[np.nda
     Compute per-channel empirical mean and standard deviation strictly over the training split
     to standardize raw physical units without data leakage.
     """
-    ch_sum = np.zeros(NUM_TERRAIN_CHANNELS, dtype=np.float64)
-    ch_sq_sum = np.zeros(NUM_TERRAIN_CHANNELS, dtype=np.float64)
+    n_ch = dataset.num_channels
+    ch_sum = np.zeros(n_ch, dtype=np.float64)
+    ch_sq_sum = np.zeros(n_ch, dtype=np.float64)
     total_px = 0
 
     for spec in dataset.manifest:
@@ -266,17 +267,18 @@ def compute_train_channel_stats(dataset: "MegalithLidarDataset") -> Tuple[np.nda
     mean = ch_sum / max(total_px, 1)
     var = np.maximum(ch_sq_sum / max(total_px, 1) - mean * mean, 1e-8)
     std = np.sqrt(var)
-    # Channel 0, 1, 2, 4 are zero-mean differential/bandpass quantities by symmetry; pin mean=0
-    # so exact D4 sign/zero-point symmetry is preserved
-    for idx in (0, 1, 2, 4):
-        mean[idx] = 0.0
+    # Channels 0, 1, 2, 4 (and 6, 7 bandpass cropmarks) are zero-mean differential/bandpass quantities;
+    # pin mean=0 so exact D4 sign/zero-point symmetry is preserved
+    for idx in (0, 1, 2, 4, 6, 7):
+        if idx < n_ch:
+            mean[idx] = 0.0
     return mean.astype(np.float32), std.astype(np.float32)
 
 
 class MegalithLidarDataset(Dataset):
     """
-    PyTorch Dataset yielding standardized 6-channel isotropic scale-space tensors
-    and exact surveyed NHLE polygon masks.
+    PyTorch Dataset yielding standardized 6-channel (or 8-channel LiDAR + Scale-Space Cropmark)
+    isotropic scale-space tensors and exact surveyed NHLE polygon masks.
     """
 
     def __init__(
@@ -289,32 +291,59 @@ class MegalithLidarDataset(Dataset):
         channel_mean: Optional[np.ndarray] = None,
         channel_std: Optional[np.ndarray] = None,
         target_domain: str = "prehistoric",
+        include_cropmarks: bool = False,
+        aerial_cache_dir: Optional[Path] = None,
     ) -> None:
         self.manifest = manifest
         self.catalog = catalog
         self.tile_cache_dir = Path(tile_cache_dir)
         self.augment = augment
         self.target_domain = target_domain
+        self.include_cropmarks = include_cropmarks
+        self.num_channels = NUM_TERRAIN_CHANNELS + (2 if include_cropmarks else 0)
+        self.aerial_cache_dir = Path(aerial_cache_dir) if aerial_cache_dir else (self.tile_cache_dir.parent / "aerial_tiles")
         self.feature_cache_dir = Path(feature_cache_dir) if feature_cache_dir else None
         if self.feature_cache_dir is not None:
             self.feature_cache_dir.mkdir(parents=True, exist_ok=True)
         self.channel_mean = (
-            np.asarray(channel_mean, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+            np.asarray(channel_mean, dtype=np.float32).reshape(-1, 1, 1)
             if channel_mean is not None
-            else np.zeros((NUM_TERRAIN_CHANNELS, 1, 1), dtype=np.float32)
+            else np.zeros((self.num_channels, 1, 1), dtype=np.float32)
         )
         self.channel_std = (
-            np.asarray(channel_std, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+            np.asarray(channel_std, dtype=np.float32).reshape(-1, 1, 1)
             if channel_std is not None
-            else np.ones((NUM_TERRAIN_CHANNELS, 1, 1), dtype=np.float32)
+            else np.ones((self.num_channels, 1, 1), dtype=np.float32)
         )
 
     def set_normalization(self, mean: np.ndarray, std: np.ndarray) -> None:
-        self.channel_mean = np.asarray(mean, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
-        self.channel_std = np.asarray(std, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+        self.channel_mean = np.asarray(mean, dtype=np.float32).reshape(-1, 1, 1)
+        self.channel_std = np.asarray(std, dtype=np.float32).reshape(-1, 1, 1)
 
     def __len__(self) -> int:
         return len(self.manifest)
+
+    def _append_cropmarks_if_needed(self, feats: np.ndarray, spec: Dict) -> np.ndarray:
+        if not self.include_cropmarks:
+            return feats[:NUM_TERRAIN_CHANNELS]
+        if feats.shape[0] >= NUM_TERRAIN_CHANNELS + 2:
+            return feats[: NUM_TERRAIN_CHANNELS + 2]
+        from megalith_lidar.aerial_cropmarks import compute_cropmark_features, fetch_or_load_aerial_tile
+
+        rgb = fetch_or_load_aerial_tile(
+            spec["e_min"],
+            spec["e_max"],
+            spec["n_min"],
+            spec["n_max"],
+            cache_dir=self.aerial_cache_dir,
+            size=feats.shape[1],
+        )
+        if rgb is not None:
+            ndsm = np.expm1(feats[5])
+            crop_feats = compute_cropmark_features(rgb, dtm=np.zeros_like(ndsm), dsm=ndsm)
+        else:
+            crop_feats = np.zeros((2, feats.shape[1], feats.shape[2]), dtype=np.float32)
+        return np.concatenate([feats[:NUM_TERRAIN_CHANNELS], crop_feats], axis=0).astype(np.float32)
 
     def _load_features_and_mask(self, spec: Dict) -> Tuple[np.ndarray, np.ndarray]:
         if self.target_domain == "roman":
@@ -328,7 +357,14 @@ class MegalithLidarDataset(Dataset):
             if f_path.exists():
                 try:
                     with np.load(f_path) as d:
-                        return d["features"].astype(np.float32), d["mask"].astype(np.uint8)
+                        raw_f = d["features"].astype(np.float32)
+                        raw_m = d["mask"].astype(np.uint8)
+                    if self.include_cropmarks and raw_f.shape[0] < NUM_TERRAIN_CHANNELS + 2:
+                        raw_f = self._append_cropmarks_if_needed(raw_f, spec)
+                        np.savez_compressed(f_path, features=raw_f.astype(np.float16), mask=raw_m)
+                    elif not self.include_cropmarks and raw_f.shape[0] > NUM_TERRAIN_CHANNELS:
+                        raw_f = raw_f[:NUM_TERRAIN_CHANNELS]
+                    return raw_f, raw_m
                 except Exception:
                     pass
 
@@ -418,6 +454,9 @@ class MegalithLidarDataset(Dataset):
         else:
             mask = np.zeros(dtm.shape, dtype=np.uint8)
 
+        if self.include_cropmarks:
+            features = self._append_cropmarks_if_needed(features, spec)
+
         if self.feature_cache_dir is not None:
             f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             np.savez_compressed(f_path, features=features.astype(np.float16), mask=mask)
@@ -442,6 +481,12 @@ class MegalithLidarDataset(Dataset):
             relief_p95_m = 0.0
 
         if self.augment:
+            # 0. Modality dropout (50% probability of zeroing aerial cropmark channels during training)
+            #    so the network remains accurate on bare-earth LiDAR in woodland/pasture or when aerial is offline
+            if self.include_cropmarks and features.shape[0] >= NUM_TERRAIN_CHANNELS + 2:
+                if np.random.rand() < 0.5:
+                    features = features.copy()
+                    features[NUM_TERRAIN_CHANNELS : NUM_TERRAIN_CHANNELS + 2] = 0.0
             # 1. Exact Dihedral D4 symmetry (rotations + flips)
             k_rot = int(np.random.randint(0, 4))
             if k_rot > 0:

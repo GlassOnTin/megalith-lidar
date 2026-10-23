@@ -1,0 +1,461 @@
+{
+  "target_domain": "iron_age_enclosures_hut_circles_and_dykes",
+  "methodology": {
+    "spatial_partitioning": "20km x 20km BNG blocks assigned strictly by SHA-256 hash (zero manual overrides)",
+    "feature_representation": "6-channel isotropic scale-space & differential invariants (exact D4 equivariance, Train-only Z-score standardization)",
+    "sub_canopy_supervision": "Bare-earth 1m DTM relief pixels (|z - G_16(z)| >= 0.16m) inside NHLE polygons retained under woodland canopy (nDSM >= 2.5m)",
+    "calibration_and_thresholding": "Platt scaling and operating thresholds (FPR=1%, 5%, 10%, Max Youden J) fitted strictly on Validation split"
+  },
+  "dataset_total_tiles": 4323,
+  "split_counts": {
+    "train": 3743,
+    "test": 265,
+    "val": 315
+  },
+  "class_counts": {
+    "1": 698,
+    "2": 765,
+    "3": 624
+  },
+  "negative_null_counts": {
+    "anthropogenic_non_enclosure": 1109,
+    "random_national": 420,
+    "matched_environment": 415,
+    "trackside_and_field_boundary": 132,
+    "woodland_canopy_and_pit": 160
+  },
+  "best_epoch": 3,
+  "train_channel_mean": [
+    0.0,
+    0.0,
+    0.0,
+    0.12239241600036621,
+    0.0,
+    0.11884398013353348,
+    0.0,
+    0.0
+  ],
+  "train_channel_std": [
+    0.20149298012256622,
+    0.6146435737609863,
+    2.54789662361145,
+    0.15650971233844757,
+    0.03154081478714943,
+    0.43679898977279663,
+    0.07385025918483734,
+    0.045027755200862885
+  ],
+  "platt_calibrator": {
+    "a": 0.969742,
+    "b": -0.239623
+  },
+  "val_selected_thresholds": {
+    "fpr_0.01": {
+      "threshold": 0.82478,
+      "val_tpr": 0.2177,
+      "val_fpr": 0.0105
+    },
+    "fpr_0.05": {
+      "threshold": 0.71145,
+      "val_tpr": 0.4194,
+      "val_fpr": 0.0524
+    },
+    "fpr_0.10": {
+      "threshold": 0.61548,
+      "val_tpr": 0.5565,
+      "val_fpr": 0.1047
+    },
+    "max_youden_j": {
+      "threshold": 0.26557,
+      "val_tpr": 0.8629,
+      "val_fpr": 0.3455,
+      "val_youden_j": 0.5174
+    }
+  },
+  "val_pixel_threshold_fpr05": 0.7507,
+  "model_validation_metrics": {
+    "n_samples": 315,
+    "n_positives": 124,
+    "n_negatives": 191,
+    "roc_auc": 0.8393,
+    "roc_auc_ci95": [
+      0.7945,
+      0.8826
+    ],
+    "pr_auc_sample_prevalence": 0.7794,
+    "pr_auc_ci95": [
+      0.7163,
+      0.8435
+    ],
+    "brier_score_uncalibrated": 0.1598,
+    "brier_score_calibrated": 0.1585,
+    "ece_uncalibrated": 0.08,
+    "ece_calibrated": 0.0468,
+    "operating_points": {
+      "fpr_0.01": {
+        "val_selected_threshold": 0.82478,
+        "tpr_recall": 0.2177,
+        "tpr_ci95": [
+          0.1452,
+          0.2984
+        ],
+        "fpr_false_positive_rate": 0.0105,
+        "fpr_ci95": [
+          0.0,
+          0.0262
+        ],
+        "youden_j": 0.2072,
+        "likelihood_ratio_pos": 20.73,
+        "ppv_at_prior_0.01": 0.1732,
+        "ppv_at_prior_0.001": 0.0203
+      },
+      "fpr_0.05": {
+        "val_selected_threshold": 0.71145,
+        "tpr_recall": 0.4194,
+        "tpr_ci95": [
+          0.3306,
+          0.5081
+        ],
+        "fpr_false_positive_rate": 0.0524,
+        "fpr_ci95": [
+          0.0209,
+          0.0838
+        ],
+        "youden_j": 0.367,
+        "likelihood_ratio_pos": 8.0,
+        "ppv_at_prior_0.01": 0.0748,
+        "ppv_at_prior_0.001": 0.0079
+      },
+      "fpr_0.10": {
+        "val_selected_threshold": 0.61548,
+        "tpr_recall": 0.5565,
+        "tpr_ci95": [
+          0.4677,
+          0.6452
+        ],
+        "fpr_false_positive_rate": 0.0995,
+        "fpr_ci95": [
+          0.0576,
+          0.1466
+        ],
+        "youden_j": 0.457,
+        "likelihood_ratio_pos": 5.59,
+        "ppv_at_prior_0.01": 0.0535,
+        "ppv_at_prior_0.001": 0.0056
+      },
+      "max_youden_j": {
+        "val_selected_threshold": 0.26557,
+        "tpr_recall": 0.8629,
+        "tpr_ci95": [
+          0.7984,
+          0.9194
+        ],
+        "fpr_false_positive_rate": 0.3455,
+        "fpr_ci95": [
+          0.2827,
+          0.4085
+        ],
+        "youden_j": 0.5174,
+        "likelihood_ratio_pos": 2.5,
+        "ppv_at_prior_0.01": 0.0246,
+        "ppv_at_prior_0.001": 0.0025
+      }
+    }
+  },
+  "model_test_metrics": {
+    "n_samples": 265,
+    "n_positives": 83,
+    "n_negatives": 182,
+    "roc_auc": 0.8654,
+    "roc_auc_ci95": [
+      0.8128,
+      0.9119
+    ],
+    "pr_auc_sample_prevalence": 0.8002,
+    "pr_auc_ci95": [
+      0.7319,
+      0.8647
+    ],
+    "brier_score_uncalibrated": 0.1383,
+    "brier_score_calibrated": 0.133,
+    "ece_uncalibrated": 0.077,
+    "ece_calibrated": 0.0861,
+    "operating_points": {
+      "fpr_0.01": {
+        "val_selected_threshold": 0.82478,
+        "tpr_recall": 0.3012,
+        "tpr_ci95": [
+          0.2048,
+          0.3976
+        ],
+        "fpr_false_positive_rate": 0.0055,
+        "fpr_ci95": [
+          0.0,
+          0.0165
+        ],
+        "youden_j": 0.2957,
+        "likelihood_ratio_pos": 54.76,
+        "ppv_at_prior_0.01": 0.3562,
+        "ppv_at_prior_0.001": 0.052
+      },
+      "fpr_0.05": {
+        "val_selected_threshold": 0.71145,
+        "tpr_recall": 0.5181,
+        "tpr_ci95": [
+          0.4217,
+          0.6148
+        ],
+        "fpr_false_positive_rate": 0.0385,
+        "fpr_ci95": [
+          0.0165,
+          0.0714
+        ],
+        "youden_j": 0.4796,
+        "likelihood_ratio_pos": 13.46,
+        "ppv_at_prior_0.01": 0.1197,
+        "ppv_at_prior_0.001": 0.0133
+      },
+      "fpr_0.10": {
+        "val_selected_threshold": 0.61548,
+        "tpr_recall": 0.5783,
+        "tpr_ci95": [
+          0.4819,
+          0.675
+        ],
+        "fpr_false_positive_rate": 0.0769,
+        "fpr_ci95": [
+          0.0438,
+          0.1209
+        ],
+        "youden_j": 0.5014,
+        "likelihood_ratio_pos": 7.52,
+        "ppv_at_prior_0.01": 0.0706,
+        "ppv_at_prior_0.001": 0.0075
+      },
+      "max_youden_j": {
+        "val_selected_threshold": 0.26557,
+        "tpr_recall": 0.8434,
+        "tpr_ci95": [
+          0.759,
+          0.9277
+        ],
+        "fpr_false_positive_rate": 0.2747,
+        "fpr_ci95": [
+          0.2088,
+          0.3407
+        ],
+        "youden_j": 0.5687,
+        "likelihood_ratio_pos": 3.07,
+        "ppv_at_prior_0.01": 0.0301,
+        "ppv_at_prior_0.001": 0.0031
+      }
+    }
+  },
+  "model_test_pos_seg_dice": 0.538,
+  "model_test_subgroup_and_confounding_analysis": {
+    "discrimination_by_negative_null": {
+      "random_national": {
+        "n_negatives": 53,
+        "roc_auc": 0.8941,
+        "ci95": [
+          0.8402,
+          0.9409
+        ]
+      },
+      "matched_environment": {
+        "n_negatives": 51,
+        "roc_auc": 0.8231,
+        "ci95": [
+          0.7538,
+          0.8918
+        ]
+      },
+      "anthropogenic_non_enclosure": {
+        "n_negatives": 38,
+        "roc_auc": 0.8503,
+        "ci95": [
+          0.7723,
+          0.916
+        ]
+      },
+      "woodland_canopy_and_pit": {
+        "n_negatives": 20,
+        "roc_auc": 0.8301,
+        "ci95": [
+          0.7307,
+          0.9127
+        ]
+      },
+      "trackside_and_field_boundary": {
+        "n_negatives": 20,
+        "roc_auc": 0.9614,
+        "ci95": [
+          0.9211,
+          0.9904
+        ]
+      }
+    },
+    "operating_point_breakdowns": {
+      "fpr_0.01": {
+        "threshold": 0.82478,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.1538,
+          "iron_age_hillfort_banjo_enclosure": 0.4419,
+          "cross_ridge_dyke_field_system": 0.1481
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0,
+          "matched_environment": 0.0,
+          "anthropogenic_non_enclosure": 0.0263,
+          "woodland_canopy_and_pit": 0.0,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.0
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.0769
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.5
+          }
+        }
+      },
+      "fpr_0.05": {
+        "threshold": 0.71145,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.3077,
+          "iron_age_hillfort_banjo_enclosure": 0.6977,
+          "cross_ridge_dyke_field_system": 0.3333
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0189,
+          "matched_environment": 0.0196,
+          "anthropogenic_non_enclosure": 0.0789,
+          "woodland_canopy_and_pit": 0.1,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.1818
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.2692
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.7391
+          }
+        }
+      },
+      "fpr_0.10": {
+        "threshold": 0.61548,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.4615,
+          "iron_age_hillfort_banjo_enclosure": 0.7209,
+          "cross_ridge_dyke_field_system": 0.4074
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.0377,
+          "matched_environment": 0.098,
+          "anthropogenic_non_enclosure": 0.0789,
+          "woodland_canopy_and_pit": 0.2,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.3636
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.2692
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.8043
+          }
+        }
+      },
+      "max_youden_j": {
+        "threshold": 0.26557,
+        "tpr_by_monument_class": {
+          "hut_circle_pound_settlement": 0.6923,
+          "iron_age_hillfort_banjo_enclosure": 0.907,
+          "cross_ridge_dyke_field_system": 0.8148
+        },
+        "fpr_by_negative_null": {
+          "random_national": 0.2264,
+          "matched_environment": 0.3725,
+          "anthropogenic_non_enclosure": 0.3158,
+          "woodland_canopy_and_pit": 0.35,
+          "trackside_and_field_boundary": 0.0
+        },
+        "tpr_by_physical_relief_snr": {
+          "low_moderate_relief_0.18_to_0.45m": {
+            "n_sites": 11,
+            "tpr_recall": 0.6364
+          },
+          "prominent_relief_0.45_to_0.90m": {
+            "n_sites": 26,
+            "tpr_recall": 0.7308
+          },
+          "high_relief_ge_0.90m": {
+            "n_sites": 46,
+            "tpr_recall": 0.9565
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.3126,
+      "val_loss": 1.9933,
+      "val_roc_auc": 0.8251,
+      "val_pos_seg_dice": 0.5862
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.2544,
+      "val_loss": 1.9655,
+      "val_roc_auc": 0.8254,
+      "val_pos_seg_dice": 0.5823
+    },
+    {
+      "epoch": 3,
+      "train_loss": 2.2327,
+      "val_loss": 1.9614,
+      "val_roc_auc": 0.8279,
+      "val_pos_seg_dice": 0.5819
+    },
+    {
+      "epoch": 4,
+      "train_loss": 2.1389,
+      "val_loss": 1.9605,
+      "val_roc_auc": 0.8109,
+      "val_pos_seg_dice": 0.5171
+    },
+    {
+      "epoch": 5,
+      "train_loss": 2.1128,
+      "val_loss": 1.9408,
+      "val_roc_auc": 0.8141,
+      "val_pos_seg_dice": 0.5767
+    },
+    {
+      "epoch": 6,
+      "train_loss": 2.0992,
+      "val_loss": 1.9206,
+      "val_roc_auc": 0.8177,
+      "val_pos_seg_dice": 0.5721
+    }
+  ]
+}
