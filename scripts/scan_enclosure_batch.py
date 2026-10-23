@@ -175,8 +175,20 @@ def run_enclosure_scan(
         "subgroup_and_confounding_analysis": eval_metrics.get("model_test_subgroup_and_confounding_analysis", {}),
     }
 
+    non_conf = [f for f in all_enclosure_features if f["properties"].get("context_category") != "flagged_modern_or_karst_confounder"]
+    conf_only = [f for f in all_enclosure_features if f["properties"].get("context_category") == "flagged_modern_or_karst_confounder"]
+    conf_only.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    export_enc = non_conf + conf_only[:400]
+    for f in export_enc:
+        p = f["properties"]
+        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 3:
+            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:3]
+
     (docs_dir / "enclosure_candidates.geojson").write_text(
-        json.dumps({"type": "FeatureCollection", "features": all_enclosure_features}, indent=2),
+        json.dumps({"type": "FeatureCollection", "features": export_enc}, separators=(",", ":")),
         encoding="utf-8",
     )
     (docs_dir / "enclosure_summary.json").write_text(

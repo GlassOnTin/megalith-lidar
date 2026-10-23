@@ -709,8 +709,19 @@ def export_public_docs(
         json.dumps(public_summary, indent=2),
         encoding="utf-8",
     )
+    non_conf = [f for f in all_features if f["properties"].get("context_category") != "flagged_modern_or_karst_confounder"]
+    conf_only = [f for f in all_features if f["properties"].get("context_category") == "flagged_modern_or_karst_confounder"]
+    conf_only.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    export_feats = non_conf + conf_only[:400]
+    for f in export_feats:
+        p = f["properties"]
+        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 3:
+            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:3]
     (docs_dir / "candidates.geojson").write_text(
-        json.dumps({"type": "FeatureCollection", "features": all_features}, indent=2),
+        json.dumps({"type": "FeatureCollection", "features": export_feats}, separators=(",", ":")),
         encoding="utf-8",
     )
     return public_summary
