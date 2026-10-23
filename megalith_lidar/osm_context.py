@@ -703,14 +703,26 @@ def annotate_candidates_with_spatial_context(
             )
         elif (
             not is_enclosure
-            and area_m2 <= 7500.0
-            and max_pos_rel_m >= 1.15
+            and area_m2 <= 14000.0
+            and max_pos_rel_m >= 0.90
             and centroid_rel_m <= 0.35
-            and (max_pos_rel_m - centroid_rel_m) >= 0.95
+            and (max_pos_rel_m - centroid_rel_m) >= 0.85
             and (
-                float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.045
-                or (ndsm_m >= 0.85 and float(cand.get("cropmark_ring_exg_diff", 0.0)) >= 0.05)
+                float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.040
+                or (ndsm_m >= 0.85 and float(cand.get("cropmark_ring_exg_diff", 0.0)) >= 0.04)
                 or cand.get("vlm_shape_verdict") == "RECTILINEAR_OR_U_BUND"
+                or any(
+                    phrase in str(cand.get("arch_context_note") or "").lower()
+                    for phrase in (
+                        "is a false positive",
+                        "likely a modern",
+                        "likely represents a modern",
+                        "confounding the model",
+                        "modern agricultural",
+                        "modern field boundary",
+                        "building platform",
+                    )
+                )
             )
         ):
             osm_conf.append(
@@ -720,7 +732,7 @@ def annotate_candidates_with_spatial_context(
                         f"embanked_slurry_lagoon_or_farm_reservoir "
                         f"(bank={max_pos_rel_m:+.2f}m, basin={centroid_rel_m:+.2f}m, area={area_m2:.0f}m2)"
                     ),
-                    "name": "Embanked slurry lagoon, lined farm reservoir, or hollow-interior bund",
+                    "name": "Embanked pond, slurry lagoon, gravel pit, or levelled court bund",
                     "wikidata": None,
                     "distance_m": 0.0,
                     "inside_polygon": True,

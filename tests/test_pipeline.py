@@ -302,8 +302,8 @@ def test_roman_taxonomy_and_sub_canopy_context():
     annotate_candidates_with_spatial_context(roman_cand, osm_idx, target_domain="roman")
     assert roman_cand[0]["context_category"] == "unidentified_candidate"
 
-    # Embanked slurry lagoon / hollow-interior farm reservoir (e.g. SE 23030 83779) should be flagged on Roman domain
-    lagoon_cand = [
+    # Embanked slurry lagoon / pond / gravel pit / levelled court (e.g. SE 23030 83779, SP 31806 97499, NU 14479 20691, SU 61106 50083, SU 60156 51931)
+    lagoon_cands = [
         {
             "easting": 423030.4,
             "northing": 483779.3,
@@ -317,11 +317,36 @@ def test_roman_taxonomy_and_sub_canopy_context():
             "cropmark_ring_exg_diff": 0.0916,
             "is_known_monument": False,
             "target_domain": "roman",
-        }
+        },
+        {
+            "easting": 431806.0,
+            "northing": 297499.0,
+            "confidence": 0.927,
+            "area_m2": 9646.0,
+            "est_local_relief_m": 1.89,
+            "max_positive_relief_m": 1.89,
+            "centroid_local_relief_m": -0.13,
+            "vlm_shape_verdict": "RECTILINEAR_OR_U_BUND",
+            "is_known_monument": False,
+            "target_domain": "roman",
+        },
+        {
+            "easting": 460156.0,
+            "northing": 151931.0,
+            "confidence": 0.905,
+            "area_m2": 1928.0,
+            "est_local_relief_m": 0.92,
+            "max_positive_relief_m": 0.92,
+            "centroid_local_relief_m": 0.04,
+            "vlm_shape_verdict": "RECTILINEAR_OR_U_BUND",
+            "is_known_monument": False,
+            "target_domain": "roman",
+        },
     ]
-    annotate_candidates_with_spatial_context(lagoon_cand, None, target_domain="roman")
-    assert lagoon_cand[0]["context_category"] == "flagged_modern_or_karst_confounder"
-    assert lagoon_cand[0]["osm_confounder_matches"][0]["osm_id"] == "lidar/slurry_lagoon_or_bund"
+    annotate_candidates_with_spatial_context(lagoon_cands, None, target_domain="roman")
+    for lc in lagoon_cands:
+        assert lc["context_category"] == "flagged_modern_or_karst_confounder"
+        assert lc["osm_confounder_matches"][0]["osm_id"] == "lidar/slurry_lagoon_or_bund"
 
     # Test Qwen3.8 VLM note downrating for obvious false positives vs uncertain vs plausible
     tier1, mult1, _ = classify_vlm_note_downrating(
