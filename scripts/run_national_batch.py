@@ -351,8 +351,7 @@ def expand_national_queue_if_needed(
         sy = int(rec.northing // square_size_m) * square_size_m
         if rec.cls in prehistoric_classes:
             prehistoric_squares_2k[(sx, sy)] = prehistoric_squares_2k.get((sx, sy), 0) + 1
-        if rec.cls in prehistoric_classes or rec.is_roman_or_road or rec.is_enclosure_or_settlement:
-            monument_squares_2k[(sx, sy)] = monument_squares_2k.get((sx, sy), 0) + 1
+        monument_squares_2k[(sx, sy)] = monument_squares_2k.get((sx, sy), 0) + 1
 
     # 1. Full 10x10 (20 km x 20 km) outward spirals in the 5 held-out seed blocks
     seed_spirals: List[List[Dict]] = []
