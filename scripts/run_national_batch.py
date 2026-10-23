@@ -877,6 +877,11 @@ def main() -> None:
         if expand_national_queue_if_needed(queue_state, catalog):
             queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
+        pending_count = sum(1 for item in queue_state["queue"] if item.get("status") == "pending")
+        if pending_count == 0 and not args.rescore_completed:
+            print("[batch] All 1,417 test squares in queue_state are completed; skipping no-op re-export.")
+            return
+
         model.to(device)
         scanned_now = 0
         for item in queue_state["queue"]:
