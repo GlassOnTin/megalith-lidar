@@ -137482,6 +137482,119 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          -3.075535,
+          53.527396
+        ]
+      },
+      "properties": {
+        "easting": 328799.6,
+        "northing": 403953.3,
+        "lat": 53.527396,
+        "lon": -3.075535,
+        "os_grid_ref": "SD 28800 03953",
+        "confidence": 0.8601,
+        "peak_prob": 0.8745,
+        "mean_prob": 0.817,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 2135.0,
+        "elongation": 1.89,
+        "est_local_relief_m": 3.04,
+        "max_positive_relief_m": 3.04,
+        "centroid_local_relief_m": 1.13,
+        "patch_min_relief_m": -1.34,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.306,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "relation/19113512(way/67700322)",
+            "subtype": "natural=beach",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 6.9,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "relation/2677819(way/199399197)",
+            "subtype": "military=range",
+            "name": "Altcar Training Camp",
+            "wikidata": null,
+            "distance_m": 15.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.04m, slope=0.31)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7783,
+        "raw_tile_logit": 1.8887,
+        "window_bbox": [
+          328576,
+          403728,
+          328832,
+          403984
+        ],
+        "region_name": "enclosure_null_test_E328000_N402000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E328000_N402000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1015909,
+            "name": "Hightown Cross on Alt Road, 60m south east of Hightown Station",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1308.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1015908,
+            "name": "Standing cross on the village green, 30m south east of the junction of Carr House Lane and Lady Green Lane",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3278.0,
+            "bearing": "E"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 5,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Merseyside",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 2135 m\u00b2 topographic anomaly (+3.04 m local relief, 0.306 / 17.0\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=beach'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Hightown Cross on Alt Road, 60m south east of Hightown Station (NHLE #1015909, 1308 m ESE) and Standing cross on the village green, 30m south east of the junction of Carr House Lane and Lady Green Lane (NHLE #1015908, 3278 m E).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8601,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           -3.018885,
           53.497676
         ]
@@ -148878,6 +148991,277 @@
         "arch_context_note": "Situated in the Mendip Carboniferous limestone plateau (Somerset) within an active monument landscape (0 scheduled monuments within 2 km and 3 within 5 km, closest being Bowl barrow 100m north east of Home Farm Cottage (NHLE #1016296, 3953 m SSW)), the 1 m DTM isolates a curvilinear rampart-and-ditch enclosure (22 m\u00b2 footprint, ~5 m span, 1.84\u00d7 elongation) rising +1.47 m above its 16 m local trend surface with weathered scarp gradients of 0.195 (11.0\u00b0), morphologically consistent with a Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement. Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM 0.21 m), confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.7872,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.493623,
+          51.327998
+        ]
+      },
+      "properties": {
+        "easting": 365703.1,
+        "northing": 158882.4,
+        "lat": 51.327998,
+        "lon": -2.493623,
+        "os_grid_ref": "ST 65703 58882",
+        "confidence": 0.8593,
+        "peak_prob": 0.8718,
+        "mean_prob": 0.822,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 9777.0,
+        "elongation": 1.35,
+        "est_local_relief_m": 1.58,
+        "max_positive_relief_m": 1.58,
+        "centroid_local_relief_m": 0.01,
+        "patch_min_relief_m": -0.12,
+        "est_surface_prominence_m": 4.2,
+        "mean_slope_tangent": 0.044,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8398,
+        "raw_tile_logit": 2.2959,
+        "window_bbox": [
+          365536,
+          158768,
+          365792,
+          159024
+        ],
+        "region_name": "enclosure_null_test_E364000_N158000",
+        "diagnostic_png": "enclosure_null_test_E364000_N158000_unidentified_01_E365536_N158768_conf859.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E364000_N158000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1004525,
+            "name": "Slight univallate hillfort 125m west of Tunley Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2659.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1013881,
+            "name": "Camerton Romano-British town and associated Prehistoric and early medieval monuments",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3911.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Mendip Carboniferous limestone plateau (Somerset)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 2,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Somerset",
+        "arch_context_note": "Situated on the Mendip Carboniferous limestone plateau, this candidate lies 2659m west of the slight univallate hillfort at Tunley Farm (NHLE #1004525) and 3911m northwest of the Camerton Romano-British town (NHLE #1013881). The 1m LiDAR close-up reveals a faint, curvilinear earthwork footprint of 9777m\u00b2 with 1.35x axial elongation, exhibiting a low-relief bank (yellow) and shallow internal hollow (blue) with a mean scarp slope of 0.044. Given the heavily smoothed morphology and shallow 1.58m relief, this is likely a degraded prehistoric enclosure or natural limestone hollow, requiring a targeted HER review and fieldwalking to rule out modern agricultural levelling.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+        "raw_unet_confidence": 0.8593,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT",
+        "vlm_downrate_reason": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.494589,
+          51.328189
+        ]
+      },
+      "properties": {
+        "easting": 365635.9,
+        "northing": 158904.1,
+        "lat": 51.328189,
+        "lon": -2.494589,
+        "os_grid_ref": "ST 65636 58904",
+        "confidence": 0.8231,
+        "peak_prob": 0.83,
+        "mean_prob": 0.8024,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 172.0,
+        "elongation": 2.73,
+        "est_local_relief_m": -0.7,
+        "max_positive_relief_m": 0.51,
+        "centroid_local_relief_m": -0.16,
+        "patch_min_relief_m": -0.7,
+        "est_surface_prominence_m": 4.79,
+        "mean_slope_tangent": 0.147,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.70m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8398,
+        "raw_tile_logit": 2.2959,
+        "window_bbox": [
+          365536,
+          158768,
+          365792,
+          159024
+        ],
+        "region_name": "enclosure_null_test_E364000_N158000",
+        "diagnostic_png": "enclosure_null_test_E364000_N158000_unidentified_01_E365536_N158768_conf859.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E364000_N158000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1004525,
+            "name": "Slight univallate hillfort 125m west of Tunley Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2724.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1013881,
+            "name": "Camerton Romano-British town and associated Prehistoric and early medieval monuments",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3977.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Mendip Carboniferous limestone plateau (Somerset)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 2,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Somerset",
+        "arch_context_note": "Located in the Mendip Carboniferous limestone plateau (Somerset), this 172 m\u00b2 topographic anomaly (-0.70 m local relief, 0.147 / 8.4\u00b0 mean scarp slope, nDSM 4.79 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Negative-relief pit, pond, or marl scoop'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Slight univallate hillfort 125m west of Tunley Farm (NHLE #1004525, 2724 m E) and Camerton Romano-British town and associated Prehistoric and early medieval monuments (NHLE #1013881, 3977 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8231,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.494287,
+          51.32858
+        ]
+      },
+      "properties": {
+        "easting": 365657.3,
+        "northing": 158947.5,
+        "lat": 51.32858,
+        "lon": -2.494287,
+        "os_grid_ref": "ST 65657 58947",
+        "confidence": 0.8151,
+        "peak_prob": 0.8214,
+        "mean_prob": 0.7964,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 126.0,
+        "elongation": 1.22,
+        "est_local_relief_m": 1.22,
+        "max_positive_relief_m": 1.22,
+        "centroid_local_relief_m": 0.01,
+        "patch_min_relief_m": -0.55,
+        "est_surface_prominence_m": 0.02,
+        "mean_slope_tangent": 0.083,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/1171516558",
+            "subtype": "power=minor_line",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 5.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "node/10886067274",
+            "subtype": "power=pole",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8398,
+        "raw_tile_logit": 2.2959,
+        "window_bbox": [
+          365536,
+          158768,
+          365792,
+          159024
+        ],
+        "region_name": "enclosure_null_test_E364000_N158000",
+        "diagnostic_png": "enclosure_null_test_E364000_N158000_unidentified_01_E365536_N158768_conf859.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E364000_N158000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1004525,
+            "name": "Slight univallate hillfort 125m west of Tunley Farm",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2698.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1013881,
+            "name": "Camerton Romano-British town and associated Prehistoric and early medieval monuments",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3988.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Mendip Carboniferous limestone plateau (Somerset)",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 2,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Somerset",
+        "arch_context_note": "Located in the Mendip Carboniferous limestone plateau (Somerset), this 126 m\u00b2 topographic anomaly (+1.22 m local relief, 0.083 / 4.7\u00b0 mean scarp slope, nDSM 0.02 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'power=minor_line'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Slight univallate hillfort 125m west of Tunley Farm (NHLE #1004525, 2698 m E) and Camerton Romano-British town and associated Prehistoric and early medieval monuments (NHLE #1013881, 3988 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8151,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     },
@@ -166895,6 +167279,232 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          -1.904566,
+          52.494841
+        ]
+      },
+      "properties": {
+        "easting": 406576.3,
+        "northing": 288552.3,
+        "lat": 52.494841,
+        "lon": -1.904566,
+        "os_grid_ref": "SP 06576 88552",
+        "confidence": 0.8056,
+        "peak_prob": 0.8098,
+        "mean_prob": 0.7929,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 82.0,
+        "elongation": 5.37,
+        "est_local_relief_m": 0.33,
+        "max_positive_relief_m": 0.33,
+        "centroid_local_relief_m": 0.01,
+        "patch_min_relief_m": -0.2,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.099,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/24020228",
+            "subtype": "leisure=park",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.6982,
+        "raw_tile_logit": 1.4653,
+        "window_bbox": [
+          406384,
+          288384,
+          406640,
+          288640
+        ],
+        "region_name": "enclosure_null_test_E406000_N288000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E406000_N288000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1485852,
+            "name": "The de Birmingham moated site, the seat of the medieval Lords of Birmingham",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2293.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1021388,
+            "name": "Remains of the Boulton and Watt Soho foundry and mint, Birmingham Canal, Smethwick",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3171.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1002980,
+            "name": "Perry Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3421.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1005887,
+            "name": "Smethwick Engine House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3927.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 0
+        },
+        "county": "West Midlands",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 82 m\u00b2 topographic anomaly (+0.33 m local relief, 0.099 / 5.7\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'leisure=park'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to The de Birmingham moated site, the seat of the medieval Lords of Birmingham (NHLE #1485852, 2293 m SSE) and Remains of the Boulton and Watt Soho foundry and mint, Birmingham Canal, Smethwick (NHLE #1021388, 3171 m W).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8056,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.904818,
+          52.495189
+        ]
+      },
+      "properties": {
+        "easting": 406559.2,
+        "northing": 288591.0,
+        "lat": 52.495189,
+        "lon": -1.904818,
+        "os_grid_ref": "SP 06559 88591",
+        "confidence": 0.7963,
+        "peak_prob": 0.7971,
+        "mean_prob": 0.7939,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 13.0,
+        "elongation": 2.05,
+        "est_local_relief_m": -0.43,
+        "max_positive_relief_m": 0.05,
+        "centroid_local_relief_m": -0.11,
+        "patch_min_relief_m": -1.31,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.234,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/24020228",
+            "subtype": "leisure=park",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/24021266",
+            "subtype": "highway=tertiary",
+            "name": "Great King Street North",
+            "wikidata": null,
+            "distance_m": 25.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.43m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.6982,
+        "raw_tile_logit": 1.4653,
+        "window_bbox": [
+          406384,
+          288384,
+          406640,
+          288640
+        ],
+        "region_name": "enclosure_null_test_E406000_N288000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E406000_N288000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1485852,
+            "name": "The de Birmingham moated site, the seat of the medieval Lords of Birmingham",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2335.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1021388,
+            "name": "Remains of the Boulton and Watt Soho foundry and mint, Birmingham Canal, Smethwick",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3150.0,
+            "bearing": "W"
+          },
+          {
+            "list_entry": 1002980,
+            "name": "Perry Bridge",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3385.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1005887,
+            "name": "Smethwick Engine House",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3907.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 0
+        },
+        "county": "West Midlands",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 13 m\u00b2 topographic anomaly (-0.43 m local relief, 0.234 / 13.2\u00b0 mean scarp slope, nDSM 0.00 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'leisure=park'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to The de Birmingham moated site, the seat of the medieval Lords of Birmingham (NHLE #1485852, 2335 m SSE) and Remains of the Boulton and Watt Soho foundry and mint, Birmingham Canal, Smethwick (NHLE #1021388, 3150 m W).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7963,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           -1.853724,
           52.010112
         ]
@@ -174416,6 +175026,111 @@
         "arch_context_note": "Located in the English lowland / river terrace landscape, this 12 m\u00b2 topographic anomaly (-0.61 m local relief, 0.318 / 17.6\u00b0 mean scarp slope, nDSM 0.09 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Standing cross on the village green (NHLE #1017814, 800 m NE) and Churchyard cross in St Lawrence's churchyard (NHLE #1017813, 1904 m E).",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.802,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.653565,
+          52.578198
+        ]
+      },
+      "properties": {
+        "easting": 423573.1,
+        "northing": 297876.6,
+        "lat": 52.578198,
+        "lon": -1.653565,
+        "os_grid_ref": "SP 23573 97877",
+        "confidence": 0.8029,
+        "peak_prob": 0.8056,
+        "mean_prob": 0.7951,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 25.0,
+        "elongation": 1.88,
+        "est_local_relief_m": -1.01,
+        "max_positive_relief_m": -0.01,
+        "centroid_local_relief_m": -0.72,
+        "patch_min_relief_m": -1.37,
+        "est_surface_prominence_m": 4.13,
+        "mean_slope_tangent": 0.391,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/852743213",
+            "subtype": "military=danger_area",
+            "name": "Kingsbury Rifle Range",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-1.01m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7151,
+        "raw_tile_logit": 1.5483,
+        "window_bbox": [
+          423344,
+          297744,
+          423600,
+          298000
+        ],
+        "region_name": "enclosure_null_test_E422000_N296000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E422000_N296000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014683,
+            "name": "Double moated site 60m east of Baxterley church",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2282.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1019978,
+            "name": "Kingsbury Hall: a medieval enclosure castle and post-medieval house",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2668.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1013769,
+            "name": "Drakenage Farm moated site, a fishpond and associated closes",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2938.0,
+            "bearing": "SSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "English lowland / river terrace landscape",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Warwickshire",
+        "arch_context_note": "Located in the English lowland / river terrace landscape, this 25 m\u00b2 topographic anomaly (-1.01 m local relief, 0.391 / 21.4\u00b0 mean scarp slope, nDSM 4.13 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Kingsbury Rifle Range'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Double moated site 60m east of Baxterley church (NHLE #1014683, 2282 m ESE) and Kingsbury Hall: a medieval enclosure castle and post-medieval house (NHLE #1019978, 2668 m SW).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8029,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     },
@@ -198094,6 +198809,965 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
+          0.091318,
+          51.502132
+        ]
+      },
+      "properties": {
+        "easting": 545251.0,
+        "northing": 180206.0,
+        "lat": 51.502132,
+        "lon": 0.091318,
+        "os_grid_ref": "TQ 45251 80206",
+        "confidence": 0.9331,
+        "peak_prob": 0.9511,
+        "mean_prob": 0.8792,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 6924.0,
+        "elongation": 1.06,
+        "est_local_relief_m": 2.74,
+        "max_positive_relief_m": 2.74,
+        "centroid_local_relief_m": 1.83,
+        "patch_min_relief_m": 1.4,
+        "est_surface_prominence_m": 0.32,
+        "mean_slope_tangent": 0.21,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/232844911",
+            "subtype": "leisure=park",
+            "name": "Gallions Reach Park",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "way/1174637843",
+            "subtype": "man_made=embankment",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 12.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9116,
+        "raw_tile_logit": 2.9824,
+        "window_bbox": [
+          545152,
+          180000,
+          545408,
+          180256
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2348.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2993.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1021456,
+            "name": "Linear Training Fortification, Royal Military Repository",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3313.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1430983,
+            "name": "Shrewsbury Barrow, Shooters Hill",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3381.0,
+            "bearing": "SSW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 6924 m\u00b2 topographic anomaly (+2.74 m local relief, 0.210 / 11.9\u00b0 mean scarp slope, nDSM 0.32 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Gallions Reach Park'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2348 m S) and Lesnes Abbey (NHLE #1002025, 2993 m ESE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9331,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.092886,
+          51.507458
+        ]
+      },
+      "properties": {
+        "easting": 545342.9,
+        "northing": 180801.4,
+        "lat": 51.507458,
+        "lon": 0.092886,
+        "os_grid_ref": "TQ 45343 80801",
+        "confidence": 0.8944,
+        "peak_prob": 0.9156,
+        "mean_prob": 0.8309,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 3999.0,
+        "elongation": 2.53,
+        "est_local_relief_m": 3.47,
+        "max_positive_relief_m": 3.47,
+        "centroid_local_relief_m": -0.67,
+        "patch_min_relief_m": -0.76,
+        "est_surface_prominence_m": 4.12,
+        "mean_slope_tangent": 0.196,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2922.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3239.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3258.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3560.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Situated in the Southern English Chalk & lowlands within an active monument landscape (0 scheduled monuments within 2 km and 6 within 5 km, closest being Burial mound on Winns Common, Plumstead (NHLE #1002005, 2922 m S) and Lesnes Abbey (NHLE #1002025, 3239 m SE)), the 1 m DTM isolates a curvilinear rampart-and-ditch enclosure (3999 m\u00b2 footprint, ~71 m span, 2.53\u00d7 elongation) rising +3.47 m above its 16 m local trend surface with weathered scarp gradients of 0.196 (11.1\u00b0), morphologically consistent with a Iron Age univallate/multivallate enclosure, banjo enclosure, or defended settlement. Moderate surface roughness (nDSM 4.12 m) warrants checking for low gorse/brash cover or stone cairn exposure. Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8944,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.09269,
+          51.506291
+        ]
+      },
+      "properties": {
+        "easting": 545333.0,
+        "northing": 180671.2,
+        "lat": 51.506291,
+        "lon": 0.09269,
+        "os_grid_ref": "TQ 45333 80671",
+        "confidence": 0.7468,
+        "peak_prob": 0.9102,
+        "mean_prob": 0.8255,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 8664.0,
+        "elongation": 1.13,
+        "est_local_relief_m": 3.68,
+        "max_positive_relief_m": 3.68,
+        "centroid_local_relief_m": 0.05,
+        "patch_min_relief_m": -0.29,
+        "est_surface_prominence_m": 4.99,
+        "mean_slope_tangent": 0.137,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [],
+        "context_category": "unidentified_candidate",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2794.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3169.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3374.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3580.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Situated within the Southern English Chalk and lowlands, this candidate lies 2794 m north of the Winns Common burial mound (NHLE #1002005) and 3169 m northwest of Lesnes Abbey (NHLE #1002025). The 1m LiDAR close-up reveals a smooth, continuous arc of raised yellow bank (16m Local Relief) bounding a dark scarp (Bare-Earth Slope), corroborating the +3.68 m relief and 7.8-degree slope. Given the 1.13x axial elongation and lack of rectilinear corners, this likely represents a natural chalk ridge or modern forestry bund rather than a banjo enclosure, necessitating a HER search and historic map review to rule out a plantation bank.",
+        "arch_context_source": "qwen3.8_vlm_vision",
+        "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+        "raw_unet_confidence": 0.8891,
+        "vlm_verdict_tier": "UNCERTAIN_OR_DEGRADED",
+        "vlm_downrate_reason": "VLM Assessment: Downrated (circular/low-relief morphology vs long-barrow class or likely natural/post-medieval feature)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.098001,
+          51.507473
+        ]
+      },
+      "properties": {
+        "easting": 545697.8,
+        "northing": 180813.2,
+        "lat": 51.507473,
+        "lon": 0.098001,
+        "os_grid_ref": "TQ 45698 80813",
+        "confidence": 0.8621,
+        "peak_prob": 0.8753,
+        "mean_prob": 0.8227,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 5310.0,
+        "elongation": 1.09,
+        "est_local_relief_m": 3.24,
+        "max_positive_relief_m": 3.24,
+        "centroid_local_relief_m": -0.87,
+        "patch_min_relief_m": -1.07,
+        "est_surface_prominence_m": 4.18,
+        "mean_slope_tangent": 0.099,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/10699475",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.4,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8523,
+        "raw_tile_logit": 2.3936,
+        "window_bbox": [
+          545536,
+          180768,
+          545792,
+          181024
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2911.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2975.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3403.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3905.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 5310 m\u00b2 topographic anomaly (+3.24 m local relief, 0.099 / 5.7\u00b0 mean scarp slope, nDSM 4.18 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2911 m S) and Lesnes Abbey (NHLE #1002025, 2975 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8621,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.092637,
+          51.505633
+        ]
+      },
+      "properties": {
+        "easting": 545331.4,
+        "northing": 180597.9,
+        "lat": 51.505633,
+        "lon": 0.092637,
+        "os_grid_ref": "TQ 45331 80598",
+        "confidence": 0.832,
+        "peak_prob": 0.844,
+        "mean_prob": 0.7961,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 158.0,
+        "elongation": 2.99,
+        "est_local_relief_m": -0.65,
+        "max_positive_relief_m": 0.34,
+        "centroid_local_relief_m": -0.29,
+        "patch_min_relief_m": -0.65,
+        "est_surface_prominence_m": 0.12,
+        "mean_slope_tangent": 0.136,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/910556783",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 5.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.65m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2721.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3128.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3442.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3597.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 158 m\u00b2 topographic anomaly (-0.65 m local relief, 0.136 / 7.7\u00b0 mean scarp slope, nDSM 0.12 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2721 m S) and Lesnes Abbey (NHLE #1002025, 3128 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.832,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.091962,
+          51.506844
+        ]
+      },
+      "properties": {
+        "easting": 545280.7,
+        "northing": 180731.3,
+        "lat": 51.506844,
+        "lon": 0.091962,
+        "os_grid_ref": "TQ 45281 80731",
+        "confidence": 0.8087,
+        "peak_prob": 0.8141,
+        "mean_prob": 0.7926,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 361.0,
+        "elongation": 1.22,
+        "est_local_relief_m": -2.61,
+        "max_positive_relief_m": 2.55,
+        "centroid_local_relief_m": -2.07,
+        "patch_min_relief_m": -3.41,
+        "est_surface_prominence_m": 3.24,
+        "mean_slope_tangent": 0.343,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-2.61m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2860.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3247.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3299.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3515.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 361 m\u00b2 topographic anomaly (-2.61 m local relief, 0.343 / 18.9\u00b0 mean scarp slope, nDSM 3.24 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Negative-relief pit, pond, or marl scoop'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2860 m S) and Lesnes Abbey (NHLE #1002025, 3247 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8087,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.097341,
+          51.507741
+        ]
+      },
+      "properties": {
+        "easting": 545651.2,
+        "northing": 180841.7,
+        "lat": 51.507741,
+        "lon": 0.097341,
+        "os_grid_ref": "TQ 45651 80842",
+        "confidence": 0.8046,
+        "peak_prob": 0.8076,
+        "mean_prob": 0.7958,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 49.0,
+        "elongation": 1.61,
+        "est_local_relief_m": 1.27,
+        "max_positive_relief_m": 1.27,
+        "centroid_local_relief_m": 0.23,
+        "patch_min_relief_m": -2.39,
+        "est_surface_prominence_m": 0.26,
+        "mean_slope_tangent": 0.339,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/10699457",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 19.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/764179830",
+            "subtype": "highway=track",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 28.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8523,
+        "raw_tile_logit": 2.3936,
+        "window_bbox": [
+          545536,
+          180768,
+          545792,
+          181024
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2940.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3029.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3356.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3854.0,
+            "bearing": "W"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 49 m\u00b2 topographic anomaly (+1.27 m local relief, 0.339 / 18.7\u00b0 mean scarp slope, nDSM 0.26 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'highway=track'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2940 m S) and Lesnes Abbey (NHLE #1002025, 3029 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8046,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.092907,
+          51.506752
+        ]
+      },
+      "properties": {
+        "easting": 545346.6,
+        "northing": 180722.9,
+        "lat": 51.506752,
+        "lon": 0.092907,
+        "os_grid_ref": "TQ 45347 80723",
+        "confidence": 0.7988,
+        "peak_prob": 0.8012,
+        "mean_prob": 0.7918,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 42.0,
+        "elongation": 2.46,
+        "est_local_relief_m": -2.18,
+        "max_positive_relief_m": -0.38,
+        "centroid_local_relief_m": -1.32,
+        "patch_min_relief_m": -2.48,
+        "est_surface_prominence_m": 0.89,
+        "mean_slope_tangent": 0.627,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-2.18m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2843.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3189.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3332.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3581.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 42 m\u00b2 topographic anomaly (-2.18 m local relief, 0.627 / 32.1\u00b0 mean scarp slope, nDSM 0.89 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Negative-relief pit, pond, or marl scoop'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2843 m S) and Lesnes Abbey (NHLE #1002025, 3189 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7988,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.093401,
+          51.506512
+        ]
+      },
+      "properties": {
+        "easting": 545381.6,
+        "northing": 180697.3,
+        "lat": 51.506512,
+        "lon": 0.093401,
+        "os_grid_ref": "TQ 45382 80697",
+        "confidence": 0.7936,
+        "peak_prob": 0.7954,
+        "mean_prob": 0.7881,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 25.0,
+        "elongation": 1.15,
+        "est_local_relief_m": 2.88,
+        "max_positive_relief_m": 2.88,
+        "centroid_local_relief_m": 2.68,
+        "patch_min_relief_m": -1.82,
+        "est_surface_prominence_m": 3.21,
+        "mean_slope_tangent": 0.481,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+2.88m, slope=0.48)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8515,
+        "raw_tile_logit": 2.3867,
+        "window_bbox": [
+          545152,
+          180576,
+          545408,
+          180832
+        ],
+        "region_name": "enclosure_null_test_E544000_N180000",
+        "diagnostic_png": "enclosure_null_test_E544000_N180000_unidentified_01_E545152_N180576_conf894.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E544000_N180000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002005,
+            "name": "Burial mound on Winns Common, Plumstead",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2814.0,
+            "bearing": "S"
+          },
+          {
+            "list_entry": 1002025,
+            "name": "Lesnes Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3145.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1003581,
+            "name": "Barking Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3369.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1003473,
+            "name": "Second World War anti-aircraft gun emplacements, Beckton",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3621.0,
+            "bearing": "WNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 6,
+          "prehistoric_within_5km": 1
+        },
+        "county": "Greater London",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 25 m\u00b2 topographic anomaly (+2.88 m local relief, 0.481 / 25.7\u00b0 mean scarp slope, nDSM 3.21 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Covered reservoir, steep embankment, or modern spoil bund'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Burial mound on Winns Common, Plumstead (NHLE #1002005, 2814 m S) and Lesnes Abbey (NHLE #1002025, 3145 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7936,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
           0.259238,
           52.37017
         ]
@@ -200222,6 +201896,1637 @@
         "arch_context_note": "Situated within the English lowland / river terrace landscape, this detection independently recovers the scheduled monument 'Devil's Ditch, Reach to Woodditton' (NHLE #1003262, centroid offset 0.0 m) in a held-out test square. In 1 m bare-earth LiDAR, the earthwork survives as a curvilinear rampart-and-ditch enclosure (403 m\u00b2 footprint, ~23 m span, 4.30\u00d7 elongation) with +2.33 m of 16 m local relief and a mean scarp gradient of 0.229 (12.9\u00b0; surface canopy nDSM 0.44 m). The site lies within a recorded monument cluster containing 3 scheduled monuments (0 prehistoric) within 2 km and 10 within 5 km.",
         "arch_context_source": "nhle_grounded_synthesis",
         "raw_unet_confidence": 0.8095,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.46727,
+          50.913338
+        ]
+      },
+      "properties": {
+        "easting": 573540.2,
+        "northing": 115551.3,
+        "lat": 50.913338,
+        "lon": 0.46727,
+        "os_grid_ref": "TQ 73540 15551",
+        "confidence": 0.8131,
+        "peak_prob": 0.8183,
+        "mean_prob": 0.7974,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 89.0,
+        "elongation": 3.84,
+        "est_local_relief_m": -1.1,
+        "max_positive_relief_m": 0.2,
+        "centroid_local_relief_m": -0.66,
+        "patch_min_relief_m": -1.44,
+        "est_surface_prominence_m": 0.56,
+        "mean_slope_tangent": 0.281,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/180988810",
+            "subtype": "landuse=recreation_ground",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 2.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1156797204",
+            "subtype": "leisure=pitch",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 8.6,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-1.10m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7463,
+        "raw_tile_logit": 1.7095,
+        "window_bbox": [
+          573344,
+          115536,
+          573600,
+          115792
+        ],
+        "region_name": "enclosure_null_test_E572000_N114000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E572000_N114000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1013226,
+            "name": "Battle Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1391.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1010802,
+            "name": "Bowl barrow in Petley Wood",
+            "cls_id": 3,
+            "cls_label": "Bronze Age round barrow / cairn",
+            "distance_m": 3752.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3902.0,
+            "bearing": "SSE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 1
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 89 m\u00b2 topographic anomaly (-1.10 m local relief, 0.281 / 15.7\u00b0 mean scarp slope, nDSM 0.56 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'landuse=recreation_ground'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Battle Abbey (NHLE #1013226, 1391 m E) and Bowl barrow in Petley Wood (NHLE #1010802, 3752 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8131,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.480431,
+          50.864534
+        ]
+      },
+      "properties": {
+        "easting": 574647.6,
+        "northing": 110156.2,
+        "lat": 50.864534,
+        "lon": 0.480431,
+        "os_grid_ref": "TQ 74648 10156",
+        "confidence": 0.8546,
+        "peak_prob": 0.8651,
+        "mean_prob": 0.8231,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 1504.0,
+        "elongation": 4.09,
+        "est_local_relief_m": 1.39,
+        "max_positive_relief_m": 1.39,
+        "centroid_local_relief_m": -0.86,
+        "patch_min_relief_m": -1.18,
+        "est_surface_prominence_m": 3.27,
+        "mean_slope_tangent": 0.201,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/419589554",
+            "subtype": "highway=bridleway",
+            "name": "Combe Valley Greenway",
+            "wikidata": null,
+            "distance_m": 2.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/202360170",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 10.6,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7249,
+        "raw_tile_logit": 1.5977,
+        "window_bbox": [
+          574576,
+          110000,
+          574832,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2395.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2872.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 1504 m\u00b2 topographic anomaly (+1.39 m local relief, 0.201 / 11.4\u00b0 mean scarp slope, nDSM 3.27 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Combe Valley Greenway'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2395 m NNE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 2872 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8546,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.472039,
+          50.864609
+        ]
+      },
+      "properties": {
+        "easting": 574056.9,
+        "northing": 110144.7,
+        "lat": 50.864609,
+        "lon": 0.472039,
+        "os_grid_ref": "TQ 74057 10145",
+        "confidence": 0.8431,
+        "peak_prob": 0.8526,
+        "mean_prob": 0.8145,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 1942.0,
+        "elongation": 4.9,
+        "est_local_relief_m": 2.17,
+        "max_positive_relief_m": 2.17,
+        "centroid_local_relief_m": 0.91,
+        "patch_min_relief_m": -0.95,
+        "est_surface_prominence_m": 0.15,
+        "mean_slope_tangent": 0.257,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/534061828",
+            "subtype": "highway=primary",
+            "name": "Haven Brook Avenue",
+            "wikidata": "Q136815586",
+            "distance_m": 15.4,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7357,
+        "raw_tile_logit": 1.6533,
+        "window_bbox": [
+          574000,
+          110000,
+          574256,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2718.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3333.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 1942 m\u00b2 topographic anomaly (+2.17 m local relief, 0.257 / 14.4\u00b0 mean scarp slope, nDSM 0.15 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Haven Brook Avenue'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2718 m NE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3333 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8431,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.472113,
+          50.864972
+        ]
+      },
+      "properties": {
+        "easting": 574060.7,
+        "northing": 110185.3,
+        "lat": 50.864972,
+        "lon": 0.472113,
+        "os_grid_ref": "TQ 74061 10185",
+        "confidence": 0.8377,
+        "peak_prob": 0.8462,
+        "mean_prob": 0.8122,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 1475.0,
+        "elongation": 6.94,
+        "est_local_relief_m": 1.61,
+        "max_positive_relief_m": 1.61,
+        "centroid_local_relief_m": 1.19,
+        "patch_min_relief_m": -0.94,
+        "est_surface_prominence_m": 0.33,
+        "mean_slope_tangent": 0.178,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/534061828",
+            "subtype": "highway=primary",
+            "name": "Haven Brook Avenue",
+            "wikidata": "Q136815586",
+            "distance_m": 21.2,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7357,
+        "raw_tile_logit": 1.6533,
+        "window_bbox": [
+          574000,
+          110000,
+          574256,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2683.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3352.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 1475 m\u00b2 topographic anomaly (+1.61 m local relief, 0.178 / 10.1\u00b0 mean scarp slope, nDSM 0.33 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Haven Brook Avenue'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2683 m NE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3352 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8377,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.473338,
+          50.864398
+        ]
+      },
+      "properties": {
+        "easting": 574149.0,
+        "northing": 110124.2,
+        "lat": 50.864398,
+        "lon": 0.473338,
+        "os_grid_ref": "TQ 74149 10124",
+        "confidence": 0.8161,
+        "peak_prob": 0.8204,
+        "mean_prob": 0.8033,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 215.0,
+        "elongation": 10.2,
+        "est_local_relief_m": -0.81,
+        "max_positive_relief_m": 0.04,
+        "centroid_local_relief_m": -0.62,
+        "patch_min_relief_m": -0.81,
+        "est_surface_prominence_m": 0.07,
+        "mean_slope_tangent": 0.188,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/534061828",
+            "subtype": "highway=primary",
+            "name": "Haven Brook Avenue",
+            "wikidata": "Q136815586",
+            "distance_m": 26.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/810342673",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 26.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.81m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7357,
+        "raw_tile_logit": 1.6533,
+        "window_bbox": [
+          574000,
+          110000,
+          574256,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2680.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3245.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 215 m\u00b2 topographic anomaly (-0.81 m local relief, 0.188 / 10.6\u00b0 mean scarp slope, nDSM 0.07 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Haven Brook Avenue'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2680 m NE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3245 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8161,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.497901,
+          50.878406
+        ]
+      },
+      "properties": {
+        "easting": 575824.6,
+        "northing": 111740.0,
+        "lat": 50.878406,
+        "lon": 0.497901,
+        "os_grid_ref": "TQ 75825 11740",
+        "confidence": 0.809,
+        "peak_prob": 0.8135,
+        "mean_prob": 0.7954,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 73.0,
+        "elongation": 1.6,
+        "est_local_relief_m": 1.85,
+        "max_positive_relief_m": 1.85,
+        "centroid_local_relief_m": 1.26,
+        "patch_min_relief_m": -1.12,
+        "est_surface_prominence_m": 0.55,
+        "mean_slope_tangent": 0.189,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/183897523",
+            "subtype": "highway=residential",
+            "name": "Plough Lane",
+            "wikidata": null,
+            "distance_m": 32.8,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7784,
+        "raw_tile_logit": 1.8896,
+        "window_bbox": [
+          575728,
+          111728,
+          575984,
+          111984
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 577.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3612.0,
+            "bearing": "SSE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 73 m\u00b2 topographic anomaly (+1.85 m local relief, 0.189 / 10.7\u00b0 mean scarp slope, nDSM 0.55 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Plough Lane'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 577 m NNW) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3612 m SSE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.809,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.498383,
+          50.879073
+        ]
+      },
+      "properties": {
+        "easting": 575856.0,
+        "northing": 111815.2,
+        "lat": 50.879073,
+        "lon": 0.498383,
+        "os_grid_ref": "TQ 75856 11815",
+        "confidence": 0.7988,
+        "peak_prob": 0.802,
+        "mean_prob": 0.7892,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 97.0,
+        "elongation": 3.93,
+        "est_local_relief_m": 1.64,
+        "max_positive_relief_m": 1.64,
+        "centroid_local_relief_m": 1.04,
+        "patch_min_relief_m": -1.67,
+        "est_surface_prominence_m": 0.22,
+        "mean_slope_tangent": 0.045,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/183897512",
+            "subtype": "highway=tertiary",
+            "name": "Chapel Hill",
+            "wikidata": null,
+            "distance_m": 15.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1554612489",
+            "subtype": "building=house",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 31.2,
+            "inside_polygon": false
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7784,
+        "raw_tile_logit": 1.8896,
+        "window_bbox": [
+          575728,
+          111728,
+          575984,
+          111984
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 512.0,
+            "bearing": "NNW"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3677.0,
+            "bearing": "SSE"
+          },
+          {
+            "list_entry": 1002250,
+            "name": "Romano-British iron working site in Beauport Park",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3925.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1013226,
+            "name": "Battle Abbey",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3991.0,
+            "bearing": "NNW"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 1,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 4,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 97 m\u00b2 topographic anomaly (+1.64 m local relief, 0.045 / 2.6\u00b0 mean scarp slope, nDSM 0.22 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Chapel Hill'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 512 m NNW) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3677 m SSE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7988,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.472784,
+          50.864527
+        ]
+      },
+      "properties": {
+        "easting": 574109.6,
+        "northing": 110137.3,
+        "lat": 50.864527,
+        "lon": 0.472784,
+        "os_grid_ref": "TQ 74110 10137",
+        "confidence": 0.795,
+        "peak_prob": 0.7965,
+        "mean_prob": 0.7905,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 31.0,
+        "elongation": 3.27,
+        "est_local_relief_m": -0.53,
+        "max_positive_relief_m": -0.27,
+        "centroid_local_relief_m": -0.39,
+        "patch_min_relief_m": -0.88,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.185,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/534061828",
+            "subtype": "highway=primary",
+            "name": "Haven Brook Avenue",
+            "wikidata": "Q136815586",
+            "distance_m": 10.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.53m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7357,
+        "raw_tile_logit": 1.6533,
+        "window_bbox": [
+          574000,
+          110000,
+          574256,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2692.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 3285.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 31 m\u00b2 topographic anomaly (-0.53 m local relief, 0.185 / 10.5\u00b0 mean scarp slope, nDSM 0.01 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Haven Brook Avenue'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2692 m NE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 3285 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.795,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.479594,
+          50.864236
+        ]
+      },
+      "properties": {
+        "easting": 574589.8,
+        "northing": 110121.0,
+        "lat": 50.864236,
+        "lon": 0.479594,
+        "os_grid_ref": "TQ 74590 10121",
+        "confidence": 0.7911,
+        "peak_prob": 0.7922,
+        "mean_prob": 0.7879,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 35.0,
+        "elongation": 4.33,
+        "est_local_relief_m": -1.43,
+        "max_positive_relief_m": -1.1,
+        "centroid_local_relief_m": -1.28,
+        "patch_min_relief_m": -1.47,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.15,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/419589554",
+            "subtype": "highway=bridleway",
+            "name": "Combe Valley Greenway",
+            "wikidata": null,
+            "distance_m": 0.3,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/527960268",
+            "subtype": "waterway=drain",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 16.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/533903121",
+            "subtype": "highway=bridleway",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 27.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-1.43m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7249,
+        "raw_tile_logit": 1.5977,
+        "window_bbox": [
+          574576,
+          110000,
+          574832,
+          110256
+        ],
+        "region_name": "enclosure_null_test_E574000_N110000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E574000_N110000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1002294,
+            "name": "Manor house (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2453.0,
+            "bearing": "NNE"
+          },
+          {
+            "list_entry": 1002297,
+            "name": "St Mary's Chapel, Bulverhythe (remains of)",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2893.0,
+            "bearing": "SE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 0,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 3,
+          "prehistoric_within_5km": 0
+        },
+        "county": "East Sussex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 35 m\u00b2 topographic anomaly (-1.43 m local relief, 0.150 / 8.5\u00b0 mean scarp slope, nDSM 0.01 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Combe Valley Greenway'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Manor house (remains of) (NHLE #1002294, 2453 m NNE) and St Mary's Chapel, Bulverhythe (remains of) (NHLE #1002297, 2893 m SE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7911,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.597435,
+          51.550807
+        ]
+      },
+      "properties": {
+        "easting": 580182.5,
+        "northing": 186743.6,
+        "lat": 51.550807,
+        "lon": 0.597435,
+        "os_grid_ref": "TQ 80183 86744",
+        "confidence": 0.9351,
+        "peak_prob": 0.9523,
+        "mean_prob": 0.8837,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 18087.0,
+        "elongation": 1.14,
+        "est_local_relief_m": 2.04,
+        "max_positive_relief_m": 2.04,
+        "centroid_local_relief_m": -0.01,
+        "patch_min_relief_m": -0.05,
+        "est_surface_prominence_m": 4.25,
+        "mean_slope_tangent": 0.085,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/106512541",
+            "subtype": "natural=water",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.9266,
+        "raw_tile_logit": 3.1875,
+        "window_bbox": [
+          580000,
+          186576,
+          580256,
+          186832
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 309.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 541.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1082.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2743.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 18087 m\u00b2 topographic anomaly (+2.04 m local relief, 0.085 / 4.9\u00b0 mean scarp slope, nDSM 4.25 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=water'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Heavy Anti-aircraft gunsite on Sandpit Hill (NHLE #1019663, 309 m SSW) and Roman Fort at Hadleigh (NHLE #1002171, 541 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.9351,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.598269,
+          51.550473
+        ]
+      },
+      "properties": {
+        "easting": 580241.6,
+        "northing": 186708.5,
+        "lat": 51.550473,
+        "lon": 0.598269,
+        "os_grid_ref": "TQ 80242 86708",
+        "confidence": 0.8841,
+        "peak_prob": 0.9049,
+        "mean_prob": 0.8218,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 6408.0,
+        "elongation": 1.57,
+        "est_local_relief_m": 2.41,
+        "max_positive_relief_m": 2.41,
+        "centroid_local_relief_m": -0.02,
+        "patch_min_relief_m": -0.11,
+        "est_surface_prominence_m": 0.64,
+        "mean_slope_tangent": 0.099,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/106512541",
+            "subtype": "natural=water",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8818,
+        "raw_tile_logit": 2.6543,
+        "window_bbox": [
+          580192,
+          186576,
+          580448,
+          186832
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "diagnostic_png": "enclosure_null_test_E580000_N186000_rediscovered_01_E580192_N186576_conf794.png",
+        "passes_fpr_0_01": true,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 312.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 494.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1014.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2736.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 6408 m\u00b2 topographic anomaly (+2.41 m local relief, 0.099 / 5.7\u00b0 mean scarp slope, nDSM 0.64 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'natural=water'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Heavy Anti-aircraft gunsite on Sandpit Hill (NHLE #1019663, 312 m SW) and Roman Fort at Hadleigh (NHLE #1002171, 494 m ENE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8841,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.606161,
+          51.545915
+        ]
+      },
+      "properties": {
+        "easting": 580806.8,
+        "northing": 186221.1,
+        "lat": 51.545915,
+        "lon": 0.606161,
+        "os_grid_ref": "TQ 80807 86221",
+        "confidence": 0.8218,
+        "peak_prob": 0.8292,
+        "mean_prob": 0.7995,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 2411.0,
+        "elongation": 1.1,
+        "est_local_relief_m": 3.83,
+        "max_positive_relief_m": 3.83,
+        "centroid_local_relief_m": -0.4,
+        "patch_min_relief_m": -0.44,
+        "est_surface_prominence_m": 2.75,
+        "mean_slope_tangent": 0.082,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/reservoir_or_bund",
+            "subtype": "covered_reservoir_or_steep_bund (relief=+3.83m, slope=0.08)",
+            "name": "Covered reservoir, steep embankment, or modern spoil bund",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.7402,
+        "raw_tile_logit": 1.6768,
+        "window_bbox": [
+          580768,
+          186000,
+          581024,
+          186256
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 268.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 653.0,
+            "bearing": "N"
+          },
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 801.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2904.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 2411 m\u00b2 topographic anomaly (+3.83 m local relief, 0.082 / 4.7\u00b0 mean scarp slope, nDSM 2.75 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Covered reservoir, steep embankment, or modern spoil bund'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Hadleigh Castle: an enclosure castle and an associated dam and mill (NHLE #1014795, 268 m SE) and Roman Fort at Hadleigh (NHLE #1002171, 653 m N).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8218,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.599274,
+          51.547678
+        ]
+      },
+      "properties": {
+        "easting": 580322.4,
+        "northing": 186400.2,
+        "lat": 51.547678,
+        "lon": 0.599274,
+        "os_grid_ref": "TQ 80322 86400",
+        "confidence": 0.8036,
+        "peak_prob": 0.8056,
+        "mean_prob": 0.7974,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 16.0,
+        "elongation": 1.68,
+        "est_local_relief_m": -0.79,
+        "max_positive_relief_m": -0.41,
+        "centroid_local_relief_m": -0.64,
+        "patch_min_relief_m": -0.79,
+        "est_surface_prominence_m": 0.01,
+        "mean_slope_tangent": 0.214,
+        "has_lidar_tin_facet": false,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.79m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.721,
+        "raw_tile_logit": 1.5781,
+        "window_bbox": [
+          580192,
+          186192,
+          580448,
+          186448
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 286.0,
+            "bearing": "WNW"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 606.0,
+            "bearing": "NE"
+          },
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 777.0,
+            "bearing": "ESE"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2951.0,
+            "bearing": "NNE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 16 m\u00b2 topographic anomaly (-0.79 m local relief, 0.214 / 12.1\u00b0 mean scarp slope, nDSM 0.01 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'Negative-relief pit, pond, or marl scoop'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Heavy Anti-aircraft gunsite on Sandpit Hill (NHLE #1019663, 286 m WNW) and Roman Fort at Hadleigh (NHLE #1002171, 606 m NE).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.8036,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.598367,
+          51.551126
+        ]
+      },
+      "properties": {
+        "easting": 580245.9,
+        "northing": 186781.3,
+        "lat": 51.551126,
+        "lon": 0.598367,
+        "os_grid_ref": "TQ 80246 86781",
+        "confidence": 0.7982,
+        "peak_prob": 0.8001,
+        "mean_prob": 0.7923,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 16.0,
+        "elongation": 1.98,
+        "est_local_relief_m": -0.38,
+        "max_positive_relief_m": 0.21,
+        "centroid_local_relief_m": -0.14,
+        "patch_min_relief_m": -1.81,
+        "est_surface_prominence_m": 0.07,
+        "mean_slope_tangent": 0.26,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": false,
+        "matched_monument": null,
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/706746244",
+            "subtype": "barrier=fence",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 2.0,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/1451137025",
+            "subtype": "highway=track",
+            "name": "Fitzwilliam Road",
+            "wikidata": null,
+            "distance_m": 8.7,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/106512541",
+            "subtype": "natural=water",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 13.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-0.38m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "flagged_modern_or_karst_confounder",
+        "calibrated_tile_prob": 0.8818,
+        "raw_tile_logit": 2.6543,
+        "window_bbox": [
+          580192,
+          186576,
+          580448,
+          186832
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "diagnostic_png": "enclosure_null_test_E580000_N186000_rediscovered_01_E580192_N186576_conf794.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 374.0,
+            "bearing": "SSW"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 471.0,
+            "bearing": "E"
+          },
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 1059.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2675.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 7,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Located in the Southern English Chalk & lowlands, this 16 m\u00b2 topographic anomaly (-0.38 m local relief, 0.260 / 14.6\u00b0 mean scarp slope, nDSM 0.07 m) mimics prehistoric earthwork geometry in 1 m LiDAR but is automatically separated by the spatial/geometric filter as 'barrier=fence'. Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it from weathered prehistoric mounds despite proximity to Heavy Anti-aircraft gunsite on Sandpit Hill (NHLE #1019663, 374 m SSW) and Roman Fort at Hadleigh (NHLE #1002171, 471 m E).",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7982,
+        "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.598739,
+          51.550143
+        ]
+      },
+      "properties": {
+        "easting": 580275.6,
+        "northing": 186673.0,
+        "lat": 51.550143,
+        "lon": 0.598739,
+        "os_grid_ref": "TQ 80276 86673",
+        "confidence": 0.7947,
+        "peak_prob": 0.7956,
+        "mean_prob": 0.7922,
+        "predicted_class_id": 2,
+        "predicted_class": "iron_age_hillfort_banjo_enclosure",
+        "target_domain": "enclosure",
+        "area_m2": 11.0,
+        "elongation": 1.63,
+        "est_local_relief_m": -1.13,
+        "max_positive_relief_m": -0.73,
+        "centroid_local_relief_m": -0.93,
+        "patch_min_relief_m": -1.5,
+        "est_surface_prominence_m": 0.0,
+        "mean_slope_tangent": 0.306,
+        "has_lidar_tin_facet": true,
+        "is_known_monument": true,
+        "matched_monument": {
+          "list_entry": 1019663,
+          "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+          "class": "other_scheduled_monument",
+          "distance_m": 37.0
+        },
+        "osm_archaeology_matches": [],
+        "osm_confounder_matches": [
+          {
+            "osm_id": "way/706746244",
+            "subtype": "barrier=fence",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 5.5,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/106512541",
+            "subtype": "natural=water",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 18.1,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/178825423",
+            "subtype": "highway=service",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 34.2,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "way/178825412",
+            "subtype": "building=yes",
+            "name": null,
+            "wikidata": null,
+            "distance_m": 34.4,
+            "inside_polygon": false
+          },
+          {
+            "osm_id": "lidar/pit",
+            "subtype": "sunken_pit_or_pond (relief=-1.13m)",
+            "name": "Negative-relief pit, pond, or marl scoop",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          },
+          {
+            "osm_id": "lidar/void",
+            "subtype": "lidar_coverage_edge_or_tin_facet",
+            "name": "LiDAR coverage boundary or interpolated TIN facet",
+            "wikidata": null,
+            "distance_m": 0.0,
+            "inside_polygon": true
+          }
+        ],
+        "context_category": "rediscovered_nhle_scheduled",
+        "calibrated_tile_prob": 0.8818,
+        "raw_tile_logit": 2.6543,
+        "window_bbox": [
+          580192,
+          186576,
+          580448,
+          186832
+        ],
+        "region_name": "enclosure_null_test_E580000_N186000",
+        "diagnostic_png": "enclosure_null_test_E580000_N186000_rediscovered_01_E580192_N186576_conf794.png",
+        "passes_fpr_0_01": false,
+        "square_id": "null_test_E580000_N186000",
+        "sampling_stream": "uniform_national_null",
+        "split": "test",
+        "nearby_nhle_monuments": [
+          {
+            "list_entry": 1019663,
+            "name": "Heavy Anti-aircraft gunsite on Sandpit Hill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 310.0,
+            "bearing": "SW"
+          },
+          {
+            "list_entry": 1002171,
+            "name": "Roman Fort at Hadleigh",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 475.0,
+            "bearing": "ENE"
+          },
+          {
+            "list_entry": 1014795,
+            "name": "Hadleigh Castle: an enclosure castle and an associated dam and mill",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 965.0,
+            "bearing": "SE"
+          },
+          {
+            "list_entry": 1002147,
+            "name": "Romano-British site N of Pound Wood, Thundersley",
+            "cls_id": 4,
+            "cls_label": "Scheduled enclosure / settlement / earthwork",
+            "distance_m": 2746.0,
+            "bearing": "NE"
+          }
+        ],
+        "nhle_cluster_summary": {
+          "landscape_area": "Southern English Chalk & lowlands",
+          "nhle_within_2km": 3,
+          "prehistoric_within_2km": 0,
+          "nhle_within_5km": 8,
+          "prehistoric_within_5km": 0
+        },
+        "county": "Essex",
+        "arch_context_note": "Situated within the Southern English Chalk & lowlands, this detection independently recovers the scheduled monument 'Heavy Anti-aircraft gunsite on Sandpit Hill' (NHLE #1019663, centroid offset 37.0 m) in a held-out test square. In 1 m bare-earth LiDAR, the earthwork survives as a curvilinear rampart-and-ditch enclosure (11 m\u00b2 footprint, ~4 m span, 1.63\u00d7 elongation) with -1.13 m of 16 m local relief and a mean scarp gradient of 0.306 (17.0\u00b0; surface canopy nDSM 0.00 m). The site lies within a recorded monument cluster containing 3 scheduled monuments (0 prehistoric) within 2 km and 8 within 5 km.",
+        "arch_context_source": "nhle_grounded_synthesis",
+        "raw_unet_confidence": 0.7947,
         "vlm_verdict_tier": "PLAUSIBLE_MONUMENT"
       }
     }
