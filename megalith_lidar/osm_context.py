@@ -755,6 +755,29 @@ def annotate_candidates_with_spatial_context(
                     float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.76
                     and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.55
                 )
+                or (
+                    float(cand.get("pond_unet_local_peak", 0.0)) >= 0.55
+                    and (
+                        (
+                            float(cand.get("cropmark_ring_exg_diff", 0.0)) <= -0.020
+                            and float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.018
+                        )
+                        or (
+                            float(cand.get("adjacent_channel_span_m", 0.0)) >= 55.0
+                            and float(cand.get("cropmark_ring_exg_diff", 0.0)) <= -0.020
+                        )
+                    )
+                )
+                or (
+                    float(cand.get("pond_unet_local_peak", 0.0)) >= 0.75
+                    and patch_min_rel_m <= -0.30
+                )
+                or (
+                    float(cand.get("ring_ditch4_m", 0.0)) <= -0.045
+                    and patch_min_rel_m <= -0.35
+                    and slope_m >= 0.12
+                    and float(cand.get("cropmark_ring_exg_diff", 0.0)) <= 0.0
+                )
             )
         ):
             osm_conf.append(

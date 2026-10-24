@@ -322,6 +322,20 @@ def classify_vlm_note_downrating(
         or (ndsm_m < 1.5 and patch_min_rel_m <= -0.25 and lum_diff <= -0.045 and ring_exg <= -0.045)
         or (pond_tile >= 0.76 and pond_peak >= 0.55)
         or (
+            pond_peak >= 0.55
+            and (
+                (ring_exg <= -0.020 and lum_diff <= -0.018)
+                or (float(cand.get("adjacent_channel_span_m") or 0.0) >= 55.0 and ring_exg <= -0.020)
+            )
+        )
+        or (pond_peak >= 0.75 and patch_min_rel_m <= -0.30)
+        or (
+            float(cand.get("ring_ditch4_m") or 0.0) <= -0.045
+            and patch_min_rel_m <= -0.35
+            and float(cand.get("mean_slope_tangent") or 0.0) >= 0.12
+            and ring_exg <= 0.0
+        )
+        or (
             is_roman
             and (
                 shape_tag == "OBVIOUS_MODERN_CONFOUNDER"
@@ -580,7 +594,15 @@ def enrich_candidates_with_archaeological_context(
         c["vlm_verdict_tier"] = tier
         c["vlm_downrate_reason"] = reason
         if c.get("context_category") in {"unidentified_candidate", "flagged_modern_or_karst_confounder"}:
-            c["confidence"] = round(raw_conf * mult, 4)
+            ring_sc = float(c.get("ring_barrow_score") or 0.0)
+            if (
+                tier == "PLAUSIBLE_MONUMENT"
+                and c.get("context_category") == "unidentified_candidate"
+                and ring_sc > 0.0
+            ):
+                c["confidence"] = round(min(0.997, raw_conf + (0.997 - raw_conf) * 0.55 * ring_sc), 4)
+            else:
+                c["confidence"] = round(raw_conf * mult, 4)
         if tier == "OBVIOUS_FALSE_POSITIVE" and c.get("context_category") == "unidentified_candidate":
             c["context_category"] = "flagged_modern_or_karst_confounder"
             confs = list(c.get("osm_confounder_matches") or [])

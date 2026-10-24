@@ -29,6 +29,150 @@ from megalith_lidar.stats import PlattCalibrator
 from megalith_lidar.terrain_features import NUM_TERRAIN_CHANNELS, compute_terrain_features
 
 
+def compute_concentric_ring_observables(
+    raw_features: np.ndarray,
+    cx_px: float,
+    cy_px: float,
+    area_m2: float,
+) -> Dict[str, float]:
+    """
+    Compute radial concentric ring-ditch and annular ring-cairn observables around a candidate
+    centroid `(cx_px, cy_px)` on the 4 m (`raw_features[0]`) and 16 m (`raw_features[0] + raw_features[1]`)
+    scale-space relief bands.
+    """
+    rel4 = raw_features[0]
+    rel16 = raw_features[0] + raw_features[1]
+    h, w = rel4.shape
+    r_eff = float(np.clip(math.sqrt(max(area_m2, 25.0) / math.pi), 6.0, 28.0))
+    rad = int(math.ceil(3.2 * r_eff)) + 2
+    ix, iy = int(round(cx_px)), int(round(cy_px))
+    x0, x1 = max(0, ix - rad), min(w, ix + rad + 1)
+    y0, y1 = max(0, iy - rad), min(h, iy + rad + 1)
+    yy, xx = np.ogrid[y0:y1, x0:x1]
+    rr = np.hypot(xx - cx_px, yy - cy_px)
+    angles = np.arctan2(yy - cy_px, xx - cx_px)
+    r4_sub = rel4[y0:y1, x0:x1]
+    r16_sub = rel16[y0:y1, x0:x1]
+
+    m_inner = rr <= 0.55 * r_eff
+    m_rim = (rr >= 0.65 * r_eff) & (rr <= 1.15 * r_eff)
+    m_d4_a = (rr >= 1.05 * r_eff) & (rr <= 1.75 * r_eff)
+    m_d4_b = (rr >= 1.45 * r_eff) & (rr <= 2.35 * r_eff)
+    m_ditch16 = (rr >= 1.45 * r_eff) & (rr <= 2.45 * r_eff)
+    m_reb_a = (rr >= 1.75 * r_eff) & (rr <= 2.55 * r_eff)
+    m_reb_b = (rr >= 2.35 * r_eff) & (rr <= 3.15 * r_eff)
+
+    inner4 = float(np.mean(r4_sub[m_inner])) if np.any(m_inner) else 0.0
+    rim4 = float(np.mean(r4_sub[m_rim])) if np.any(m_rim) else 0.0
+    d4_a = float(np.mean(r4_sub[m_d4_a])) if np.any(m_d4_a) else 0.0
+    d4_b = float(np.mean(r4_sub[m_d4_b])) if np.any(m_d4_b) else 0.0
+    if d4_b < d4_a:
+        ditch4 = d4_b
+        m_ditch4 = m_d4_b
+        reb4 = (float(np.mean(r4_sub[m_reb_b])) - ditch4) if np.any(m_reb_b) else 0.0
+    else:
+        ditch4 = d4_a
+        m_ditch4 = m_d4_a
+        reb4 = (float(np.mean(r4_sub[m_reb_a])) - ditch4) if np.any(m_reb_a) else 0.0
+    ditch16 = float(np.mean(r16_sub[m_ditch16])) if np.any(m_ditch16) else 0.0
+
+    neg_sec = 0
+    rim_sec = 0
+    for s in range(12):
+        a0 = -math.pi + s * (2.0 * math.pi / 12.0)
+        a1 = a0 + (2.0 * math.pi / 12.0)
+        ang_m = (angles >= a0) & (angles < a1)
+        sm4 = m_ditch4 & ang_m
+        sm16 = m_ditch16 & ang_m
+        sm_rim = m_rim & ang_m
+        c4 = float(np.mean(r4_sub[sm4])) < -0.007 if np.any(sm4) else False
+        c16 = float(np.mean(r16_sub[sm16])) < -0.040 if np.any(sm16) else False
+        if c4 or c16:
+            neg_sec += 1
+        if np.any(sm_rim) and float(np.mean(r4_sub[sm_rim])) > max(0.015, inner4 + 0.006):
+            rim_sec += 1
+
+    return {
+        "ring_inner4_m": round(inner4, 4),
+        "ring_rim4_m": round(rim4, 4),
+        "ring_ditch4_m": round(ditch4, 4),
+        "ring_ditch16_m": round(ditch16, 4),
+        "ring_reb4_m": round(reb4, 4),
+        "ring_neg_sectors": int(neg_sec),
+        "ring_rim_sectors": int(rim_sec),
+    }
+
+
+def evaluate_concentric_ring_score(cand: Dict) -> None:
+    """
+    Evaluate whether a candidate exhibits a concentric prehistoric ring-ditch (`ring_ditch_barrow`)
+    or annular ring-cairn (`annular_ring_cairn`) and compute `ring_barrow_score` in `[0, 1]`.
+    """
+    inner4 = float(cand.get("ring_inner4_m") or 0.0)
+    rim4 = float(cand.get("ring_rim4_m") or 0.0)
+    ditch4 = float(cand.get("ring_ditch4_m") or 0.0)
+    ditch16 = float(cand.get("ring_ditch16_m") or 0.0)
+    reb4 = float(cand.get("ring_reb4_m") or 0.0)
+    neg_sec = int(cand.get("ring_neg_sectors") or 0)
+    rim_sec = int(cand.get("ring_rim_sectors") or 0)
+
+    adj_chan = float(cand.get("adjacent_channel_span_m") or 0.0)
+    pond_pk = float(cand.get("pond_unet_local_peak") or 0.0)
+    exg = float(cand.get("cropmark_ring_exg_diff") or 0.0)
+    lum = float(cand.get("soilmark_core_lum_diff") or 0.0)
+    elong = float(cand.get("elongation") or 1.0)
+    patch_min = float(cand.get("patch_min_relief_m") or 0.0)
+
+    is_pond_like = (
+        (adj_chan >= 35.0)
+        or (pond_pk >= 0.55 and exg <= -0.020 and lum <= -0.018)
+        or (pond_pk >= 0.75 and patch_min <= -0.30)
+        or (pond_pk >= 0.85)
+        or (ditch4 <= -0.042 and patch_min <= -0.30)
+    )
+    ring_type: Optional[str] = None
+    ring_score = 0.0
+    if not is_pond_like and elong <= 1.65 and cand.get("target_domain", "prehistoric") == "prehistoric":
+        if (
+            inner4 >= 0.055
+            and -0.040 <= ditch4 <= -0.009
+            and reb4 >= 0.0025
+            and neg_sec >= 7
+            and ((ditch16 <= -0.040 and neg_sec >= 8) or (reb4 >= 0.012 and exg >= 0.020))
+        ):
+            s_d4 = float(np.clip((-ditch4 - 0.007) / 0.015, 0.0, 1.0))
+            s_d16 = (
+                float(np.clip((-ditch16 - 0.035) / 0.040, 0.0, 1.0))
+                if ditch16 < 0
+                else float(np.clip(reb4 / 0.018, 0.0, 1.0))
+            )
+            s_sec = float(np.clip((neg_sec - 6.0) / 4.0, 0.0, 1.0))
+            s_reb = float(np.clip(reb4 / 0.012, 0.0, 1.0))
+            s_crop = float(np.clip(exg / 0.05, 0.0, 1.0)) if exg > 0 else 0.0
+            ring_score = float(0.30 * s_d4 + 0.25 * s_d16 + 0.18 * s_sec + 0.12 * s_reb + 0.15 * s_crop)
+            ring_type = "ring_ditch_barrow"
+        if rim4 >= 0.028 and (rim4 - inner4) >= 0.014 and rim_sec >= 7 and -0.035 <= ditch4 <= 0.002 and reb4 >= 0.006:
+            s_rim = float(np.clip((rim4 - inner4 - 0.010) / 0.025, 0.0, 1.0))
+            s_rsec = float(np.clip((rim_sec - 6.0) / 4.0, 0.0, 1.0))
+            s_reb = float(np.clip(reb4 / 0.014, 0.0, 1.0))
+            sc2 = float(0.45 * s_rim + 0.30 * s_rsec + 0.25 * s_reb)
+            if sc2 > ring_score:
+                ring_score = sc2
+                ring_type = "annular_ring_cairn"
+
+    cand["has_concentric_ring"] = bool(ring_score > 0.0)
+    cand["ring_type"] = ring_type
+    cand["ring_barrow_score"] = round(ring_score, 4)
+    raw_conf = float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0)))
+    cand["raw_unet_confidence"] = round(raw_conf, 4)
+    if (
+        ring_score > 0.0
+        and cand.get("context_category", "unidentified_candidate") == "unidentified_candidate"
+        and cand.get("vlm_verdict_tier", "PLAUSIBLE_MONUMENT") == "PLAUSIBLE_MONUMENT"
+    ):
+        cand["confidence"] = round(min(0.997, raw_conf + (0.997 - raw_conf) * 0.55 * ring_score), 4)
+
+
 def extract_candidates_from_tile(
     prob_map: np.ndarray,
     cls_prob_map: np.ndarray,
@@ -204,38 +348,40 @@ def extract_candidates_from_tile(
                 "distance_m": round(float(dist_m), 1),
             }
 
-        # Pure model probability without any ad-hoc topographic bonus
+        # Pure model probability before concentric ring evaluation
         score = float(0.75 * peak_prob + 0.25 * mean_prob)
+        ring_obs = compute_concentric_ring_observables(raw_features, cx_px, cy_px, area_m2)
 
-        candidates.append(
-            {
-                "easting": round(easting, 1),
-                "northing": round(northing, 1),
-                "lat": round(lat, 6),
-                "lon": round(lon, 6),
-                "os_grid_ref": grid_ref,
-                "confidence": round(score, 4),
-                "peak_prob": round(peak_prob, 4),
-                "mean_prob": round(mean_prob, 4),
-                "predicted_class_id": best_cls_idx,
-                "predicted_class": cls_map_dict.get(best_cls_idx, "megalithic_monument"),
-                "target_domain": target_domain,
-                "area_m2": round(area_m2, 1),
-                "elongation": round(elongation, 2),
-                "est_local_relief_m": round(signed_relief_m, 2),
-                "max_positive_relief_m": round(max_pos_relief_m, 2),
-                "centroid_local_relief_m": round(centroid_relief_m, 2),
-                "patch_min_relief_m": round(patch_min_relief_m, 2),
-                "est_surface_prominence_m": round(ndsm_m, 2),
-                "mean_slope_tangent": round(float(np.mean(grad_vals)), 3),
-                "ridge_continuation_span_m": round(ridge_span_m, 1),
-                "ridge_continuation_elongation": round(ridge_elong, 2),
-                "adjacent_channel_span_m": round(channel_span_m, 1),
-                "has_lidar_tin_facet": has_tin_facet,
-                "is_known_monument": is_known,
-                "matched_monument": matched_info,
-            }
-        )
+        cand_dict = {
+            "easting": round(easting, 1),
+            "northing": round(northing, 1),
+            "lat": round(lat, 6),
+            "lon": round(lon, 6),
+            "os_grid_ref": grid_ref,
+            "confidence": round(score, 4),
+            "raw_unet_confidence": round(score, 4),
+            "peak_prob": round(peak_prob, 4),
+            "mean_prob": round(mean_prob, 4),
+            "predicted_class_id": best_cls_idx,
+            "predicted_class": cls_map_dict.get(best_cls_idx, "megalithic_monument"),
+            "target_domain": target_domain,
+            "area_m2": round(area_m2, 1),
+            "elongation": round(elongation, 2),
+            "est_local_relief_m": round(signed_relief_m, 2),
+            "max_positive_relief_m": round(max_pos_relief_m, 2),
+            "centroid_local_relief_m": round(centroid_relief_m, 2),
+            "patch_min_relief_m": round(patch_min_relief_m, 2),
+            "est_surface_prominence_m": round(ndsm_m, 2),
+            "mean_slope_tangent": round(float(np.mean(grad_vals)), 3),
+            "ridge_continuation_span_m": round(ridge_span_m, 1),
+            "ridge_continuation_elongation": round(ridge_elong, 2),
+            "adjacent_channel_span_m": round(channel_span_m, 1),
+            "has_lidar_tin_facet": has_tin_facet,
+            "is_known_monument": is_known,
+            "matched_monument": matched_info,
+        }
+        cand_dict.update(ring_obs)
+        candidates.append(cand_dict)
 
     candidates.sort(key=lambda c: c["confidence"], reverse=True)
     return candidates
@@ -561,6 +707,8 @@ def scan_region(
                 cm = compute_candidate_cropmark_metrics(rgb, cx_px=cx_px, cy_px=cy_px, area_m2=float(c.get("area_m2", 300.0)))
                 c.update(cm)
         annotate_candidates_with_spatial_context(cands, osm_index, target_domain=target_domain)
+        for c in cands:
+            evaluate_concentric_ring_score(c)
         raw_candidates.extend(cands)
         if cands:
             window_records[key] = (raw_feats, prob_map, cands)
