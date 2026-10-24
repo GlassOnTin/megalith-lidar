@@ -400,7 +400,8 @@ def expand_national_queue_if_needed(
             if i < len(s):
                 new_seed_round_robin.append(s[i])
 
-    # 2. Remaining held-out test landscape squares across England
+    # 2. Remaining held-out test landscape squares across England, followed by 1-ring Halo squares
+    #    in held-out test blocks and out-of-sample val-split monument squares so multi-day runs never starve
     new_landscape: List[Dict] = []
     for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
         if (sx, sy) in existing_coords:
@@ -428,18 +429,80 @@ def expand_national_queue_if_needed(
             }
         )
     rng.shuffle(new_landscape)
-    all_new_landscape = new_seed_round_robin + new_landscape
 
-    # 3. Matching number of uniform_national_null squares across all 53 test-split 20 km blocks
+    # 2b. 1-ring Halo (2 km adjacent) squares around monuments inside held-out test 20 km blocks
+    halo_test_coords: Set[Tuple[int, int]] = set()
+    for (mx, my) in monument_squares_2k.keys():
+        if assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2) != "test":
+            continue
+        bx, by = mx // 20000, my // 20000
+        for dx in (-square_size_m, 0, square_size_m):
+            for dy in (-square_size_m, 0, square_size_m):
+                nx, ny = mx + dx, my + dy
+                if (nx // 20000, ny // 20000) == (bx, by) and (nx, ny) not in existing_coords:
+                    halo_test_coords.add((nx, ny))
+    halo_test_list: List[Dict] = []
+    for sx, sy in sorted(halo_test_coords):
+        existing_coords.add((sx, sy))
+        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
+        lat, lon = bng_to_latlon(ce, cn)
+        halo_test_list.append(
+            {
+                "square_id": f"test_landscape_E{sx}_N{sy}",
+                "sampling_stream": "heldout_test_landscape",
+                "split": "test",
+                "e_min": sx,
+                "n_min": sy,
+                "e_max": sx + square_size_m,
+                "n_max": sy + square_size_m,
+                "center_lat": round(lat, 5),
+                "center_lon": round(lon, 5),
+                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                "known_prehistoric_monuments_in_square": 0,
+                "status": "pending",
+            }
+        )
+    rng.shuffle(halo_test_list)
+
+    # 2c. Out-of-sample val-split monument landscape squares across England
+    val_landscape_list: List[Dict] = []
+    for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
+        if (sx, sy) in existing_coords:
+            continue
+        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
+        if assign_spatial_split(ce, cn) != "val":
+            continue
+        existing_coords.add((sx, sy))
+        lat, lon = bng_to_latlon(ce, cn)
+        val_landscape_list.append(
+            {
+                "square_id": f"test_landscape_E{sx}_N{sy}",
+                "sampling_stream": "heldout_test_landscape",
+                "split": "val",
+                "e_min": sx,
+                "n_min": sy,
+                "e_max": sx + square_size_m,
+                "n_max": sy + square_size_m,
+                "center_lat": round(lat, 5),
+                "center_lon": round(lon, 5),
+                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                "status": "pending",
+            }
+        )
+    rng.shuffle(val_landscape_list)
+    all_new_landscape = new_seed_round_robin + new_landscape + halo_test_list + val_landscape_list
+
+    # 3. Matching number of uniform_national_null squares across out-of-sample (test + val) 20 km blocks
     test_land_blocks = sorted(
         [
             (bx, by)
             for (bx, by) in land_blocks_20k
-            if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) == "test"
+            if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) in {"test", "val"}
         ]
     )
     new_null: List[Dict] = []
-    for _pass_idx in range(25):
+    for _pass_idx in range(45):
         if len(new_null) >= len(all_new_landscape):
             break
         blocks_copy = list(test_land_blocks)
@@ -454,12 +517,13 @@ def expand_national_queue_if_needed(
             existing_coords.add((sx, sy))
             ce = sx + square_size_m // 2
             cn = sy + square_size_m // 2
+            sp_null = assign_spatial_split(ce, cn)
             lat, lon = bng_to_latlon(ce, cn)
             new_null.append(
                 {
                     "square_id": f"null_test_E{sx}_N{sy}",
                     "sampling_stream": "uniform_national_null",
-                    "split": "test",
+                    "split": sp_null,
                     "e_min": sx,
                     "n_min": sy,
                     "e_max": sx + square_size_m,
