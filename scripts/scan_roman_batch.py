@@ -21,6 +21,7 @@ from megalith_lidar.arch_context import (
 )
 from megalith_lidar.catalog import download_or_load_nhle_catalog
 from megalith_lidar.model import MegalithUNet
+from megalith_lidar.osm_context import annotate_candidates_with_spatial_context
 from megalith_lidar.scanner import scan_region
 from megalith_lidar.stats import PlattCalibrator
 

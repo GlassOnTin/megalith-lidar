@@ -705,7 +705,7 @@ def annotate_candidates_with_spatial_context(
             not is_enclosure
             and area_m2 <= 14000.0
             and (
-                (centroid_rel_m <= 0.05 and patch_min_rel_m <= -0.28 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
+                (centroid_rel_m <= 0.12 and patch_min_rel_m <= -0.22 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
                 or cand.get("vlm_shape_verdict") == "OBVIOUS_MODERN_CONFOUNDER"
                 or (
                     cand.get("vlm_shape_verdict") == "RECTILINEAR_OR_U_BUND"

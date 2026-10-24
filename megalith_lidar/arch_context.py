@@ -316,7 +316,7 @@ def classify_vlm_note_downrating(
         lum_diff = float(cand.get("soilmark_core_lum_diff", 0.0))
         ring_exg = float(cand.get("cropmark_ring_exg_diff", 0.0))
         if area_m2 <= 14000.0 and (
-            (centroid_rel_m <= 0.05 and patch_min_rel_m <= -0.28 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
+            (centroid_rel_m <= 0.12 and patch_min_rel_m <= -0.22 and (max_pos_rel_m - centroid_rel_m) >= 0.70)
             or shape_tag == "OBVIOUS_MODERN_CONFOUNDER"
             or (
                 shape_tag == "RECTILINEAR_OR_U_BUND"
@@ -571,6 +571,10 @@ def enrich_candidates_with_archaeological_context(
         raw_conf = float(c.get("raw_unet_confidence", c.get("confidence", 0.0)))
         c["raw_unet_confidence"] = round(raw_conf, 4)
         tier, mult, reason = classify_vlm_note_downrating(note, shape_tag, c)
+        if c.get("vlm_verdict_tier") == "OBVIOUS_FALSE_POSITIVE" and tier != "OBVIOUS_FALSE_POSITIVE":
+            tier = "OBVIOUS_FALSE_POSITIVE"
+            mult = 0.35
+            reason = c.get("vlm_downrate_reason") or c.get("context_reason") or "Flagged confounder"
         c["vlm_verdict_tier"] = tier
         c["vlm_downrate_reason"] = reason
         if c.get("context_category") in {"unidentified_candidate", "flagged_modern_or_karst_confounder"}:
@@ -649,8 +653,7 @@ def enrich_candidates_with_archaeological_context(
         det_note = build_deterministic_academic_context(cand, nearby_nhle, cluster)
         cand["arch_context_note"] = det_note
         cand["arch_context_source"] = "nhle_grounded_synthesis"
-        cand["raw_unet_confidence"] = round(float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0))), 4)
-        cand["vlm_verdict_tier"] = "PLAUSIBLE_MONUMENT"
+        _apply_vlm_verdict(cand, det_note, str(cand.get("vlm_shape_verdict") or "ROUNDED_MOUND_OR_RING"))
 
     if cache_dirty:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
