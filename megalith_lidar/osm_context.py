@@ -746,6 +746,12 @@ def annotate_candidates_with_spatial_context(
                     )
                 )
                 or (
+                    ndsm_m < 1.5
+                    and patch_min_rel_m <= -0.25
+                    and float(cand.get("soilmark_core_lum_diff", 0.0)) <= -0.045
+                    and float(cand.get("cropmark_ring_exg_diff", 0.0)) <= -0.045
+                )
+                or (
                     float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.76
                     and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.55
                 )

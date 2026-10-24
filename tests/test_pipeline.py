@@ -355,6 +355,22 @@ def test_roman_taxonomy_and_sub_canopy_context():
             "is_known_monument": False,
             "target_domain": "roman",
         },
+        {
+            "easting": 465419.1,
+            "northing": 211746.5,
+            "confidence": 0.9794,
+            "area_m2": 555.0,
+            "est_local_relief_m": 1.13,
+            "max_positive_relief_m": 1.13,
+            "centroid_local_relief_m": 0.91,
+            "patch_min_relief_m": -0.32,
+            "est_surface_prominence_m": 0.10,
+            "soilmark_core_lum_diff": -0.0989,
+            "cropmark_ring_exg_diff": -0.1507,
+            "vlm_shape_verdict": "ROUNDED_MOUND_OR_RING",
+            "is_known_monument": False,
+            "target_domain": "prehistoric",
+        },
     ]
     annotate_candidates_with_spatial_context(lagoon_cands, None, target_domain="roman")
     for lc in lagoon_cands:
