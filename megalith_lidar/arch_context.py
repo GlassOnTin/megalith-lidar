@@ -330,6 +330,10 @@ def classify_vlm_note_downrating(
                 and (
                     lum_diff <= -0.038
                     or (ndsm_m >= 0.85 and ring_exg >= 0.04)
+                    or (
+                        float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.74
+                        and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.45
+                    )
                     or any(
                         phrase in low
                         for phrase in (
@@ -348,6 +352,10 @@ def classify_vlm_note_downrating(
                         )
                     )
                 )
+            )
+            or (
+                float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.76
+                and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.55
             )
         ):
             return (

@@ -379,6 +379,33 @@ def save_candidate_diagnostic_png(
     canvas.save(out_path)
 
 
+_POND_UNET_CACHE: Dict[str, Tuple[MegalithUNet, np.ndarray, np.ndarray, PlattCalibrator, Dict[int, str]]] = {}
+
+
+def _get_or_load_pond_unet(
+    ckpt_path: Path, device: torch.device
+) -> Optional[Tuple[MegalithUNet, np.ndarray, np.ndarray, PlattCalibrator, Dict[int, str]]]:
+    if not ckpt_path.exists():
+        return None
+    key = f"{ckpt_path}:{device}"
+    if key in _POND_UNET_CACHE:
+        return _POND_UNET_CACHE[key]
+    try:
+        ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+        p_model = MegalithUNet(in_channels=NUM_TERRAIN_CHANNELS, num_classes=4, pretrained=False).to(device)
+        p_model.load_state_dict(ckpt.get("model_state_dict") or ckpt["model_state"])
+        p_model.eval()
+        p_mean = np.asarray(ckpt["channel_mean"], dtype=np.float32).reshape(-1, 1, 1)
+        p_std = np.asarray(ckpt["channel_std"], dtype=np.float32).reshape(-1, 1, 1)
+        p_cal = PlattCalibrator.from_dict(ckpt["calibrator"])
+        p_cls = {int(k): v for k, v in ckpt.get("class_names", {}).items()}
+        bundle = (p_model, p_mean, p_std, p_cal, p_cls)
+        _POND_UNET_CACHE[key] = bundle
+        return bundle
+    except Exception:
+        return None
+
+
 def scan_region(
     model: MegalithUNet,
     catalog: MonumentCatalog,
@@ -489,7 +516,6 @@ def scan_region(
             prob_threshold=pixel_prob_threshold,
             target_domain=target_domain,
         )
-        annotate_candidates_with_spatial_context(cands, osm_index, target_domain=target_domain)
         if rgb is None and cands:
             from megalith_lidar.aerial_cropmarks import (
                 compute_candidate_cropmark_metrics,
@@ -497,6 +523,33 @@ def scan_region(
             )
 
             rgb = fetch_or_load_aerial_tile(e0, e1, n0, n1, cache_dir=aerial_cache_dir, size=dtm.shape[0])
+        if cands:
+            pond_ckpt_path = Path(tile_cache_dir).parent / "checkpoints" / "pond_unet_best.pt"
+            pond_bundle = _get_or_load_pond_unet(pond_ckpt_path, device)
+            if pond_bundle is not None:
+                p_model, p_mean, p_std, p_cal, p_cls_names = pond_bundle
+                if rgb is not None:
+                    from megalith_lidar.aerial_cropmarks import compute_cropmark_features
+
+                    p_crop = compute_cropmark_features(rgb, dtm=dtm, dsm=dsm)
+                else:
+                    p_crop = np.zeros((2, dtm.shape[0], dtm.shape[1]), dtype=np.float32)
+                p_full = np.concatenate([raw_feats[:NUM_TERRAIN_CHANNELS], p_crop], axis=0)
+                p_std_feats = (p_full - p_mean) / p_std
+                p_prob_map, p_cls_map, _, p_tile_prob = predict_tile_with_d4_tta(
+                    p_model, p_std_feats, device, calibrator=p_cal
+                )
+                yy_p, xx_p = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                for c in cands:
+                    cx_p = int(np.clip(round(c["easting"] - e0), 4, dtm.shape[1] - 5))
+                    cy_p = int(np.clip(round(n1 - c["northing"]), 4, dtm.shape[0] - 5))
+                    r_p = int(np.clip(round(math.sqrt(max(float(c.get("area_m2", 400.0)), 36.0) / math.pi)), 6, 40))
+                    disc_p = ((xx_p - cx_p) ** 2 + (yy_p - cy_p) ** 2) <= r_p**2
+                    c["pond_unet_tile_prob"] = round(float(p_tile_prob), 4)
+                    c["pond_unet_local_peak"] = round(float(np.percentile(p_prob_map[disc_p], 90.0)), 4)
+                    c["pond_unet_local_mean"] = round(float(np.mean(p_prob_map[disc_p])), 4)
+                    c_scores = [float(np.mean(p_cls_map[cid][disc_p])) for cid in (1, 2, 3)]
+                    c["pond_unet_predicted_class"] = p_cls_names.get(int(np.argmax(c_scores)) + 1, "pond_lagoon_water_basin")
         for c in cands:
             c["calibrated_tile_prob"] = round(cal_tile_prob, 4)
             c["raw_tile_logit"] = round(raw_tile_logit, 4)
@@ -507,6 +560,7 @@ def scan_region(
                 cy_px = float((n1 - c["northing"]) * (dtm.shape[0] / max(n1 - n0, 1.0)))
                 cm = compute_candidate_cropmark_metrics(rgb, cx_px=cx_px, cy_px=cy_px, area_m2=float(c.get("area_m2", 300.0)))
                 c.update(cm)
+        annotate_candidates_with_spatial_context(cands, osm_index, target_domain=target_domain)
         raw_candidates.extend(cands)
         if cands:
             window_records[key] = (raw_feats, prob_map, cands)

@@ -739,7 +739,15 @@ def annotate_candidates_with_spatial_context(
                                 )
                             )
                         )
+                        or (
+                            float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.74
+                            and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.45
+                        )
                     )
+                )
+                or (
+                    float(cand.get("pond_unet_tile_prob", 0.0)) >= 0.76
+                    and float(cand.get("pond_unet_local_peak", 0.0)) >= 0.55
                 )
             )
         ):
