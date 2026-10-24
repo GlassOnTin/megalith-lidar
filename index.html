@@ -855,7 +855,7 @@
     crossorigin=""
   ></script>
   <script>
-    const map = L.map("map").setView([52.8, -1.7], 6);
+    const map = L.map("map", { keyboard: false }).setView([52.8, -1.7], 6);
     const osmBaseLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: "&copy; OpenStreetMap contributors"
@@ -1216,10 +1216,21 @@
         if (isSel) matchedRowEl = tr;
       });
       if (scrollRow && matchedRowEl) {
-        if (scrollRow === "nearest") {
-          matchedRowEl.scrollIntoView({ block: "nearest" });
-        } else {
-          matchedRowEl.scrollIntoView({ block: "center", behavior: "smooth" });
+        const listContainer = document.getElementById("candidateListContainer");
+        if (listContainer) {
+          const cRect = listContainer.getBoundingClientRect();
+          const rRect = matchedRowEl.getBoundingClientRect();
+          const stickyHeaderH = 34;
+          if (scrollRow === "nearest") {
+            if (rRect.top < cRect.top + stickyHeaderH) {
+              listContainer.scrollTop -= (cRect.top + stickyHeaderH - rRect.top);
+            } else if (rRect.bottom > cRect.bottom) {
+              listContainer.scrollTop += (rRect.bottom - cRect.bottom);
+            }
+          } else {
+            const targetTop = listContainer.scrollTop + (rRect.top - cRect.top) - (cRect.height / 2) + (rRect.height / 2);
+            listContainer.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+          }
         }
       }
 
@@ -1956,9 +1967,18 @@
         });
       });
 
-      document.getElementById("opSelect").addEventListener("change", () => renderActiveView(true));
-      document.getElementById("countySelect").addEventListener("change", () => renderActiveView(true, true));
-      document.getElementById("chkOnlyDiag").addEventListener("change", () => renderActiveView(true));
+      document.getElementById("opSelect").addEventListener("change", (ev) => {
+        ev.target.blur();
+        renderActiveView(true);
+      });
+      document.getElementById("countySelect").addEventListener("change", (ev) => {
+        ev.target.blur();
+        renderActiveView(true, true);
+      });
+      document.getElementById("chkOnlyDiag").addEventListener("change", (ev) => {
+        ev.target.blur();
+        renderActiveView(true);
+      });
       const chkAerial = document.getElementById("chkAerialBasemap");
       if (chkAerial) {
         chkAerial.addEventListener("change", () => {
@@ -1988,37 +2008,41 @@
         });
       }
 
-      window.addEventListener("keydown", (ev) => {
-        if (ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
-        if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
-        const tag = ev.target && ev.target.tagName ? ev.target.tagName.toUpperCase() : "";
-        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ev.target && ev.target.isContentEditable)) {
-          return;
-        }
-        if (currentTab === "stats" || currentVisibleFeatures.length === 0) return;
-
-        ev.preventDefault();
-        ev.stopPropagation();
-
-        let curIdx = currentVisibleFeatures.findIndex(
-          (f) => featureKey(f.properties) === selectedFeatureKey
-        );
-        let nextIdx = 0;
-        if (curIdx === -1) {
-          nextIdx = 0;
-        } else if (ev.key === "ArrowDown") {
-          nextIdx = Math.min(currentVisibleFeatures.length - 1, curIdx + 1);
-        } else if (ev.key === "ArrowUp") {
-          nextIdx = Math.max(0, curIdx - 1);
-        }
-        const nextFeat = currentVisibleFeatures[nextIdx];
-        if (nextFeat && nextFeat.properties) {
-          selectCandidate(nextFeat.properties, true, "nearest");
-        }
-      }, true);
-
       renderActiveView(true);
     }
+
+    function handleArrowKeyRowNav(ev) {
+      const isDown = ev.key === "ArrowDown" || ev.key === "Down" || ev.keyCode === 40;
+      const isUp = ev.key === "ArrowUp" || ev.key === "Up" || ev.keyCode === 38;
+      if (!isDown && !isUp) return;
+      if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
+      if (currentTab === "stats") return;
+
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      if (document.activeElement && document.activeElement.tagName === "SELECT") {
+        document.activeElement.blur();
+      }
+      if (!currentVisibleFeatures || currentVisibleFeatures.length === 0) return;
+
+      let curIdx = currentVisibleFeatures.findIndex(
+        (f) => featureKey(f.properties) === selectedFeatureKey
+      );
+      let nextIdx = 0;
+      if (curIdx === -1) {
+        nextIdx = 0;
+      } else if (isDown) {
+        nextIdx = Math.min(currentVisibleFeatures.length - 1, curIdx + 1);
+      } else if (isUp) {
+        nextIdx = Math.max(0, curIdx - 1);
+      }
+      const nextFeat = currentVisibleFeatures[nextIdx];
+      if (nextFeat && nextFeat.properties) {
+        selectCandidate(nextFeat.properties, true, "nearest");
+      }
+    }
+    window.addEventListener("keydown", handleArrowKeyRowNav, { capture: true, passive: false });
 
     init();
   </script>
