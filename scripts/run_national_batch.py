@@ -621,8 +621,16 @@ def export_public_docs(
         if not report_path.exists() or not geojson_path.exists():
             continue
 
-        rep = json.loads(report_path.read_text(encoding="utf-8"))
-        gj = json.loads(geojson_path.read_text(encoding="utf-8"))
+        try:
+            rep = json.loads(report_path.read_text(encoding="utf-8"))
+            gj = json.loads(geojson_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        rep_cand_by_coord = {
+            (round(float(rc.get("easting", 0.0)), 1), round(float(rc.get("northing", 0.0)), 1)): rc
+            for rc in rep.get("candidates", [])
+        }
 
         area_km2 = float(rep.get("area_km2", 4.0))
         st = stream_stats.setdefault(
@@ -647,6 +655,28 @@ def export_public_docs(
         unid_001 = 0
         for feat in gj.get("features", []):
             props = feat.get("properties", {})
+            rc_match = rep_cand_by_coord.get(
+                (round(float(props.get("easting", 0.0)), 1), round(float(props.get("northing", 0.0)), 1))
+            )
+            if rc_match:
+                for rk in (
+                    "ring_inner4_m",
+                    "ring_rim4_m",
+                    "ring_ditch4_m",
+                    "ring_ditch16_m",
+                    "ring_reb4_m",
+                    "ring_neg_sectors",
+                    "ring_rim_sectors",
+                    "has_concentric_ring",
+                    "ring_type",
+                    "ring_barrow_score",
+                    "pond_unet_tile_prob",
+                    "pond_unet_local_peak",
+                    "pond_unet_local_mean",
+                    "pond_unet_predicted_class",
+                ):
+                    if rk in rc_match and rk not in props:
+                        props[rk] = rc_match[rk]
             props["square_id"] = sq_id
             props["sampling_stream"] = stream
             props["split"] = sq.get("split", "test")
@@ -689,8 +719,13 @@ def export_public_docs(
         )
 
     if catalog is not None and all_features:
+        from megalith_lidar.scanner import evaluate_concentric_ring_score
+
         extractor = NHLESpatialContextExtractor(catalog)
         cand_props = [f["properties"] for f in all_features]
+        for cp in cand_props:
+            if "ring_inner4_m" in cp:
+                evaluate_concentric_ring_score(cp)
         arch_cache_path = survey_dir.parent / "arch_context_cache.json"
         enrich_candidates_with_archaeological_context(
             candidates=cand_props,
