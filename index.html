@@ -841,27 +841,39 @@
         <div style="background:rgba(255, 214, 0, 0.08);border:1px solid rgba(255, 214, 0, 0.35);border-radius:4px;padding:8px 10px;margin-bottom:8px;font-size:12.5px;">
           <strong>Coverage Note:</strong> Only the marked <strong>2 km × 2 km sample squares</strong> (<span id="mapCoverageSummary">1,306 squares = 5,224.0 km², or 4.01% of England</span>) have been scanned across all three detectors. Any region outside these boxes has <strong>not</strong> yet been evaluated by the models.
         </div>
-        <div class="controls" style="margin-bottom:8px;justify-content:space-between;">
+        <div class="controls" style="margin-bottom:8px;justify-content:space-between;gap:8px;">
           <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
             <label>
               <input type="checkbox" id="chkShowScannedSquares" checked />
               Show scanned 2 km × 2 km squares
             </label>
+            <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
+              <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
+              Show Rediscovered Known Monuments (<span style="color:#00e676;">★</span>)
+            </label>
+            <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
+              <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
+              Show All Candidate Categories (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
+            </label>
             <label>
               <input type="checkbox" id="chkAerialBasemap" />
               Aerial / Cropmark Orthophoto basemap
             </label>
-            <span class="muted" style="font-size:12px;">
-              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Held-Out Monument Square ·
-              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> National Null Square
-            </span>
           </div>
-          <div id="mapScoreScaleLegend" style="display:flex;align-items:center;gap:6px;font-size:11.5px;" class="muted">
-            <span>Detection Score:</span>
-            <span id="scoreScaleMinLbl" style="font-variant-numeric:tabular-nums;">0.75</span>
-            <span style="display:inline-block;width:96px;height:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.22);background:linear-gradient(90deg, rgba(168,85,247,0.38) 0%, rgba(249,115,22,0.72) 50%, rgba(254,240,138,1.0) 100%);"></span>
-            <span id="scoreScaleMaxLbl" style="font-variant-numeric:tabular-nums;">0.99</span>
-            <span style="font-size:11px;">(size &amp; opacity scaled)</span>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11.5px;" class="muted">
+            <span><strong style="color:#facc15;font-size:13px;">●</strong> Prehistoric</span>
+            <span><strong style="color:#c084fc;font-size:13px;">■</strong> Roman</span>
+            <span><strong style="color:#38bdf8;font-size:13px;">◆</strong> Iron Age / Settlement</span>
+            <span><strong style="color:#00e676;font-size:13px;">★</strong> Rediscovered Monument</span>
+            <span>
+              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Monument Sq ·
+              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Null Sq
+            </span>
+            <span id="mapScoreScaleLegend" style="display:inline-flex;align-items:center;gap:4px;">
+              <span>Score:</span>
+              <span id="scoreScaleMinLbl" style="font-variant-numeric:tabular-nums;">0.75</span>–<span id="scoreScaleMaxLbl" style="font-variant-numeric:tabular-nums;">0.99</span>
+              <span style="font-size:11px;">(size &amp; brightness scaled)</span>
+            </span>
           </div>
         </div>
         <div id="map"></div>
@@ -1255,6 +1267,59 @@
       return `${p.os_grid_ref}_${p.easting}_${p.northing}_${p.predicted_class || ""}`;
     }
 
+    const ShapeMarker = L.CircleMarker.extend({
+      _updatePath: function () {
+        if (!this._renderer || !this._renderer._setPath) {
+          L.CircleMarker.prototype._updatePath.call(this);
+          return;
+        }
+        if (this._empty()) {
+          this._renderer._setPath(this, "M0 0");
+          return;
+        }
+        const pt = this._point;
+        const r = Math.max(this._radius, 1);
+        const shape = this.options.shape || "circle";
+        let d = "";
+        if (shape === "square") {
+          const s = r * 0.94;
+          d = `M${(pt.x - s).toFixed(1)},${(pt.y - s).toFixed(1)}L${(pt.x + s).toFixed(1)},${(pt.y - s).toFixed(1)}L${(pt.x + s).toFixed(1)},${(pt.y + s).toFixed(1)}L${(pt.x - s).toFixed(1)},${(pt.y + s).toFixed(1)}Z`;
+        } else if (shape === "diamond") {
+          const s = r * 1.24;
+          d = `M${pt.x.toFixed(1)},${(pt.y - s).toFixed(1)}L${(pt.x + s).toFixed(1)},${pt.y.toFixed(1)}L${pt.x.toFixed(1)},${(pt.y + s).toFixed(1)}L${(pt.x - s).toFixed(1)},${pt.y.toFixed(1)}Z`;
+        } else if (shape === "star") {
+          const outer = r * 1.32;
+          const inner = r * 0.56;
+          const pts = [];
+          for (let i = 0; i < 10; i++) {
+            const ang = -Math.PI / 2 + (i * Math.PI) / 5;
+            const rad = i % 2 === 0 ? outer : inner;
+            pts.push(`${(pt.x + Math.cos(ang) * rad).toFixed(1)},${(pt.y + Math.sin(ang) * rad).toFixed(1)}`);
+          }
+          d = "M" + pts.join("L") + "Z";
+        } else if (shape === "triangle_down") {
+          const s = r * 1.15;
+          d = `M${(pt.x - s).toFixed(1)},${(pt.y - s * 0.75).toFixed(1)}L${(pt.x + s).toFixed(1)},${(pt.y - s * 0.75).toFixed(1)}L${pt.x.toFixed(1)},${(pt.y + s * 1.05).toFixed(1)}Z`;
+        } else {
+          L.CircleMarker.prototype._updatePath.call(this);
+          return;
+        }
+        this._renderer._setPath(this, d);
+      }
+    });
+
+    function getCandidateDomain(p) {
+      if (!p) return "prehistoric";
+      if (p.target_domain === "roman") return "roman";
+      if (p.target_domain === "enclosure") return "enclosure";
+      const cls = p.predicted_class || "";
+      if (cls.startsWith("roman_")) return "roman";
+      if (cls === "hut_circle_pound_settlement" || cls === "iron_age_hillfort_banjo_enclosure" || cls === "cross_ridge_dyke_field_system") {
+        return "enclosure";
+      }
+      return "prehistoric";
+    }
+
     function categoryColor(cat) {
       if (cat === "rediscovered_nhle_scheduled") return "#00e676";
       if (cat === "rediscovered_osm_archaeology") return "#00d2ff";
@@ -1262,28 +1327,62 @@
       return "#ffd600";
     }
 
-    function scoreScaledStyle(score, sMin, sMax) {
+    function scoreScaledStyle(score, sMin, sMax, p) {
       const span = Math.max(sMax - sMin, 0.02);
       const t = Math.max(0.0, Math.min(1.0, ((score || 0) - sMin) / span));
-      // Smooth 4-stop perceptual ramp: violet (#9333ea) -> coral-red (#f97316) -> gold (#facc15) -> incandescent yellow-white (#fef08a)
-      const stops = [
-        [147, 51, 234],
-        [249, 115, 22],
-        [250, 204, 21],
-        [254, 240, 138]
-      ];
+      const cat = p && p.context_category;
+      const dom = getCandidateDomain(p);
+
+      let stops;
+      let shape = "circle";
+      let glyph = "●";
+      let catLabel = "Prehistoric Candidate";
+
+      if (cat === "rediscovered_nhle_scheduled" || cat === "rediscovered_osm_archaeology") {
+        shape = "star";
+        glyph = "★";
+        catLabel = cat === "rediscovered_nhle_scheduled" ? "Rediscovered NHLE Scheduled Monument" : "Rediscovered OSM Archaeology";
+        stops = cat === "rediscovered_nhle_scheduled"
+          ? [[5, 150, 105], [16, 185, 129], [0, 230, 118], [167, 243, 208]]
+          : [[2, 132, 199], [6, 182, 212], [0, 210, 255], [165, 243, 252]];
+      } else if (cat === "flagged_modern_or_karst_confounder") {
+        shape = "triangle_down";
+        glyph = "▼";
+        catLabel = "Filtered Modern / Geomorphic Confounder";
+        stops = [[154, 52, 18], [234, 88, 12], [251, 146, 60], [254, 215, 170]];
+      } else if (dom === "roman") {
+        shape = "square";
+        glyph = "■";
+        catLabel = "Roman Candidate";
+        stops = [[109, 40, 217], [147, 51, 234], [192, 132, 252], [245, 208, 254]];
+      } else if (dom === "enclosure") {
+        shape = "diamond";
+        glyph = "◆";
+        catLabel = "Iron Age / Settlement Candidate";
+        stops = [[3, 105, 161], [2, 132, 199], [56, 189, 248], [186, 230, 253]];
+      } else {
+        shape = "circle";
+        glyph = "●";
+        catLabel = "Prehistoric Candidate";
+        stops = [[180, 83, 9], [245, 158, 11], [250, 204, 21], [254, 240, 138]];
+      }
+
       const pos = t * (stops.length - 1);
       const i0 = Math.min(stops.length - 2, Math.floor(pos));
       const f = pos - i0;
       const r = Math.round(stops[i0][0] + f * (stops[i0 + 1][0] - stops[i0][0]));
       const g = Math.round(stops[i0][1] + f * (stops[i0 + 1][1] - stops[i0][1]));
       const b = Math.round(stops[i0][2] + f * (stops[i0 + 1][2] - stops[i0][2]));
+      const isKnown = shape === "star";
       return {
+        shape,
+        glyph,
+        catLabel,
         fillColor: `rgb(${r}, ${g}, ${b})`,
-        fillOpacity: +(0.34 + 0.64 * Math.pow(t, 0.85)).toFixed(2),
-        radius: +(4.5 + 5.0 * Math.pow(t, 1.15)).toFixed(1),
-        strokeColor: t >= 0.82 ? "#ffffff" : "#0f1217",
-        weight: t >= 0.82 ? 1.8 : 1.1,
+        fillOpacity: isKnown ? 0.92 : +(0.42 + 0.56 * Math.pow(t, 0.85)).toFixed(2),
+        radius: isKnown ? +(6.2 + 3.0 * Math.pow(t, 1.0)).toFixed(1) : +(4.8 + 4.8 * Math.pow(t, 1.15)).toFixed(1),
+        strokeColor: isKnown ? "#ffffff" : (t >= 0.82 ? "#ffffff" : "#0f1217"),
+        weight: isKnown ? 1.5 : (t >= 0.82 ? 1.8 : 1.1),
         normT: t
       };
     }
@@ -2077,14 +2176,51 @@
       if (minLbl) minLbl.textContent = sMin.toFixed(2);
       if (maxLbl) maxLbl.textContent = sMax.toFixed(2);
 
-      // Draw markers on the map in ascending confidence order so highest-score markers always sit on top
-      const mapOrdered = filtered.slice().sort((a, b) => (a.properties.confidence || 0) - (b.properties.confidence || 0));
+      // Build the combined map marker list (active tab + optional All Domains + optional Rediscovered Known Monuments)
+      const showRediscEl = document.getElementById("chkShowRediscoveredOnMap");
+      const showAllDomEl = document.getElementById("chkShowAllDomainsOnMap");
+      const showRedisc = showRediscEl ? showRediscEl.checked : true;
+      const showAllDom = showAllDomEl ? showAllDomEl.checked : false;
+
+      const mapFeaturesByKey = new Map();
+      filtered.forEach((f) => {
+        if (f && f.properties) mapFeaturesByKey.set(featureKey(f.properties), f);
+      });
+
+      if (showAllDom || showRedisc) {
+        const allCombined = geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures);
+        allCombined.forEach((f) => {
+          const p = f && f.properties;
+          if (!p) return;
+          if (op === "fpr_0.01" && !p.passes_fpr_0_01) return;
+          if (onlyDiag && !p.diagnostic_png) return;
+          if (curCounty && (p.county || "England") !== curCounty) return;
+          if (!matchesSurveyFilter(p, curSf)) return;
+          const isKnown = matchesTab(p, "known");
+          const isUnid = matchesTab(p, "unidentified");
+          if ((showRedisc && isKnown) || (showAllDom && isUnid && currentTab !== "confounders")) {
+            const k = featureKey(p);
+            if (!mapFeaturesByKey.has(k)) {
+              mapFeaturesByKey.set(k, f);
+            }
+          }
+        });
+      }
+
+      // Draw markers on the map in ascending confidence order so highest-score & rediscovered markers sit on top
+      const mapOrdered = Array.from(mapFeaturesByKey.values()).sort((a, b) => {
+        const ka = matchesTab(a.properties, "known") ? 1 : 0;
+        const kb = matchesTab(b.properties, "known") ? 1 : 0;
+        if (ka !== kb) return ka - kb;
+        return (a.properties.confidence || 0) - (b.properties.confidence || 0);
+      });
       mapOrdered.forEach((f) => {
         const p = f.properties;
-        const st = scoreScaledStyle(p.confidence, sMin, sMax);
+        const st = scoreScaledStyle(p.confidence, sMin, sMax, p);
         const sMeta = SURVEY_STATUS_META[p.user_survey_status];
-        const marker = L.circleMarker([p.lat, p.lon], {
+        const marker = new ShapeMarker([p.lat, p.lon], {
           pane: "candidatesPane",
+          shape: st.shape,
           radius: sMeta ? st.radius + 1.5 : st.radius,
           color: sMeta ? sMeta.stroke : st.strokeColor,
           weight: sMeta ? 2.5 : st.weight,
@@ -2094,8 +2230,11 @@
         const surveyTip = p.user_survey_status
           ? `<br/><strong>${(sMeta && sMeta.fullLabel) || p.user_survey_status}</strong>${p.user_survey_comment ? `: ${p.user_survey_comment}` : ""}`
           : "";
+        const knownTip = (p.matched_monument && p.matched_monument.name)
+          ? `<br/><span style="color:#00e676;">★ ${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry})</span>`
+          : "";
         marker.bindTooltip(
-          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${surveyTip}<br/><em>Click to select row &amp; view 6-panel LiDAR + Cropmarks</em>`
+          `<strong>${st.glyph} ${p.os_grid_ref}</strong> · <span class="muted">${st.catLabel}</span><br/>${formatClass(p.predicted_class)} · Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${knownTip}${surveyTip}<br/><em>Click to select &amp; view 6-panel LiDAR + Cropmarks</em>`
         );
         marker.on("click", (ev) => {
           L.DomEvent.stopPropagation(ev);
@@ -2107,7 +2246,7 @@
       filtered.forEach((f) => {
         const p = f.properties;
         const key = featureKey(p);
-        const st = scoreScaledStyle(p.confidence, sMin, sMax);
+        const st = scoreScaledStyle(p.confidence, sMin, sMax, p);
 
         const rowCopyText = `${p.os_grid_ref} (${p.county || "England"}) | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
         const tr = document.createElement("tr");
@@ -2123,7 +2262,7 @@
             ${p.county ? `<div class="muted" style="font-size:11px;margin-top:2px;">${p.county}</div>` : ""}
           </td>
           <td>${formatClass(p.predicted_class)}</td>
-          <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${st.fillColor};opacity:${Math.max(0.45, st.fillOpacity)};margin-right:6px;vertical-align:middle;border:1px solid rgba(255,255,255,0.28);"></span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
+          <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
           <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
@@ -2356,6 +2495,20 @@
       }
       renderScannedSquares();
       document.getElementById("chkShowScannedSquares").addEventListener("change", renderScannedSquares);
+      const chkRediscMap = document.getElementById("chkShowRediscoveredOnMap");
+      if (chkRediscMap) {
+        chkRediscMap.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(false);
+        });
+      }
+      const chkAllDomMap = document.getElementById("chkShowAllDomainsOnMap");
+      if (chkAllDomMap) {
+        chkAllDomMap.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(false);
+        });
+      }
       document.getElementById("btnResetNationalView").addEventListener("click", () => {
         map.setView([52.85, -1.85], 6);
       });
