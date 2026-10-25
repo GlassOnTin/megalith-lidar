@@ -101,7 +101,7 @@ def main() -> int:
         cand_props = [f["properties"] for f in gj.get("features", [])]
         matched = apply_community_annotations_to_candidates(cand_props, merged)
         if matched > 0:
-            gj_path.write_text(json.dumps(gj), encoding="utf-8")
+            gj_path.write_text(json.dumps(gj, separators=(",", ":")), encoding="utf-8")
         print(f"{gj_rel}: applied {matched} matching annotations across {len(cand_props)} features")
 
     return 0

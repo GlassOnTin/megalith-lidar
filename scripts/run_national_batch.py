@@ -858,8 +858,14 @@ def export_public_docs(
     export_feats = non_conf + conf_only[:400]
     for f in export_feats:
         p = f["properties"]
+        p.pop("nearby_environmental_features", None)
+        if isinstance(p.get("environmental_confounder_hints"), list):
+            p["environmental_confounder_hints"] = p["environmental_confounder_hints"][:2]
         if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 3:
             p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:3]
+        for k_empty in ("osm_archaeology_matches", "osm_confounder_matches", "megalithic_portal_matches"):
+            if p.get(k_empty) == []:
+                p.pop(k_empty, None)
     (docs_dir / "candidates.geojson").write_text(
         json.dumps({"type": "FeatureCollection", "features": export_feats}, separators=(",", ":")),
         encoding="utf-8",
