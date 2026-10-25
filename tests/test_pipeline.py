@@ -572,6 +572,91 @@ def test_megalith_unet_8channel_cropmark_branch():
     assert model.cropmark_tile_out.weight.grad is not None
 
 
+def test_environmental_and_geomorphic_false_positive_context():
+    from megalith_lidar.arch_context import (
+        build_deterministic_academic_context,
+        classify_vlm_note_downrating,
+        derive_false_positive_context_hints,
+        infer_landscape_character_area,
+    )
+    from megalith_lidar.osm_context import (
+        OSMParsedFeature,
+        OSMSpatialIndex,
+        annotate_candidates_with_spatial_context,
+        is_active_holocene_coastal_dune_belt,
+    )
+
+    # 1. Ainsdale / Formby sand-dune belt recognition and downrating
+    e_dune, n_dune = 329533.0, 409075.0
+    assert is_active_holocene_coastal_dune_belt(e_dune, n_dune) is not None
+    area_name = infer_landscape_character_area(e_dune, n_dune)
+    assert "Ainsdale" in area_name and "sand-dune" in area_name
+
+    dune_cand = {
+        "os_grid_ref": "SD 29533 09075",
+        "easting": e_dune,
+        "northing": n_dune,
+        "predicted_class": "round_barrow_cairn",
+        "confidence": 0.96,
+        "est_local_relief_m": 0.45,
+        "mean_slope_tangent": 0.08,
+        "area_m2": 320.0,
+        "elongation": 1.15,
+        "est_surface_prominence_m": 0.08,
+    }
+    annotated = annotate_candidates_with_spatial_context([dune_cand], osm_index=None)
+    assert annotated[0]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert any(m["osm_id"] == "geomorph/coastal_sand_dunes" for m in annotated[0]["osm_confounder_matches"])
+
+    dune_hints = derive_false_positive_context_hints(
+        annotated[0],
+        nearby_nhle=[],
+        cluster={"landscape_area": area_name, "nhle_within_2km": 0, "prehistoric_within_2km": 0, "nhle_within_5km": 1},
+    )
+    assert any("sand-dune" in h and "cannot survive" in h for h in dune_hints)
+    tier, mult, reason = classify_vlm_note_downrating("Test note.", "ROUNDED_MOUND_OR_RING", annotated[0])
+    assert tier == "OBVIOUS_FALSE_POSITIVE" and mult == 0.35
+
+    # 2. Meandering river scroll-bar / oxbow palaeochannel environmental context within 400 m
+    river_feat = OSMParsedFeature(
+        osm_id="way/999",
+        category="osm_confounder",
+        subtype="waterway=river",
+        name="River Ribble",
+        wikidata=None,
+        coords_27700=[(365100.0, 435000.0), (365100.0, 435500.0)],
+        is_closed_area=False,
+        bbox_27700=(365100.0, 435000.0, 365100.0, 435500.0),
+        match_radius_m=28.0,
+    )
+    idx = OSMSpatialIndex([river_feat])
+    river_cand = {
+        "os_grid_ref": "SD 65000 35200",
+        "easting": 365000.0,
+        "northing": 435200.0,
+        "predicted_class": "round_barrow_cairn",
+        "confidence": 0.94,
+        "est_local_relief_m": 0.38,
+        "mean_slope_tangent": 0.06,
+        "area_m2": 290.0,
+        "elongation": 1.30,
+        "est_surface_prominence_m": 0.05,
+        "ridge_continuation_span_m": 48.0,
+        "adjacent_channel_span_m": 34.0,
+    }
+    annotate_candidates_with_spatial_context([river_cand], osm_index=idx)
+    assert river_cand["context_category"] == "unidentified_candidate"
+    assert len(river_cand["nearby_environmental_features"]) == 1
+    assert river_cand["nearby_environmental_features"][0]["name"] == "River Ribble"
+
+    cluster = {"landscape_area": infer_landscape_character_area(365000.0, 435200.0), "nhle_within_2km": 1, "prehistoric_within_2km": 1, "nhle_within_5km": 3}
+    r_hints = derive_false_positive_context_hints(river_cand, nearby_nhle=[], cluster=cluster)
+    assert any("meandering river" in h and "River Ribble" in h for h in r_hints)
+    det_note = build_deterministic_academic_context(river_cand, nearby_nhle=[], cluster=cluster)
+    assert "meandering river" in det_note and "River Ribble" in det_note
+
+
+
 
 
 

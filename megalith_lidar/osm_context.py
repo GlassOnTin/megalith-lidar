@@ -114,6 +114,9 @@ OSM_CONFOUNDER_NATURAL_VALUES = frozenset(
         "shingle",
         "beach",
         "dune",
+        "sand",
+        "coastline",
+        "mud",
         "wood",
         "tree",
         "tree_row",
@@ -243,7 +246,12 @@ def classify_osm_tags_with_radius(tags: Dict[str, str]) -> Optional[Tuple[str, s
     if leisure in OSM_CONFOUNDER_LEISURE_VALUES:
         return ("osm_confounder", f"leisure={leisure}", 35.0)
     if natural in OSM_CONFOUNDER_NATURAL_VALUES:
-        rad = 24.0 if natural in {"wood", "tree", "tree_row"} else 30.0
+        if natural in {"wood", "tree", "tree_row"}:
+            rad = 24.0
+        elif natural in {"dune", "sand", "beach", "shingle", "coastline", "mud"}:
+            rad = 45.0
+        else:
+            rad = 30.0
         return ("osm_confounder", f"natural={natural}", rad)
     if waterway in OSM_CONFOUNDER_WATERWAY_VALUES:
         rad = 18.0 if waterway in {"stream", "ditch", "drain"} else 28.0
@@ -416,7 +424,7 @@ class OSMSpatialIndex:
                 or "building" in tags
                 or "golf" in tags
                 or "military" in tags
-                or tags.get("natural") in {"sinkhole", "bare_rock", "scree", "shingle", "beach", "dune", "wood", "water", "wetland"}
+                or tags.get("natural") in {"sinkhole", "bare_rock", "scree", "shingle", "beach", "dune", "sand", "mud", "wood", "water", "wetland"}
                 or cat == "osm_archaeology"
             )
             is_area = is_closed and has_area_tag
@@ -526,6 +534,102 @@ class OSMSpatialIndex:
             "osm_confounder_matches": conf_matches,
         }
 
+    def query_environmental_context(
+        self,
+        easting: float,
+        northing: float,
+        radius_m: float = 400.0,
+        max_items: int = 8,
+    ) -> List[Dict]:
+        """
+        Return nearby geomorphic, hydrological, extractive, military, or recreational
+        context features within `radius_m` (up to `max_items` deduplicated features) so
+        the academic context synthesis can evaluate landscape-level false positives
+        (e.g., meandering rivers, coastal sand dunes, quarries, airfields, golf courses).
+        """
+        env_matches: List[Dict] = []
+        skip_distant_minor = {
+            "barrier=fence",
+            "barrier=hedge",
+            "barrier=wall",
+            "barrier=ditch",
+            "power=pole",
+            "power=minor_line",
+            "highway=service",
+            "highway=residential",
+            "highway=unclassified",
+            "highway=track",
+            "highway=bridleway",
+            "highway=byway",
+            "building=yes",
+            "building=house",
+            "building=detached",
+            "building=shed",
+            "building=garage",
+            "natural=tree",
+            "natural=tree_row",
+        }
+        for feat in self.features:
+            if feat.category == "osm_archaeology":
+                continue
+            b_emin, b_nmin, b_emax, b_nmax = feat.bbox_27700
+            if (
+                easting < b_emin - radius_m
+                or easting > b_emax + radius_m
+                or northing < b_nmin - radius_m
+                or northing > b_nmax + radius_m
+            ):
+                continue
+            dist_m = _point_to_geometry_distance_m(
+                easting, northing, feat.coords_27700, feat.is_closed_area
+            )
+            if dist_m > radius_m:
+                continue
+            if dist_m > 45.0 and feat.subtype in skip_distant_minor and not feat.name:
+                continue
+            env_matches.append(
+                {
+                    "osm_id": feat.osm_id,
+                    "subtype": feat.subtype,
+                    "name": feat.name,
+                    "distance_m": round(float(dist_m), 1),
+                    "inside_polygon": bool(feat.is_closed_area and dist_m == 0.0),
+                }
+            )
+        env_matches.sort(key=lambda m: (m["distance_m"], 0 if m.get("name") else 1))
+        deduped: List[Dict] = []
+        seen_keys = set()
+        for m in env_matches:
+            key = (m["subtype"], m.get("name") or "")
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            deduped.append(m)
+            if len(deduped) >= max_items:
+                break
+        return deduped
+
+
+def is_active_holocene_coastal_dune_belt(easting: float, northing: float) -> Optional[str]:
+    """
+    Return the named Holocene mobile coastal sand-dune system if `(easting, northing)` lies
+    inside a rapidly shifting aeolian sand-dune / beach-barrier belt where unburied Bronze Age
+    or Roman earthwork morphology cannot survive on the active surface.
+    """
+    # Sefton Coast mobile dune belt: Crosby -> Formby Point -> Freshfield -> Ainsdale -> Birkdale
+    if 325000 <= easting <= 331800 and 403500 <= northing <= 420500:
+        return "Sefton Coast (Formby / Ainsdale / Birkdale) Holocene mobile aeolian sand-dune belt"
+    # North Devon Braunton Burrows & Saunton Sands mobile dune system
+    if 243500 <= easting <= 247200 and 131500 <= northing <= 137500:
+        return "Braunton Burrows (North Devon) Holocene mobile coastal sand-dune system"
+    # Studland Peninsula mobile dune spit (Dorset)
+    if 402500 <= easting <= 404500 and 82500 <= northing <= 86500:
+        return "Studland Heath / South Haven Holocene coastal dune spit"
+    # Holy Island / Ross Links / Bamburgh coastal dunes (Northumberland)
+    if 408000 <= easting <= 415500 and 634000 <= northing <= 643500:
+        return "Lindisfarne / Ross Links / Bamburgh Holocene coastal sand-dune system"
+    return None
+
 
 def fetch_or_load_osm_context(
     e_min: int,
@@ -597,10 +701,14 @@ def annotate_candidates_with_spatial_context(
     for cand in candidates:
         osm_arch = []
         osm_conf = []
+        env_feats = []
+        e_pt = float(cand["easting"])
+        n_pt = float(cand["northing"])
         if osm_index is not None:
-            res = osm_index.query_point(cand["easting"], cand["northing"])
+            res = osm_index.query_point(e_pt, n_pt)
             osm_arch = res["osm_archaeology_matches"]
             raw_conf = list(res["osm_confounder_matches"])
+            env_feats = osm_index.query_environmental_context(e_pt, n_pt, radius_m=400.0)
             if is_roman:
                 # 14-21% of scheduled Roman villas, forts, and Roman road aggers sit inside woodland
                 # (landuse=forest / natural=wood) where 1m bare-earth LiDAR sees through the canopy.
@@ -613,6 +721,34 @@ def annotate_candidates_with_spatial_context(
                 ]
             else:
                 osm_conf = raw_conf
+        cand["nearby_environmental_features"] = env_feats
+
+        dune_belt = is_active_holocene_coastal_dune_belt(e_pt, n_pt)
+        near_coastal_dune_osm = next(
+            (
+                m
+                for m in env_feats
+                if m.get("subtype") in {"natural=dune", "natural=sand", "natural=beach", "natural=shingle", "natural=coastline"}
+                and float(m.get("distance_m", 999.0)) <= 180.0
+            ),
+            None,
+        )
+        if dune_belt or near_coastal_dune_osm:
+            dune_desc = dune_belt or (
+                f"Coastal dune/beach margin ({near_coastal_dune_osm['subtype']} at {near_coastal_dune_osm['distance_m']:.0f}m)"
+                if near_coastal_dune_osm
+                else "Holocene coastal sand-dune system"
+            )
+            osm_conf.append(
+                {
+                    "osm_id": "geomorph/coastal_sand_dunes",
+                    "subtype": f"holocene_coastal_sand_dune_or_blowout ({dune_desc})",
+                    "name": f"Active Holocene coastal sand-dune blowout, parabolic dune ridge, or beach slack ({dune_desc})",
+                    "wikidata": None,
+                    "distance_m": float(near_coastal_dune_osm["distance_m"]) if near_coastal_dune_osm else 0.0,
+                    "inside_polygon": dune_belt is not None,
+                }
+            )
 
         # Intrinsic 1m LiDAR physical confounder checks (when outside known monuments)
         ndsm_m = float(cand.get("est_surface_prominence_m", 0.0))

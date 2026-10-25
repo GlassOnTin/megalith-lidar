@@ -674,6 +674,8 @@ def export_public_docs(
                     "pond_unet_local_peak",
                     "pond_unet_local_mean",
                     "pond_unet_predicted_class",
+                    "nearby_environmental_features",
+                    "environmental_confounder_hints",
                 ):
                     if rk in rc_match and rk not in props:
                         props[rk] = rc_match[rk]

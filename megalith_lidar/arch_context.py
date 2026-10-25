@@ -18,6 +18,7 @@ from megalith_lidar.catalog import (
     CLASS_MEGALITHIC_TOMB_LONG_BARROW,
     MonumentCatalog,
 )
+from megalith_lidar.osm_context import is_active_holocene_coastal_dune_belt
 
 COMPASS_16 = [
     "N", "NNE", "NE", "ENE",
@@ -45,6 +46,30 @@ def compass_bearing_from_Site(cand_e: float, cand_n: float, mon_e: float, mon_n:
 
 def infer_landscape_character_area(e: float, n: float) -> str:
     """Return a concise British landscape/physiographic descriptor from EPSG:27700 coordinates."""
+    if 325000 <= e <= 334500 and 403000 <= n <= 421000:
+        return "Sefton Coast — Formby, Ainsdale & Birkdale Holocene aeolian sand-dune belt (Merseyside)"
+    if 243000 <= e <= 249000 and 131000 <= n <= 138000:
+        return "North Devon Braunton Burrows & Taw–Torridge estuarine dune belt (Devon)"
+    if 575000 <= e <= 612000 and 342000 <= n <= 347000:
+        return "North Norfolk Holocene barrier coast, mobile dunes & saltmarsh (Norfolk)"
+    if 570000 <= e <= 605000 and 280000 <= n <= 318000:
+        return "Breckland & West Norfolk periglacial coversand & pingo-scar landscape (Norfolk / Suffolk)"
+    if 510000 <= e <= 555000 and 280000 <= n <= 365000:
+        return "Fenland & Lincolnshire Marsh reclaimed marine-silt lowland — roddons & salterns"
+    if 335000 <= e <= 385000 and 320000 <= n <= 385000:
+        return "Cheshire–Shropshire meres-and-mosses kettle-hole glacial till plain"
+    if 360000 <= e <= 410000 and 455000 <= n <= 500000:
+        return "Craven & Yorkshire Dales Carboniferous limestone karst & drumlin belt (North Yorkshire / Lancashire)"
+    if 405000 <= e <= 432000 and 350000 <= n <= 388000:
+        return "Peak District Carboniferous limestone plateau & lead-mining rake belt (Derbyshire / Staffordshire)"
+    if 485000 <= e <= 515000 and 425000 <= n <= 475000:
+        return "Yorkshire Wolds Upper Chalk dip-slope & dry-valley system (East Riding of Yorkshire)"
+    if 450000 <= e <= 515000 and 480000 <= n <= 520000:
+        return "North York Moors Jurassic sandstone moorland & Tabular Hills (North Yorkshire)"
+    if 515000 <= e <= 585000 and 115000 <= n <= 160000:
+        return "High & Low Weald clay-and-sandstone ironworking landscape (Sussex / Kent)"
+    if 410000 <= e <= 445000 and 95000 <= n <= 120000:
+        return "New Forest & Hampshire Basin Tertiary gravel plateau & heathland (Hampshire)"
     if 415000 <= e <= 440000 and 475000 <= n <= 505000:
         return "Ure Valley & Mowbray / Masham fluvio-glacial terrace (North Yorkshire)"
     if 400000 <= e <= 435000 and 210000 <= n <= 245000:
@@ -72,6 +97,179 @@ def infer_landscape_character_area(e: float, n: float) -> str:
     if n <= 190000 and e > 360000:
         return "Southern English Chalk & lowlands"
     return "English lowland / river terrace landscape"
+
+
+def derive_false_positive_context_hints(
+    cand: Dict,
+    nearby_nhle: List[Dict],
+    cluster: Dict,
+) -> List[str]:
+    """
+    Synthesize deeper geomorphic, geological, hydrological, and land-use false-positive
+    considerations from the candidate's coordinates, 1 m LiDAR observables, nearby OSM
+    environmental features (within 400 m), and nearby NHLE monument types.
+    """
+    hints: List[str] = []
+    e = float(cand.get("easting", 0.0))
+    n = float(cand.get("northing", 0.0))
+    landscape = str(cluster.get("landscape_area") or infer_landscape_character_area(e, n))
+    land_low = landscape.lower()
+    env_feats = list(cand.get("nearby_environmental_features") or [])
+    confs = list(cand.get("osm_confounder_matches") or [])
+    all_osm = env_feats + [c for c in confs if str(c.get("osm_id", "")).startswith(("node/", "way/", "relation/"))]
+
+    ridge_span = float(cand.get("ridge_continuation_span_m") or 0.0)
+    channel_span = float(cand.get("adjacent_channel_span_m") or 0.0)
+    patch_min_rel = float(cand.get("patch_min_relief_m") or 0.0)
+    ndsm = float(cand.get("est_surface_prominence_m") or 0.0)
+
+    def _fmt_osm(m: Dict) -> str:
+        sub = m.get("subtype", "feature")
+        nm = f" '{m['name']}'" if m.get("name") else ""
+        dist = float(m.get("distance_m", 0.0))
+        return f"{sub}{nm} ({dist:.0f} m)" if dist > 0 else f"{sub}{nm} (on-site)"
+
+    # 1. Aeolian / Coastal Sand Dunes (e.g. Ainsdale/Formby, Braunton Burrows, coastal spits)
+    dune_belt = is_active_holocene_coastal_dune_belt(e, n)
+    coastal_osm = [
+        m
+        for m in all_osm
+        if any(
+            k in str(m.get("subtype", ""))
+            for k in ("natural=dune", "natural=sand", "natural=beach", "natural=shingle", "natural=coastline", "natural=mud")
+        )
+    ]
+    if dune_belt or "sand-dune" in land_low or "dune belt" in land_low or "mobile dunes" in land_low or coastal_osm:
+        coastal_ref = _fmt_osm(coastal_osm[0]) if coastal_osm else (dune_belt or landscape)
+        hints.append(
+            f"Aeolian/coastal sand-dune taphonomy ({coastal_ref}): in rapidly shifting Holocene blown-sand and parabolic dune/slack systems, "
+            f"unburied Bronze Age or Roman earthworks cannot survive on the mobile surface unless sealed beneath consolidated peat/intertidal silt beds; "
+            f"evaluate active blowout rims, parabolic dune noses, Marram-grass hummocks, golf links bunkers, or WWII coastal/airfield defences."
+        )
+
+    # 2. Meandering Rivers, Floodplain Scroll-Bars & Palaeochannels
+    water_osm = [
+        m
+        for m in all_osm
+        if any(
+            k in str(m.get("subtype", ""))
+            for k in ("waterway=river", "waterway=stream", "waterway=canal", "waterway=drain", "waterway=ditch", "natural=wetland", "natural=water")
+        )
+    ]
+    if water_osm or ridge_span >= 35.0 or channel_span >= 28.0:
+        w_parts = []
+        if water_osm:
+            w_parts.append(_fmt_osm(water_osm[0]))
+        if ridge_span >= 35.0 or channel_span >= 28.0:
+            w_parts.append(f"1 m LiDAR ridge continuation {ridge_span:.0f} m / adjacent channel {channel_span:.0f} m")
+        w_str = ", ".join(w_parts)
+        hints.append(
+            f"Fluvial/alluvial geomorphology ({w_str}): carefully test whether the arcuate bank, ditch, or mound is a meandering river point-bar "
+            f"scroll ridge, oxbow cut-off bank, crevasse splay, flood levee, or abandoned palaeochannel margin rather than a built monument."
+        )
+
+    # 3. Fenland / Marine Silt Roddons & Salterns
+    if "fenland" in land_low or "roddon" in land_low or "saltmarsh" in land_low:
+        hints.append(
+            "Fenland/estuarine silt geomorphology: raised sinuous marine-silt roddons (differential peat wastage along extinct tidal creeks) "
+            "and Iron Age/Roman/medieval briquetage saltern mounds closely mimic barrows, enclosures, and Roman road aggers."
+        )
+
+    # 4. Periglacial Pingos, Kettle-Holes & Glacial Drumlin/Kame Hummocks
+    if (
+        "pingo" in land_low
+        or "kettle-hole" in land_low
+        or "drumlin" in land_low
+        or "fluvio-glacial" in land_low
+        or ("eden valley" in land_low and patch_min_rel <= -0.18)
+    ):
+        hints.append(
+            "Glacial/periglacial geomorphology: Devensian periglacial pingo rampart scars, kettle-hole rims, and fluvio-glacial kame or drumlin "
+            "hummocks produce circular embanked basins and smooth oval mounds that require BGS superficial-deposit cross-checking."
+        )
+
+    # 5. Karst Solution Dolines, Shakeholes & Field Limekilns
+    karst_osm = [
+        m
+        for m in all_osm
+        if any(k in str(m.get("subtype", "")) for k in ("natural=sinkhole", "natural=bare_rock", "natural=scree", "natural=cliff"))
+    ]
+    if karst_osm or (
+        any(k in land_low for k in ("karst", "limestone", "chalk", "wolds", "mendip", "cotswold"))
+        and patch_min_rel <= -0.18
+    ):
+        k_ref = f" ({_fmt_osm(karst_osm[0])})" if karst_osm else ""
+        hints.append(
+            f"Karst/carbonate dissolution & lime-burning{k_ref}: check for solution dolines, shakeholes above limestone/chalk joints, "
+            f"periglacial coombe-rock slumps, and post-medieval field limekilns with annular quarry-spoil collars."
+        )
+
+    # 6. Extractive Bell-Pits, Lead Rakes, Tin Streamworks & Marl/Gravel Quarries
+    mining_osm = [
+        m
+        for m in all_osm
+        if any(
+            k in str(m.get("subtype", ""))
+            for k in ("landuse=quarry", "man_made=mineshaft", "man_made=adit", "man_made=spoil_heap", "landuse=landfill")
+        )
+    ]
+    mining_nhle = [
+        m
+        for m in nearby_nhle
+        if any(
+            w in str(m.get("name", "")).lower()
+            for w in ("mine", "colliery", "bell pit", "lead", "tin", "streamwork", "quarry", "kiln", "smelt", "ironworks", "coal")
+        )
+    ]
+    if mining_osm or mining_nhle or any(k in land_low for k in ("lead-mining", "ironworking", "bodmin", "dartmoor")):
+        m_ref = (
+            _fmt_osm(mining_osm[0])
+            if mining_osm
+            else (f"nearby NHLE '{mining_nhle[0]['name']}'" if mining_nhle else landscape)
+        )
+        hints.append(
+            f"Extractive/industrial mining heritage ({m_ref}): coal or ironstone bell-pits (doughnut spoil rings around a shaft hollow), "
+            f"lead-mining hillocks, tin-streaming waste mounds, and post-medieval marl/gravel pits frequently mimic ring-barrows and hut circles."
+        )
+
+    # 7. Military Airfields/Training Areas, Golf Courses & 18th/19th-Century Parkland Tree-Rings
+    mil_rec_osm = [
+        m
+        for m in all_osm
+        if any(
+            k in str(m.get("subtype", ""))
+            for k in ("military=", "landuse=military", "leisure=golf_course", "golf=", "leisure=park", "leisure=garden", "leisure=pitch", "leisure=track")
+        )
+    ]
+    if mil_rec_osm or "salisbury plain" in land_low:
+        mr_ref = _fmt_osm(mil_rec_osm[0]) if mil_rec_osm else "Salisbury Plain military training area"
+        hints.append(
+            f"Military/recreational/designed-landscape context ({mr_ref}): rule out WWII airfield dispersal pens, searchlight/anti-aircraft gun-pits, "
+            f"ordnance craters, golf course tees/bunkers, and 18th/19th-century parkland tree-ring plantation banks."
+        )
+
+    # 8. Sub-Canopy Forestry Ploughing, Windthrow Root-Plates & Clearance Cairns
+    wood_osm = [
+        m
+        for m in all_osm
+        if any(k in str(m.get("subtype", "")) for k in ("landuse=forest", "natural=wood"))
+    ]
+    if wood_osm or ndsm >= 0.25:
+        w_ref = _fmt_osm(wood_osm[0]) if wood_osm else f"surface roughness nDSM {ndsm:.2f} m"
+        hints.append(
+            f"Woodland/canopy taphonomy ({w_ref}): check for tree-throw root-plate hollows, charcoal burning platforms, "
+            f"forestry drainage ridging, brash stacks, or sparse ground-return TIN interpolation facets beneath canopy."
+        )
+
+    # 9. Fallback Agricultural / Post-Medieval Map Check
+    if len(hints) < 2:
+        hints.append(
+            "Agricultural/post-medieval land-use check: cross-check First Edition 25-inch OS mapping and historic vertical aerial photography "
+            "for plough headlands along removed field boundaries, medieval rabbit-warren pillow mounds, post-medieval windmill mounds, "
+            "or infilled farm ponds and marl pits."
+        )
+
+    return hints[:4]
 
 
 class NHLESpatialContextExtractor:
@@ -210,12 +408,14 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     if cat == "flagged_modern_or_karst_confounder":
         cm = (cand.get("osm_confounder_matches") or [{}])[0]
         reason = cm.get("name") or cm.get("subtype") or "modern/geological confounder"
+        fp_hints = cand.get("environmental_confounder_hints") or derive_false_positive_context_hints(cand, nearby_nhle, cluster)
+        env_clause = f" Context check: {fp_hints[0]}" if fp_hints else ""
         return (
             f"Located in the {landscape}, this {area:.0f} m² topographic anomaly ({rel_m:+.2f} m local relief, "
-            f"{slope:.3f} / {slope_deg:.1f}° mean scarp slope, nDSM {ndsm:.2f} m) mimics prehistoric earthwork geometry "
-            f"in 1 m LiDAR but is automatically separated by the spatial/geometric filter as '{reason}'. "
-            f"Steep machine-graded scarps, negative-relief extraction pits, or mapped modern infrastructure distinguish it "
-            f"from weathered prehistoric mounds despite proximity to {nearest_str or 'regional monuments'}."
+            f"{slope:.3f} / {slope_deg:.1f}° mean scarp slope, nDSM {ndsm:.2f} m) mimics archaeological earthwork geometry "
+            f"in 1 m LiDAR but is separated by the spatial/geomorphic filter as '{reason}'. "
+            f"Machine-graded scarps, negative-relief extraction basins, mobile geomorphic surfaces, or mapped infrastructure distinguish it "
+            f"from weathered monuments despite proximity to {nearest_str or 'regional monuments'}.{env_clause}"
         )
 
     # Unidentified candidate
@@ -227,16 +427,20 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     )
     canopy_clause = (
         f"Bare-earth/surface comparison shows minimal above-ground vegetation or structure (nDSM {ndsm:.2f} m), "
-        f"confirming that the anomaly is a genuine ground-surface earthwork rather than scrub canopy."
+        f"confirming that the anomaly is a ground-surface relief feature rather than scrub canopy."
         if ndsm < 0.25
         else f"Moderate surface roughness (nDSM {ndsm:.2f} m) warrants checking for low gorse/brash cover or stone cairn exposure."
+    )
+    fp_hints = cand.get("environmental_confounder_hints") or derive_false_positive_context_hints(cand, nearby_nhle, cluster)
+    primary_hint = fp_hints[0] if fp_hints else (
+        "cross-check First Edition 25-inch OS mapping and historic aerial photography "
+        "to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing."
     )
     return (
         f"Situated in the {landscape} {cluster_clause}, the 1 m DTM isolates {form_phrase} rising {rel_m:+.2f} m "
         f"above its 16 m local trend surface with weathered scarp gradients of {slope:.3f} ({slope_deg:.1f}°), "
         f"morphologically consistent with a {arch_parallel}. {canopy_clause} "
-        f"Recommended HER follow-up: cross-check First Edition 25-inch OS mapping and historic aerial photography "
-        f"to rule out post-medieval marl/quarry spoil or field-clearance mounds before ground-truthing."
+        f"Critical false-positive & HER check — {primary_hint}"
     )
 
 
@@ -299,6 +503,20 @@ def classify_vlm_note_downrating(
     is_roman = cand.get("target_domain") == "roman"
     pred_cls = cand.get("predicted_class", "")
     elong = float(cand.get("elongation", 1.15))
+    e_coord = float(cand.get("easting") or 0.0)
+    n_coord = float(cand.get("northing") or 0.0)
+
+    dune_belt = is_active_holocene_coastal_dune_belt(e_coord, n_coord)
+    has_coastal_dune_conf = any(
+        c.get("osm_id") == "geomorph/coastal_sand_dunes"
+        for c in (cand.get("osm_confounder_matches") or [])
+    )
+    if dune_belt or has_coastal_dune_conf:
+        return (
+            "OBVIOUS_FALSE_POSITIVE",
+            0.35,
+            f"Active Holocene coastal sand-dune system ({dune_belt or 'mobile coastal dunes'}): unburied Bronze Age/Roman earthworks cannot survive on shifting blown sand",
+        )
 
     if not is_roman and shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}:
         return (
@@ -410,6 +628,12 @@ def classify_vlm_note_downrating(
         or "natural chalk scree" in low
         or "natural limestone scree" in low
         or "natural granite outcrop" in low
+        or "meander scroll" in low
+        or "meandering river" in low
+        or "oxbow" in low
+        or "palaeochannel" in low
+        or "parabolic dune" in low
+        or "dune blowout" in low
         or "modern forestry" in low
         or "field clearance ring" in low
         or "more likely a post-medieval" in low
@@ -443,13 +667,23 @@ def query_local_vlm_academic_context(
     ]
     nearest_block = "\n".join(nearest_lines) if nearest_lines else "- None within 4 km"
 
+    env_feats = list(cand.get("nearby_environmental_features") or [])
+    env_lines = [
+        f"- {ef.get('subtype')}{(' ' + repr(ef['name'])) if ef.get('name') else ''} at {float(ef.get('distance_m', 0.0)):.0f} m"
+        for ef in env_feats[:6]
+    ]
+    env_block = "\n".join(env_lines) if env_lines else "- No mapped OSM waterways, quarries, dunes, or military features within 400 m"
+
+    fp_hints = list(cand.get("environmental_confounder_hints") or derive_false_positive_context_hints(cand, nearby_nhle, cluster))
+    fp_block = "\n".join(f"- {h}" for h in fp_hints)
+
     slope = float(cand.get("mean_slope_tangent", 0.08))
     slope_deg = math.degrees(math.atan(slope))
     has_img = diag_png_path is not None and diag_png_path.exists()
     shape_prefix_instr = (
         "First output one tag: [SHAPE: RECTILINEAR_OR_U_BUND] (if the earthwork inside the circle in the 80m x 80m close-up "
         "has straight/square 90-degree corners, a flat rectangular reservoir/building platform, or a U-shaped bank wrapping a dark blue sunken pit), "
-        "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if it is clearly a modern road/track embankment, quarry scoop, military gun-pit, or utility feature), "
+        "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if it is clearly a modern road/track embankment, quarry scoop, military gun-pit, active coastal sand-dune blowout, or utility feature), "
         "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound or ring). "
         if has_img
         else ""
@@ -461,15 +695,20 @@ def query_local_vlm_academic_context(
         f"Model Nearest Form Class: {cand.get('predicted_class')} (score={cand.get('confidence'):.3f}, calibrated tile p={cand.get('calibrated_tile_prob', 0.0):.3f})\n"
         f"1m LiDAR Measurements: 16m bare-earth relief = {cand.get('est_local_relief_m'):+.2f} m, "
         f"mean scarp slope = {slope:.3f} ({slope_deg:.1f} deg), footprint = {cand.get('area_m2')} m2, "
-        f"axial elongation = {cand.get('elongation')}x, surface canopy nDSM = {cand.get('est_surface_prominence_m')} m.\n"
+        f"axial elongation = {cand.get('elongation')}x, surface canopy nDSM = {cand.get('est_surface_prominence_m')} m, "
+        f"ridge continuation = {float(cand.get('ridge_continuation_span_m') or 0.0):.0f} m, "
+        f"adjacent channel span = {float(cand.get('adjacent_channel_span_m') or 0.0):.0f} m.\n"
         f"Scheduled Monuments within 2 km: {cluster.get('nhle_within_2km')} ({cluster.get('prehistoric_within_2km')} prehistoric); "
         f"within 5 km: {cluster.get('nhle_within_5km')}.\n"
-        f"Nearest Historic England Scheduled Monuments:\n{nearest_block}\n\n"
+        f"Nearest Historic England Scheduled Monuments:\n{nearest_block}\n"
+        f"Nearby Environmental & Land-Use Features (OSM within 400 m):\n{env_block}\n"
+        f"Site-Specific Geomorphic, Geological & Land-Use False-Positive Considerations:\n{fp_block}\n\n"
         f"{shape_prefix_instr}"
-        "Then write a concise 3-sentence (maximum 90 words total) academic landscape-archaeology and 1m LiDAR morphological assessment of this site. "
-        "Sentence 1: Landscape setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
+        "Then write a concise 3-sentence (maximum 95 words total) academic landscape-archaeology and 1m LiDAR morphological assessment of this site. "
+        "Sentence 1: Landscape/geological setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
         "Sentence 2: Critical morphological reading of the 1m LiDAR close-up (Left=Bare-Earth Slope, Right=16m Local Relief where yellow is raised and blue is sunken) and measurements. "
-        "Sentence 3: Specific archaeological or modern-confounder interpretation and what historic map / HER / field check is required. "
+        "Sentence 3: Specific archaeological vs. geomorphic/environmental false-positive evaluation — explicitly address the supplied site-specific false-positive hazards "
+        "(e.g. whether a nearby meandering river/stream could explain the mark as a scroll-bar or oxbow palaeochannel, whether shifting Holocene coastal sand dunes preclude survival of unburied Roman/Bronze Age earthworks, or whether karst sinkholes, mining bell-pits, military/airfield works, golf features, or farm ponds apply) and state the required historic map/BGS/HER check. "
         "Use plain, rigorous British archaeological prose with no bullet points, no markdown headers, and no invented facts."
     )
 
@@ -640,6 +879,7 @@ def enrich_candidates_with_archaeological_context(
         nearby_nhle, cluster = extractor.query_context(e, n)
         cand["nearby_nhle_monuments"] = nearby_nhle
         cand["nhle_cluster_summary"] = cluster
+        cand["environmental_confounder_hints"] = derive_false_positive_context_hints(cand, nearby_nhle, cluster)
         if not cand.get("county") and cand.get("lat") is not None and cand.get("lon") is not None:
             cand["county"] = lookup_ceremonial_county(float(cand["lat"]), float(cand["lon"]))
 
