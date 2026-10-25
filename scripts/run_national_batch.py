@@ -315,7 +315,7 @@ def expand_national_queue_if_needed(
     queue_state: Dict,
     catalog: MonumentCatalog,
     square_size_m: int = 2000,
-    min_pending: int = 1200,
+    min_pending: int = 4200,
     seed: int = 20261023,
 ) -> bool:
     """
@@ -491,7 +491,46 @@ def expand_national_queue_if_needed(
             }
         )
     rng.shuffle(val_landscape_list)
-    all_new_landscape = new_seed_round_robin + new_landscape + halo_test_list + val_landscape_list
+
+    # 2d. 1-ring Halo in val blocks and 2-ring Halo (4 km adjacent) in test + val blocks
+    halo_extended_coords: List[Tuple[int, int, str]] = []
+    seen_ext: Set[Tuple[int, int]] = set()
+    for (mx, my) in monument_squares_2k.keys():
+        sp_m = assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2)
+        if sp_m not in {"test", "val"}:
+            continue
+        bx, by = mx // 20000, my // 20000
+        for r_mult in (1, 2):
+            for dx in range(-r_mult * square_size_m, (r_mult + 1) * square_size_m, square_size_m):
+                for dy in range(-r_mult * square_size_m, (r_mult + 1) * square_size_m, square_size_m):
+                    nx, ny = mx + dx, my + dy
+                    if (nx // 20000, ny // 20000) == (bx, by) and (nx, ny) not in existing_coords and (nx, ny) not in seen_ext:
+                        seen_ext.add((nx, ny))
+                        halo_extended_coords.append((nx, ny, sp_m))
+    halo_extended_list: List[Dict] = []
+    for sx, sy, sp_m in sorted(halo_extended_coords):
+        existing_coords.add((sx, sy))
+        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
+        lat, lon = bng_to_latlon(ce, cn)
+        halo_extended_list.append(
+            {
+                "square_id": f"test_landscape_E{sx}_N{sy}",
+                "sampling_stream": "heldout_test_landscape",
+                "split": sp_m,
+                "e_min": sx,
+                "n_min": sy,
+                "e_max": sx + square_size_m,
+                "n_max": sy + square_size_m,
+                "center_lat": round(lat, 5),
+                "center_lon": round(lon, 5),
+                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                "status": "pending",
+            }
+        )
+    rng.shuffle(halo_extended_list)
+
+    all_new_landscape = new_seed_round_robin + new_landscape + halo_test_list + val_landscape_list + halo_extended_list
 
     # 3. Matching number of uniform_national_null squares across out-of-sample (test + val) 20 km blocks
     test_land_blocks = sorted(
@@ -501,9 +540,10 @@ def expand_national_queue_if_needed(
             if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) in {"test", "val"}
         ]
     )
+    target_null_count = max(len(all_new_landscape), max(0, min_pending - pending_now))
     new_null: List[Dict] = []
-    for _pass_idx in range(45):
-        if len(new_null) >= len(all_new_landscape):
+    for _pass_idx in range(80):
+        if len(new_null) >= target_null_count:
             break
         blocks_copy = list(test_land_blocks)
         rng.shuffle(blocks_copy)
@@ -535,7 +575,7 @@ def expand_national_queue_if_needed(
                     "status": "pending",
                 }
             )
-            if len(new_null) >= len(all_new_landscape):
+            if len(new_null) >= target_null_count:
                 break
 
     # Interleave 1:1
