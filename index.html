@@ -855,6 +855,15 @@
               <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
               Show All Candidate Categories (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
             </label>
+            <label title="Render national kernel-density hot-spot isopleths and marching-squares contour rings">
+              <input type="checkbox" id="chkShowDensityContours" checked />
+              Hot-Spot Density Contours
+            </label>
+            <select id="densityModeSelect" title="Choose how hot-spot density contours are calculated" style="padding:3px 6px;font-size:11.5px;">
+              <option value="normalized_all" selected>Contours: All Categories / Scanned km²</option>
+              <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
+              <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
+            </select>
             <label>
               <input type="checkbox" id="chkAerialBasemap" />
               Aerial / Cropmark Orthophoto basemap
@@ -901,11 +910,14 @@
       attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     });
 
+    map.createPane("densityPane");
+    map.getPane("densityPane").style.zIndex = 350;
     map.createPane("squaresPane");
     map.getPane("squaresPane").style.zIndex = 380;
     map.createPane("candidatesPane");
     map.getPane("candidatesPane").style.zIndex = 650;
 
+    const densityContourLayer = L.layerGroup().addTo(map);
     const squaresLayer = L.layerGroup().addTo(map);
     const countyBoundaryLayer = L.layerGroup().addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
@@ -1475,6 +1487,211 @@
         }
       }
       return cur;
+    }
+
+    function renderDensityContourLayer(mapOrdered, activeTabFiltered) {
+      densityContourLayer.clearLayers();
+      const chkEl = document.getElementById("chkShowDensityContours");
+      if (!chkEl || !chkEl.checked) return;
+
+      const modeEl = document.getElementById("densityModeSelect");
+      const mode = modeEl ? modeEl.value : "normalized_all";
+      const ptsSource = mode === "normalized_tab" ? activeTabFiltered : mapOrdered;
+      if (!ptsSource || ptsSource.length === 0) return;
+
+      const latMin = 49.85, latMax = 55.85;
+      const lonMin = -5.85, lonMax = 1.90;
+      const nx = 128, ny = 152;
+      const dLat = (latMax - latMin) / (ny - 1);
+      const dLon = (lonMax - lonMin) / (nx - 1);
+
+      const candGrid = new Float32Array(nx * ny);
+      const areaGrid = new Float32Array(nx * ny);
+
+      ptsSource.forEach((f) => {
+        const p = f && f.properties;
+        if (!p || p.lat == null || p.lon == null) return;
+        const ix = Math.round((Number(p.lon) - lonMin) / dLon);
+        const iy = Math.round((Number(p.lat) - latMin) / dLat);
+        if (ix >= 0 && ix < nx && iy >= 0 && iy < ny) {
+          candGrid[iy * nx + ix] += 1.0;
+        }
+      });
+
+      const scannedSqs = (summaryData && summaryData.scanned_squares) || [];
+      scannedSqs.forEach((sq) => {
+        if (sq.center_lat == null || sq.center_lon == null) return;
+        const ix = Math.round((Number(sq.center_lon) - lonMin) / dLon);
+        const iy = Math.round((Number(sq.center_lat) - latMin) / dLat);
+        if (ix >= 0 && ix < nx && iy >= 0 && iy < ny) {
+          areaGrid[iy * nx + ix] += Number(sq.area_km2 || 4.0);
+        }
+      });
+
+      // 3-pass separable Gaussian-like smoothing (radius 4 cells ≈ 16 km bandwidth)
+      let smCand = boxBlurSeparable(candGrid, nx, ny, 4);
+      smCand = boxBlurSeparable(smCand, nx, ny, 3);
+      let smArea = boxBlurSeparable(areaGrid, nx, ny, 4);
+      smArea = boxBlurSeparable(smArea, nx, ny, 3);
+
+      const field = new Float32Array(nx * ny);
+      let maxVal = 0.0;
+      const cellAreaKm2 = ((latMax - latMin) * 111.1 / ny) * ((lonMax - lonMin) * 67.0 / nx);
+      for (let i = 0; i < nx * ny; i++) {
+        let v = 0.0;
+        if (mode === "raw_kde") {
+          v = smCand[i] / Math.max(cellAreaKm2, 1.0);
+        } else {
+          // Empirical-Bayes exposure-normalized rate (detections per scanned km²)
+          if (smArea[i] > 0.025) {
+            v = smCand[i] / (smArea[i] + 0.45);
+          }
+        }
+        field[i] = v;
+        if (v > maxVal) maxVal = v;
+      }
+      if (maxVal <= 1e-6) return;
+
+      // 1. Render smooth bilinearly upsampled translucent hot-spot isoband image overlay
+      const scale = 3;
+      const cw = (nx - 1) * scale;
+      const ch = (ny - 1) * scale;
+      const canv = document.createElement("canvas");
+      canv.width = cw;
+      canv.height = ch;
+      const ctx = canv.getContext("2d");
+      const imgData = ctx.createImageData(cw, ch);
+      const rgba = imgData.data;
+
+      const colorStops = [
+        [0.14, 14, 116, 144, 0],
+        [0.24, 6, 182, 212, 58],
+        [0.42, 16, 185, 129, 88],
+        [0.60, 250, 204, 21, 118],
+        [0.78, 249, 115, 22, 148],
+        [0.92, 239, 68, 68, 178],
+        [1.00, 254, 240, 138, 198]
+      ];
+
+      for (let py = 0; py < ch; py++) {
+        // Note: canvas y=0 is latMax (top), y=ch-1 is latMin (bottom)
+        const gy = (ny - 1) - (py / scale);
+        const iy0 = Math.max(0, Math.min(ny - 2, Math.floor(gy)));
+        const fy = gy - iy0;
+        for (let px = 0; px < cw; px++) {
+          const gx = px / scale;
+          const ix0 = Math.max(0, Math.min(nx - 2, Math.floor(gx)));
+          const fx = gx - ix0;
+          const v00 = field[iy0 * nx + ix0];
+          const v10 = field[iy0 * nx + ix0 + 1];
+          const v01 = field[(iy0 + 1) * nx + ix0];
+          const v11 = field[(iy0 + 1) * nx + ix0 + 1];
+          const val = (1 - fx) * (1 - fy) * v00 + fx * (1 - fy) * v10 + (1 - fx) * fy * v01 + fx * fy * v11;
+          const norm = val / maxVal;
+          if (norm < 0.14) continue;
+
+          let sIdx = 0;
+          while (sIdx < colorStops.length - 2 && norm > colorStops[sIdx + 1][0]) sIdx++;
+          const c0 = colorStops[sIdx];
+          const c1 = colorStops[sIdx + 1];
+          const t = Math.max(0, Math.min(1, (norm - c0[0]) / Math.max(c1[0] - c0[0], 1e-4)));
+          const outIdx = (py * cw + px) * 4;
+          rgba[outIdx]     = Math.round(c0[1] + t * (c1[1] - c0[1]));
+          rgba[outIdx + 1] = Math.round(c0[2] + t * (c1[2] - c0[2]));
+          rgba[outIdx + 2] = Math.round(c0[3] + t * (c1[3] - c0[3]));
+          rgba[outIdx + 3] = Math.round(c0[4] + t * (c1[4] - c0[4]));
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      L.imageOverlay(canv.toDataURL("image/png"), [[latMin, lonMin], [latMax, lonMax]], {
+        pane: "densityPane",
+        opacity: 0.85,
+        interactive: false
+      }).addTo(densityContourLayer);
+
+      // 2. Marching-Squares Vector Iso-Contour Lines
+      const contourLevels = [
+        { frac: 0.24, color: "#22d3ee", weight: 1.0, dash: "4,3", label: "Outer Regional Cluster (≥24% peak)" },
+        { frac: 0.42, color: "#34d399", weight: 1.25, dash: null, label: "Elevated Monument Density (≥42% peak)" },
+        { frac: 0.60, color: "#facc15", weight: 1.5, dash: null, label: "High-Density Landscape (≥60% peak)" },
+        { frac: 0.78, color: "#f97316", weight: 1.85, dash: null, label: "Major National Hot-Spot (≥78% peak)" },
+        { frac: 0.90, color: "#fef08a", weight: 2.2, dash: null, label: "Core Hot-Spot Peak (≥90% peak)" }
+      ];
+
+      // Edge table for standard 16-case marching squares (edges: 0=bottom, 1=right, 2=top, 3=left)
+      const msEdges = [
+        [],
+        [[3, 0]],
+        [[0, 1]],
+        [[3, 1]],
+        [[1, 2]],
+        [[3, 2], [0, 1]],
+        [[0, 2]],
+        [[3, 2]],
+        [[2, 3]],
+        [[2, 0]],
+        [[0, 3], [2, 1]],
+        [[2, 1]],
+        [[1, 3]],
+        [[1, 0]],
+        [[0, 3]],
+        []
+      ];
+
+      contourLevels.forEach((lvl) => {
+        const th = lvl.frac * maxVal;
+        const segments = [];
+        for (let iy = 0; iy < ny - 1; iy++) {
+          const lat0 = latMin + iy * dLat;
+          const lat1 = lat0 + dLat;
+          for (let ix = 0; ix < nx - 1; ix++) {
+            const v0 = field[iy * nx + ix];             // bottom-left
+            const v1 = field[iy * nx + ix + 1];         // bottom-right
+            const v2 = field[(iy + 1) * nx + ix + 1];   // top-right
+            const v3 = field[(iy + 1) * nx + ix];       // top-left
+            const code = (v0 >= th ? 1 : 0) | (v1 >= th ? 2 : 0) | (v2 >= th ? 4 : 0) | (v3 >= th ? 8 : 0);
+            const pairs = msEdges[code];
+            if (!pairs || pairs.length === 0) continue;
+
+            const lon0 = lonMin + ix * dLon;
+            const lon1 = lon0 + dLon;
+            const interpEdge = (edgeId) => {
+              if (edgeId === 0) {
+                const t = Math.max(0, Math.min(1, (th - v0) / ((v1 - v0) || 1e-9)));
+                return [lat0, lon0 + t * dLon];
+              }
+              if (edgeId === 1) {
+                const t = Math.max(0, Math.min(1, (th - v1) / ((v2 - v1) || 1e-9)));
+                return [lat0 + t * dLat, lon1];
+              }
+              if (edgeId === 2) {
+                const t = Math.max(0, Math.min(1, (th - v3) / ((v2 - v3) || 1e-9)));
+                return [lat1, lon0 + t * dLon];
+              }
+              const t = Math.max(0, Math.min(1, (th - v0) / ((v3 - v0) || 1e-9)));
+              return [lat0 + t * dLat, lon0];
+            };
+
+            pairs.forEach(([eA, eB]) => {
+              segments.push([interpEdge(eA), interpEdge(eB)]);
+            });
+          }
+        }
+
+        if (segments.length > 0) {
+          const unitStr = mode === "raw_kde" ? "smoothed detections/km²" : "candidates / scanned km²";
+          L.polyline(segments, {
+            pane: "densityPane",
+            color: lvl.color,
+            weight: lvl.weight,
+            opacity: 0.88,
+            dashArray: lvl.dash,
+            interactive: true
+          }).bindTooltip(
+            `<strong>${lvl.label}</strong><br/>Contour threshold: <strong>≥ ${th.toFixed(2)} ${unitStr}</strong>`
+          ).addTo(densityContourLayer);
+        }
+      });
     }
 
     function renderAerialAndCropmarkCanvases(p) {
@@ -2214,6 +2431,7 @@
         if (ka !== kb) return ka - kb;
         return (a.properties.confidence || 0) - (b.properties.confidence || 0);
       });
+      renderDensityContourLayer(mapOrdered, filtered);
       mapOrdered.forEach((f) => {
         const p = f.properties;
         const st = scoreScaledStyle(p.confidence, sMin, sMax, p);
@@ -2505,6 +2723,20 @@
       const chkAllDomMap = document.getElementById("chkShowAllDomainsOnMap");
       if (chkAllDomMap) {
         chkAllDomMap.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(false);
+        });
+      }
+      const chkDensContours = document.getElementById("chkShowDensityContours");
+      if (chkDensContours) {
+        chkDensContours.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(false);
+        });
+      }
+      const densModeSel = document.getElementById("densityModeSelect");
+      if (densModeSel) {
+        densModeSel.addEventListener("change", (ev) => {
           ev.target.blur();
           renderActiveView(false);
         });
