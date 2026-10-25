@@ -923,4 +923,213 @@ def enrich_candidates_with_archaeological_context(
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
+    apply_community_annotations_to_candidates(candidates)
     return vlm_calls
+
+
+SURVEY_STATUS_LABELS = {
+    "field_verified_monument": "Field-Verified Monument",
+    "historic_survey_confirmed": "Historic / HER Survey Record",
+    "priority_field_target": "Priority Field Target",
+    "uncertain_needs_check": "Uncertain / Needs Ground Check",
+    "field_rejected_confounder": "Field-Rejected Confounder / Pond",
+}
+
+
+def _norm_grid_ref(val: object) -> str:
+    return " ".join(str(val or "").upper().strip().split())
+
+
+def parse_survey_annotations_payload(payload: object) -> List[Dict]:
+    """
+    Parse either:
+      1. `{"annotations": [...]}` (`docs/community_annotations.json` format),
+      2. `[...]` (raw list of annotation objects),
+      3. `{"type": "FeatureCollection", "features": [...]}` (GeoJSON of historic survey records or field notes),
+      4. `{"grid_ref": {...}}` (keyed map of annotations).
+    Returns normalized annotation dicts.
+    """
+    raw_items: List[Dict] = []
+    if isinstance(payload, list):
+        raw_items = [x for x in payload if isinstance(x, dict)]
+    elif isinstance(payload, dict):
+        if isinstance(payload.get("annotations"), list):
+            raw_items = [x for x in payload["annotations"] if isinstance(x, dict)]
+        elif payload.get("type") == "FeatureCollection" and isinstance(payload.get("features"), list):
+            for feat in payload["features"]:
+                if not isinstance(feat, dict):
+                    continue
+                props = dict(feat.get("properties") or {})
+                geom = feat.get("geometry") or {}
+                coords = geom.get("coordinates")
+                if isinstance(coords, (list, tuple)) and len(coords) >= 2 and isinstance(coords[0], (int, float)):
+                    c0, c1 = float(coords[0]), float(coords[1])
+                    if abs(c0) <= 180.0 and abs(c1) <= 90.0:
+                        props.setdefault("lon", c0)
+                        props.setdefault("lat", c1)
+                    else:
+                        props.setdefault("easting", c0)
+                        props.setdefault("northing", c1)
+                raw_items.append(props)
+        else:
+            for k, v in payload.items():
+                if k in {"schema_version", "updated_at_utc", "description"}:
+                    continue
+                if isinstance(v, dict):
+                    item = dict(v)
+                    item.setdefault("os_grid_ref", k)
+                    raw_items.append(item)
+
+    normalized: List[Dict] = []
+    for item in raw_items:
+        gref = _norm_grid_ref(item.get("os_grid_ref") or item.get("grid_ref") or item.get("ngr"))
+        status = str(
+            item.get("status")
+            or item.get("user_survey_status")
+            or item.get("survey_status")
+            or ("historic_survey_confirmed" if (item.get("her_id") or item.get("monument_id")) else "priority_field_target")
+        ).strip()
+        comment = str(
+            item.get("comment")
+            or item.get("user_survey_comment")
+            or item.get("notes")
+            or item.get("description")
+            or item.get("name")
+            or ""
+        ).strip()
+        observer = str(
+            item.get("observer")
+            or item.get("user_survey_observer")
+            or item.get("author")
+            or item.get("source")
+            or ""
+        ).strip()
+        date_str = str(item.get("date") or item.get("user_survey_date") or "").strip()
+        ref_str = str(
+            item.get("reference")
+            or item.get("user_survey_reference")
+            or item.get("her_id")
+            or item.get("url")
+            or ""
+        ).strip()
+        entry: Dict = {
+            "os_grid_ref": gref,
+            "status": status,
+            "comment": comment,
+            "observer": observer,
+            "date": date_str,
+            "reference": ref_str,
+        }
+        for num_k in ("easting", "northing", "lat", "lon"):
+            if item.get(num_k) is not None:
+                try:
+                    entry[num_k] = float(item[num_k])
+                except Exception:
+                    pass
+        if entry["os_grid_ref"] or ("easting" in entry and "northing" in entry) or ("lat" in entry and "lon" in entry):
+            normalized.append(entry)
+    return normalized
+
+
+def load_community_annotations(path: Optional[Path] = None) -> List[Dict]:
+    if path is None:
+        path = Path(__file__).resolve().parents[1] / "docs" / "community_annotations.json"
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return parse_survey_annotations_payload(payload)
+    except Exception:
+        return []
+
+
+def apply_community_annotations_to_candidates(
+    candidates: List[Dict],
+    annotations: Optional[List[Dict]] = None,
+    match_radius_m: float = 45.0,
+) -> int:
+    """
+    Match community/user field-survey and historic-survey annotations onto `candidates`
+    by exact `os_grid_ref` or within `match_radius_m` in EPSG:27700 / WGS84 coordinates.
+    Updates `user_survey_*` fields and routes `field_rejected_confounder` to
+    `flagged_modern_or_karst_confounder`.
+    """
+    if annotations is None:
+        annotations = load_community_annotations()
+    if not annotations:
+        return 0
+
+    by_gref: Dict[str, Dict] = {}
+    for ann in annotations:
+        if ann.get("os_grid_ref"):
+            by_gref[_norm_grid_ref(ann["os_grid_ref"])] = ann
+
+    matched_count = 0
+    for cand in candidates:
+        gref = _norm_grid_ref(cand.get("os_grid_ref"))
+        ann = by_gref.get(gref)
+        if ann is None:
+            ce = cand.get("easting")
+            cn = cand.get("northing")
+            clat = cand.get("lat")
+            clon = cand.get("lon")
+            best_d = match_radius_m + 1.0
+            for a in annotations:
+                if ce is not None and cn is not None and "easting" in a and "northing" in a:
+                    d = math.hypot(float(ce) - float(a["easting"]), float(cn) - float(a["northing"]))
+                    if d <= match_radius_m and d < best_d:
+                        best_d = d
+                        ann = a
+                elif clat is not None and clon is not None and "lat" in a and "lon" in a:
+                    # Approx metres in UK
+                    d_lat = (float(clat) - float(a["lat"])) * 111132.0
+                    d_lon = (float(clon) - float(a["lon"])) * 67000.0
+                    d = math.hypot(d_lat, d_lon)
+                    if d <= match_radius_m and d < best_d:
+                        best_d = d
+                        ann = a
+        if ann is None:
+            continue
+
+        matched_count += 1
+        status = ann.get("status") or "priority_field_target"
+        cand["user_survey_status"] = status
+        cand["user_survey_status_label"] = SURVEY_STATUS_LABELS.get(status, status)
+        cand["user_survey_comment"] = ann.get("comment") or ""
+        cand["user_survey_observer"] = ann.get("observer") or ""
+        cand["user_survey_date"] = ann.get("date") or ""
+        cand["user_survey_reference"] = ann.get("reference") or ""
+
+        if status == "field_rejected_confounder":
+            cand["context_category"] = "flagged_modern_or_karst_confounder"
+            raw_c = float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0)))
+            cand["raw_unet_confidence"] = round(raw_c, 4)
+            cand["confidence"] = round(raw_c * 0.35, 4)
+            cand["vlm_verdict_tier"] = "OBVIOUS_FALSE_POSITIVE"
+            reason_txt = f"Field / User Survey Rejection: {ann.get('comment') or 'Confirmed false positive / pond'}"
+            cand["vlm_downrate_reason"] = reason_txt
+            confs = list(cand.get("osm_confounder_matches") or [])
+            if not any(c.get("osm_id") == "survey/field_rejected" for c in confs):
+                confs.insert(
+                    0,
+                    {
+                        "osm_id": "survey/field_rejected",
+                        "subtype": "field_survey_rejected_confounder",
+                        "name": reason_txt,
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    },
+                )
+                cand["osm_confounder_matches"] = confs
+        elif status in {"field_verified_monument", "historic_survey_confirmed"}:
+            if cand.get("context_category") == "flagged_modern_or_karst_confounder":
+                cand["context_category"] = "unidentified_candidate"
+            raw_c = float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0)))
+            if float(cand.get("confidence", 0.0)) < raw_c:
+                cand["confidence"] = round(raw_c, 4)
+                cand["vlm_verdict_tier"] = "PLAUSIBLE_MONUMENT"
+                cand["vlm_downrate_reason"] = None
+
+    return matched_count
+

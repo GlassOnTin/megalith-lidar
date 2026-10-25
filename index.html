@@ -721,13 +721,37 @@
               </select>
             </label>
             <label>
+              Survey / Notes:
+              <select id="surveyFilterSelect">
+                <option value="">All Sites</option>
+                <option value="any_note">Annotated / Surveyed Only</option>
+                <option value="field_verified_monument">✓ Field-Verified Monument</option>
+                <option value="historic_survey_confirmed">Historic / HER Confirmed</option>
+                <option value="priority_field_target">★ Priority Field Target</option>
+                <option value="uncertain_needs_check">? Needs Ground Check</option>
+                <option value="field_rejected_confounder">✗ Field-Rejected Confounder</option>
+              </select>
+            </label>
+            <label>
               <input type="checkbox" id="chkOnlyDiag" />
               Only show sites with 4-panel LiDAR image rendered
             </label>
           </div>
-          <button class="btn-link" id="btnCopyVisibleRows" type="button" style="cursor:pointer;">
-            Copy Visible Table Rows
-          </button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <input type="file" id="inpSurveyJsonFile" accept=".json,.geojson,application/json" style="display:none;" />
+            <button class="btn-link" id="btnLoadSurveyJson" type="button" style="cursor:pointer;" title="Import field survey comments or historic survey JSON/GeoJSON">
+              Load Notes / Historic JSON
+            </button>
+            <button class="btn-link" id="btnSaveSurveyJson" type="button" style="cursor:pointer;" title="Download all field &amp; historic survey annotations as community_annotations.json">
+              Save Notes (.json)
+            </button>
+            <button class="btn-link" id="btnSubmitSurveyPr" type="button" style="cursor:pointer;" title="Copy community_annotations.json to clipboard and open GitHub PR editor">
+              Submit PR ↗
+            </button>
+            <button class="btn-link" id="btnCopyVisibleRows" type="button" style="cursor:pointer;">
+              Copy Visible Table Rows
+            </button>
+          </div>
         </div>
 
         <!-- Candidate table (shown for tabs 1, 2, 3) -->
@@ -891,6 +915,269 @@
     let sortCol = "confidence";
     let sortDir = "desc";
     let activeMobilePanel = 1; // Default to Panel 2 (16m Local Relief) on mobile portrait
+    const SURVEY_STORAGE_KEY = "megalith_lidar_survey_annotations_v1";
+    const SURVEY_OBSERVER_KEY = "megalith_lidar_last_observer_v1";
+    let communityAnnotationsList = [];
+    let localAnnotationsByKey = {};
+
+    const SURVEY_STATUS_META = {
+      field_verified_monument: { label: "✓ Field Verified", fullLabel: "Field-Verified Monument", badgeClass: "badge-nhle", stroke: "#00e676" },
+      historic_survey_confirmed: { label: "Historic / HER", fullLabel: "Historic / HER Survey Record", badgeClass: "badge-osm", stroke: "#00d2ff" },
+      priority_field_target: { label: "★ Priority Target", fullLabel: "Priority Field Target", badgeClass: "badge-unid", stroke: "#ffd600" },
+      uncertain_needs_check: { label: "? Needs Check", fullLabel: "Uncertain / Needs Ground Check", badgeClass: "badge-unid", stroke: "#f59e0b" },
+      field_rejected_confounder: { label: "✗ Field Rejected", fullLabel: "Field-Rejected Confounder / Pond", badgeClass: "badge-conf", stroke: "#ff6e40" }
+    };
+
+    function normGridRef(val) {
+      return String(val || "").toUpperCase().trim().replace(/\s+/g, " ");
+    }
+
+    function surveyStatusBadge(status) {
+      const m = SURVEY_STATUS_META[status];
+      if (!m) return "";
+      return `<span class="badge ${m.badgeClass}" title="${m.fullLabel}">${m.label}</span>`;
+    }
+
+    function loadLocalSurveyAnnotations() {
+      try {
+        const raw = localStorage.getItem(SURVEY_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            localAnnotationsByKey = parsed;
+          }
+        }
+      } catch (_e) {
+        localAnnotationsByKey = {};
+      }
+    }
+
+    function saveLocalSurveyAnnotations() {
+      try {
+        localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(localAnnotationsByKey));
+      } catch (_e) {}
+    }
+
+    function parseIncomingAnnotationsPayload(payload) {
+      let rawItems = [];
+      if (Array.isArray(payload)) {
+        rawItems = payload;
+      } else if (payload && typeof payload === "object") {
+        if (Array.isArray(payload.annotations)) {
+          rawItems = payload.annotations;
+        } else if (payload.type === "FeatureCollection" && Array.isArray(payload.features)) {
+          rawItems = payload.features.map((feat) => {
+            const props = Object.assign({}, (feat && feat.properties) || {});
+            const geom = (feat && feat.geometry) || {};
+            if (Array.isArray(geom.coordinates) && geom.coordinates.length >= 2 && typeof geom.coordinates[0] === "number") {
+              const c0 = Number(geom.coordinates[0]);
+              const c1 = Number(geom.coordinates[1]);
+              if (Math.abs(c0) <= 180 && Math.abs(c1) <= 90) {
+                if (props.lon == null) props.lon = c0;
+                if (props.lat == null) props.lat = c1;
+              } else {
+                if (props.easting == null) props.easting = c0;
+                if (props.northing == null) props.northing = c1;
+              }
+            }
+            return props;
+          });
+        } else {
+          Object.keys(payload).forEach((k) => {
+            if (["schema_version", "updated_at_utc", "description"].includes(k)) return;
+            if (payload[k] && typeof payload[k] === "object") {
+              rawItems.push(Object.assign({ os_grid_ref: k }, payload[k]));
+            }
+          });
+        }
+      }
+      const out = [];
+      rawItems.forEach((item) => {
+        if (!item || typeof item !== "object") return;
+        const gref = normGridRef(item.os_grid_ref || item.grid_ref || item.ngr || "");
+        const status = String(
+          item.status ||
+          item.user_survey_status ||
+          item.survey_status ||
+          ((item.her_id || item.monument_id) ? "historic_survey_confirmed" : "priority_field_target")
+        ).trim();
+        const comment = String(
+          item.comment || item.user_survey_comment || item.notes || item.description || item.name || ""
+        ).trim();
+        const observer = String(
+          item.observer || item.user_survey_observer || item.author || item.source || ""
+        ).trim();
+        const date = String(item.date || item.user_survey_date || new Date().toISOString().slice(0, 10)).trim();
+        const reference = String(
+          item.reference || item.user_survey_reference || item.her_id || item.url || ""
+        ).trim();
+        const entry = { os_grid_ref: gref, status, comment, observer, date, reference };
+        ["easting", "northing", "lat", "lon"].forEach((nk) => {
+          if (item[nk] != null && !Number.isNaN(Number(item[nk]))) {
+            entry[nk] = Number(item[nk]);
+          }
+        });
+        if (entry.os_grid_ref || (entry.easting != null && entry.northing != null) || (entry.lat != null && entry.lon != null)) {
+          out.push(entry);
+        }
+      });
+      return out;
+    }
+
+    function getMergedAnnotationsList() {
+      const byKey = {};
+      const order = [];
+      const addEntry = (item) => {
+        if (!item) return;
+        let k = normGridRef(item.os_grid_ref);
+        if (!k && item.easting != null && item.northing != null) {
+          k = `E${Math.round(item.easting)}_N${Math.round(item.northing)}`;
+        }
+        if (!k && item.lat != null && item.lon != null) {
+          k = `LAT${Number(item.lat).toFixed(5)}_LON${Number(item.lon).toFixed(5)}`;
+        }
+        if (!k) return;
+        if (item._deleted) {
+          delete byKey[k];
+          return;
+        }
+        if (!byKey[k]) order.push(k);
+        byKey[k] = Object.assign({}, byKey[k] || {}, item);
+      };
+      communityAnnotationsList.forEach(addEntry);
+      Object.values(localAnnotationsByKey).forEach(addEntry);
+      return order.filter((k) => byKey[k] && (byKey[k].status || byKey[k].comment)).map((k) => byKey[k]);
+    }
+
+    function applyAnnotationToCandidateProps(p, ann) {
+      if (!p) return;
+      if (p._orig_context_category == null) p._orig_context_category = p.context_category;
+      if (p._orig_confidence == null) p._orig_confidence = p.confidence;
+      if (p._orig_vlm_downrate_reason === undefined) p._orig_vlm_downrate_reason = p.vlm_downrate_reason || null;
+
+      if (!ann || ann._deleted || (!ann.status && !ann.comment)) {
+        delete p.user_survey_status;
+        delete p.user_survey_status_label;
+        delete p.user_survey_comment;
+        delete p.user_survey_observer;
+        delete p.user_survey_date;
+        delete p.user_survey_reference;
+        p.context_category = p._orig_context_category;
+        p.confidence = p._orig_confidence;
+        p.vlm_downrate_reason = p._orig_vlm_downrate_reason;
+        return;
+      }
+
+      const st = ann.status || "priority_field_target";
+      p.user_survey_status = st;
+      p.user_survey_status_label = (SURVEY_STATUS_META[st] && SURVEY_STATUS_META[st].fullLabel) || st;
+      p.user_survey_comment = ann.comment || "";
+      p.user_survey_observer = ann.observer || "";
+      p.user_survey_date = ann.date || "";
+      p.user_survey_reference = ann.reference || "";
+
+      if (st === "field_rejected_confounder") {
+        p.context_category = "flagged_modern_or_karst_confounder";
+        const rawC = Number(p.raw_unet_confidence || p._orig_confidence || p.confidence || 0);
+        p.confidence = Number((rawC * 0.35).toFixed(4));
+        p.vlm_downrate_reason = `Field / Survey Rejection: ${ann.comment || "Confirmed false positive / pond"}`;
+      } else if (st === "field_verified_monument" || st === "historic_survey_confirmed") {
+        if (p._orig_context_category === "flagged_modern_or_karst_confounder") {
+          p.context_category = "unidentified_candidate";
+        } else {
+          p.context_category = p._orig_context_category;
+        }
+        const rawC = Number(p.raw_unet_confidence || p._orig_confidence || p.confidence || 0);
+        p.confidence = Math.max(Number(p._orig_confidence || 0), rawC);
+        p.vlm_downrate_reason = null;
+      } else {
+        p.context_category = p._orig_context_category;
+        p.confidence = p._orig_confidence;
+        p.vlm_downrate_reason = p._orig_vlm_downrate_reason;
+      }
+    }
+
+    function applySurveyAnnotationsToAllFeatures() {
+      const merged = getMergedAnnotationsList();
+      const byGref = {};
+      merged.forEach((a) => {
+        if (a.os_grid_ref) byGref[normGridRef(a.os_grid_ref)] = a;
+      });
+      const allFeats = geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures);
+      let matchedCount = 0;
+      allFeats.forEach((f) => {
+        const p = f && f.properties;
+        if (!p) return;
+        const gref = normGridRef(p.os_grid_ref);
+        let ann = byGref[gref] || localAnnotationsByKey[gref] || null;
+        if (!ann) {
+          let bestD = 46.0;
+          for (const a of merged) {
+            if (p.easting != null && p.northing != null && a.easting != null && a.northing != null) {
+              const d = Math.hypot(Number(p.easting) - Number(a.easting), Number(p.northing) - Number(a.northing));
+              if (d <= 45.0 && d < bestD) {
+                bestD = d;
+                ann = a;
+              }
+            } else if (p.lat != null && p.lon != null && a.lat != null && a.lon != null) {
+              const dLat = (Number(p.lat) - Number(a.lat)) * 111132.0;
+              const dLon = (Number(p.lon) - Number(a.lon)) * 67000.0;
+              const d = Math.hypot(dLat, dLon);
+              if (d <= 45.0 && d < bestD) {
+                bestD = d;
+                ann = a;
+              }
+            }
+          }
+        }
+        if (ann && !ann._deleted) matchedCount++;
+        applyAnnotationToCandidateProps(p, ann);
+      });
+      return matchedCount;
+    }
+
+    function buildCommunityAnnotationsExportString() {
+      const merged = getMergedAnnotationsList();
+      const payload = {
+        schema_version: "1.0",
+        updated_at_utc: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        description: "Community field-survey observations, county HER cross-references, and historic survey annotations for the UK 1 m LiDAR & Aerial Cropmark Monument Survey. Users can load/save this JSON in the web viewer or submit additions via GitHub Pull Request.",
+        annotations: merged
+      };
+      return JSON.stringify(payload, null, 2) + "\n";
+    }
+
+    function exportSurveyAnnotationsJson() {
+      const jsonStr = buildCommunityAnnotationsExportString();
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "community_annotations.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    function copyAndOpenGithubPr(statusElem) {
+      const jsonStr = buildCommunityAnnotationsExportString();
+      const prUrl = "https://github.com/GlassOnTin/megalith-lidar/edit/main/docs/community_annotations.json";
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          if (statusElem) {
+            const orig = statusElem.textContent;
+            statusElem.textContent = "Copied JSON! Opening GitHub PR editor...";
+            setTimeout(() => { statusElem.textContent = orig; }, 2600);
+          }
+          window.open(prUrl, "_blank", "noopener");
+        }).catch(() => {
+          window.open(prUrl, "_blank", "noopener");
+        });
+      } else {
+        window.open(prUrl, "_blank", "noopener");
+      }
+    }
 
     function pointInRing(lon, lat, ring) {
       let inside = false;
@@ -1022,21 +1309,30 @@
     }
 
     function contextNote(p) {
+      let baseNote = "Unrecorded in NHLE & OpenStreetMap";
       if (p.matched_monument) {
-        return `${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry}, ${p.matched_monument.distance_m} m)`;
-      }
-      if (p.osm_archaeology_matches && p.osm_archaeology_matches.length > 0) {
+        baseNote = `${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry}, ${p.matched_monument.distance_m} m)`;
+      } else if (p.osm_archaeology_matches && p.osm_archaeology_matches.length > 0) {
         const m = p.osm_archaeology_matches[0];
-        return `${m.name || m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
-      }
-      if (p.osm_confounder_matches && p.osm_confounder_matches.length > 0) {
+        baseNote = `${m.name || m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
+      } else if (p.osm_confounder_matches && p.osm_confounder_matches.length > 0) {
         const m = p.osm_confounder_matches[0];
-        return `${m.name ? m.name + ": " : ""}${m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
+        baseNote = `${m.name ? m.name + ": " : ""}${m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
+      } else if (p.vlm_downrate_reason) {
+        baseNote = p.vlm_downrate_reason;
       }
-      if (p.vlm_downrate_reason) {
-        return p.vlm_downrate_reason;
+      if (p.user_survey_comment || p.user_survey_status) {
+        const lbl = (SURVEY_STATUS_META[p.user_survey_status] && SURVEY_STATUS_META[p.user_survey_status].fullLabel) || "Survey Note";
+        const obs = p.user_survey_observer ? ` (${p.user_survey_observer})` : "";
+        return `[${lbl}${obs}${p.user_survey_comment ? ": " + p.user_survey_comment : ""}] · ${baseNote}`;
       }
-      return "Unrecorded in NHLE & OpenStreetMap";
+      return baseNote;
+    }
+
+    function matchesSurveyFilter(p, sf) {
+      if (!sf) return true;
+      if (sf === "any_note") return Boolean(p.user_survey_status || p.user_survey_comment);
+      return p.user_survey_status === sf;
     }
 
     function matchesTab(p, tab) {
@@ -1308,6 +1604,51 @@
         `;
       }
 
+      const curStatus = p.user_survey_status || "";
+      const curComment = (p.user_survey_comment || "").replace(/"/g, "&quot;");
+      const defaultObs = p.user_survey_observer || (typeof localStorage !== "undefined" ? (localStorage.getItem(SURVEY_OBSERVER_KEY) || "") : "");
+      const curRef = (p.user_survey_reference || "").replace(/"/g, "&quot;");
+      html += `
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(0, 230, 118, 0.06);border:1px solid rgba(0, 230, 118, 0.30);border-radius:4px;font-size:13px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <div>
+              <strong style="color:#fff;">Field Survey &amp; Historic Record Log</strong>
+              ${p.user_survey_status ? ` · ${surveyStatusBadge(p.user_survey_status)}` : '<span class="muted" style="font-size:12px;"> · Record ground-truthing or HER / historic survey data</span>'}
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn-link" id="btnInspectorExportJson" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Save All (.json)</button>
+              <button class="btn-link" id="btnInspectorPr" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Copy &amp; Open PR ↗</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:8px;">
+            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+              <span class="muted">Survey Verdict / Radar Status:</span>
+              <select id="inpSurveyStatus" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;">
+                <option value="" ${curStatus === "" ? "selected" : ""}>Unreviewed (use model default)</option>
+                <option value="field_verified_monument" ${curStatus === "field_verified_monument" ? "selected" : ""}>✓ Field-Verified Monument (ground-truthed)</option>
+                <option value="historic_survey_confirmed" ${curStatus === "historic_survey_confirmed" ? "selected" : ""}>Historic / HER Survey Record (found in HER / map)</option>
+                <option value="priority_field_target" ${curStatus === "priority_field_target" ? "selected" : ""}>★ Priority Field Target / Interesting Feature</option>
+                <option value="uncertain_needs_check" ${curStatus === "uncertain_needs_check" ? "selected" : ""}>? Uncertain / Needs Ground Check</option>
+                <option value="field_rejected_confounder" ${curStatus === "field_rejected_confounder" ? "selected" : ""}>✗ Field-Rejected False Positive / Pond (move to Tab 5)</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+              <span class="muted">Observer / Source (e.g. Name or County HER):</span>
+              <input type="text" id="inpSurveyObserver" value="${defaultObs.replace(/"/g, "&quot;")}" placeholder="e.g. Ian Williams or Cornwall HER" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+              <span class="muted">HER ID / Historic Survey Reference / URL:</span>
+              <input type="text" id="inpSurveyRef" value="${curRef}" placeholder="e.g. MCO12345 or 1888 OS 25-inch" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+            </label>
+          </div>
+          <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;">
+            <input type="text" id="inpSurveyComment" value="${curComment}" placeholder="Add field survey observations, ditch/bank measurements, cropmark notes, or historic survey details..." style="flex:1;min-width:220px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12.5px;" />
+            <button class="btn-link" id="btnSaveSiteAnnotation" type="button" style="cursor:pointer;background:rgba(0,230,118,0.18);border-color:rgba(0,230,118,0.55);color:#00e676;">Save to View</button>
+            <button class="btn-link" id="btnClearSiteAnnotation" type="button" style="cursor:pointer;background:rgba(255,110,64,0.14);border-color:rgba(255,110,64,0.45);color:#ff6e40;">Clear</button>
+          </div>
+        </div>
+      `;
+
       const mobileDock = document.getElementById("tableBottomLidarDock");
       const hasPng = Boolean(p.diagnostic_png);
       const effectivePanel = (!hasPng && activeMobilePanel < 4) ? 4 : activeMobilePanel;
@@ -1450,6 +1791,58 @@
           });
         });
       }
+      const btnSaveSite = document.getElementById("btnSaveSiteAnnotation");
+      if (btnSaveSite) {
+        btnSaveSite.addEventListener("click", () => {
+          const stVal = (document.getElementById("inpSurveyStatus") || {}).value || "";
+          const obsVal = ((document.getElementById("inpSurveyObserver") || {}).value || "").trim();
+          const refVal = ((document.getElementById("inpSurveyRef") || {}).value || "").trim();
+          const cmtVal = ((document.getElementById("inpSurveyComment") || {}).value || "").trim();
+          if (obsVal) {
+            try { localStorage.setItem(SURVEY_OBSERVER_KEY, obsVal); } catch (_e) {}
+          }
+          const gref = normGridRef(p.os_grid_ref);
+          if (!stVal && !cmtVal) {
+            localAnnotationsByKey[gref] = { os_grid_ref: gref, _deleted: true };
+          } else {
+            localAnnotationsByKey[gref] = {
+              os_grid_ref: gref,
+              easting: Number(p.easting),
+              northing: Number(p.northing),
+              lat: Number(p.lat),
+              lon: Number(p.lon),
+              status: stVal || "priority_field_target",
+              comment: cmtVal,
+              observer: obsVal,
+              date: new Date().toISOString().slice(0, 10),
+              reference: refVal
+            };
+          }
+          saveLocalSurveyAnnotations();
+          applySurveyAnnotationsToAllFeatures();
+          renderActiveView(false);
+          selectCandidate(p, false, false);
+        });
+      }
+      const btnClearSite = document.getElementById("btnClearSiteAnnotation");
+      if (btnClearSite) {
+        btnClearSite.addEventListener("click", () => {
+          const gref = normGridRef(p.os_grid_ref);
+          localAnnotationsByKey[gref] = { os_grid_ref: gref, _deleted: true };
+          saveLocalSurveyAnnotations();
+          applySurveyAnnotationsToAllFeatures();
+          renderActiveView(false);
+          selectCandidate(p, false, false);
+        });
+      }
+      const btnInspExp = document.getElementById("btnInspectorExportJson");
+      if (btnInspExp) {
+        btnInspExp.addEventListener("click", exportSurveyAnnotationsJson);
+      }
+      const btnInspPr = document.getElementById("btnInspectorPr");
+      if (btnInspPr) {
+        btnInspPr.addEventListener("click", () => copyAndOpenGithubPr(btnInspPr));
+      }
       if (zoomMap) {
         map.setView([p.lat, p.lon], Math.max(map.getZoom(), 11));
       }
@@ -1461,6 +1854,8 @@
       const curCounty = countySel.value || "";
       const op = document.getElementById("opSelect").value;
       const onlyDiag = document.getElementById("chkOnlyDiag").checked;
+      const sfSel = document.getElementById("surveyFilterSelect");
+      const curSf = sfSel ? sfSel.value : "";
 
       const sourceList = currentTab === "roman"
         ? romanFeatures
@@ -1476,6 +1871,7 @@
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return;
         if (onlyDiag && !p.diagnostic_png) return;
+        if (!matchesSurveyFilter(p, curSf)) return;
         const tabOk = (currentTab === "roman" || currentTab === "enclosure")
           ? matchesTab(p, "unidentified")
           : matchesTab(p, currentTab);
@@ -1509,12 +1905,15 @@
       const onlyDiag = document.getElementById("chkOnlyDiag").checked;
       const countySel = document.getElementById("countySelect");
       const curCounty = countySel ? countySel.value : "";
+      const sfSel = document.getElementById("surveyFilterSelect");
+      const curSf = sfSel ? sfSel.value : "";
 
       const baseList = geojsonFeatures.filter((f) => {
         const p = f.properties;
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         if (curCounty && (p.county || "England") !== curCounty) return false;
+        if (!matchesSurveyFilter(p, curSf)) return false;
         return true;
       });
 
@@ -1523,6 +1922,7 @@
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         if (curCounty && (p.county || "England") !== curCounty) return false;
+        if (!matchesSurveyFilter(p, curSf)) return false;
         return true;
       });
 
@@ -1531,6 +1931,7 @@
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         if (curCounty && (p.county || "England") !== curCounty) return false;
+        if (!matchesSurveyFilter(p, curSf)) return false;
         return true;
       });
 
@@ -1571,6 +1972,8 @@
       const onlyDiag = document.getElementById("chkOnlyDiag").checked;
       const countySel = document.getElementById("countySelect");
       const curCounty = countySel ? countySel.value : "";
+      const sfSel = document.getElementById("surveyFilterSelect");
+      const curSf = sfSel ? sfSel.value : "";
 
       countyBoundaryLayer.clearLayers();
       if (curCounty && countiesGeoJSON && countiesGeoJSON.features) {
@@ -1612,6 +2015,7 @@
         if (op === "fpr_0.01" && !p.passes_fpr_0_01) return false;
         if (onlyDiag && !p.diagnostic_png) return false;
         if (curCounty && (p.county || "England") !== curCounty) return false;
+        if (!matchesSurveyFilter(p, curSf)) return false;
         if (currentTab === "roman" || currentTab === "enclosure") {
           return matchesTab(p, "unidentified");
         }
@@ -1678,16 +2082,20 @@
       mapOrdered.forEach((f) => {
         const p = f.properties;
         const st = scoreScaledStyle(p.confidence, sMin, sMax);
+        const sMeta = SURVEY_STATUS_META[p.user_survey_status];
         const marker = L.circleMarker([p.lat, p.lon], {
           pane: "candidatesPane",
-          radius: st.radius,
-          color: st.strokeColor,
-          weight: st.weight,
+          radius: sMeta ? st.radius + 1.5 : st.radius,
+          color: sMeta ? sMeta.stroke : st.strokeColor,
+          weight: sMeta ? 2.5 : st.weight,
           fillColor: st.fillColor,
           fillOpacity: st.fillOpacity
         });
+        const surveyTip = p.user_survey_status
+          ? `<br/><strong>${(sMeta && sMeta.fullLabel) || p.user_survey_status}</strong>${p.user_survey_comment ? `: ${p.user_survey_comment}` : ""}`
+          : "";
         marker.bindTooltip(
-          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m<br/><em>Click to select row &amp; view 6-panel LiDAR + Cropmarks</em>`
+          `<strong>${p.os_grid_ref}</strong> · ${formatClass(p.predicted_class)}<br/>Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${surveyTip}<br/><em>Click to select row &amp; view 6-panel LiDAR + Cropmarks</em>`
         );
         marker.on("click", (ev) => {
           L.DomEvent.stopPropagation(ev);
@@ -1718,7 +2126,7 @@
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${st.fillColor};opacity:${Math.max(0.45, st.fillOpacity)};margin-right:6px;vertical-align:middle;border:1px solid rgba(255,255,255,0.28);"></span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}</td>
+          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
           <td class="muted">${contextNote(p)}</td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");
@@ -1747,14 +2155,15 @@
 
     async function init() {
       const bust = Date.now();
-      const [sumResp, gjResp, rSumResp, rGjResp, eSumResp, eGjResp, cntResp] = await Promise.all([
+      const [sumResp, gjResp, rSumResp, rGjResp, eSumResp, eGjResp, cntResp, commAnnResp] = await Promise.all([
         fetch(`${DATA_BASE}docs/survey_summary.json?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/candidates.geojson?v=${bust}`, { cache: "no-store" }),
         fetch(`${DATA_BASE}docs/roman_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
         fetch(`${DATA_BASE}docs/roman_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
         fetch(`${DATA_BASE}docs/enclosure_summary.json?v=${bust}`, { cache: "no-store" }).catch(() => null),
         fetch(`${DATA_BASE}docs/enclosure_candidates.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
-        fetch(`${DATA_BASE}docs/uk_counties.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null)
+        fetch(`${DATA_BASE}docs/uk_counties.geojson?v=${bust}`, { cache: "no-store" }).catch(() => null),
+        fetch(`${DATA_BASE}docs/community_annotations.json?v=${bust}`, { cache: "no-store" }).catch(() => null)
       ]);
       summaryData = await sumResp.json();
       const gj = await gjResp.json();
@@ -1776,6 +2185,14 @@
       if (cntResp && cntResp.ok) {
         countiesGeoJSON = await cntResp.json();
       }
+      if (commAnnResp && commAnnResp.ok) {
+        try {
+          const commPayload = await commAnnResp.json();
+          communityAnnotationsList = parseIncomingAnnotationsPayload(commPayload);
+        } catch (_e) {}
+      }
+      loadLocalSurveyAnnotations();
+      applySurveyAnnotationsToAllFeatures();
       geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures).forEach((f) => {
         const p = f.properties;
         if (p && !p.county && p.lat != null && p.lon != null) {
@@ -1981,10 +2398,63 @@
         ev.target.blur();
         renderActiveView(true, true);
       });
+      const sfSelectEl = document.getElementById("surveyFilterSelect");
+      if (sfSelectEl) {
+        sfSelectEl.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(true);
+        });
+      }
       document.getElementById("chkOnlyDiag").addEventListener("change", (ev) => {
         ev.target.blur();
         renderActiveView(true);
       });
+      const btnLoadJson = document.getElementById("btnLoadSurveyJson");
+      const inpFileJson = document.getElementById("inpSurveyJsonFile");
+      if (btnLoadJson && inpFileJson) {
+        btnLoadJson.addEventListener("click", () => inpFileJson.click());
+        inpFileJson.addEventListener("change", (ev) => {
+          const file = ev.target.files && ev.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const payload = JSON.parse(String(reader.result || "{}"));
+              const parsed = parseIncomingAnnotationsPayload(payload);
+              parsed.forEach((entry) => {
+                let k = normGridRef(entry.os_grid_ref);
+                if (!k && entry.easting != null && entry.northing != null) {
+                  k = `E${Math.round(entry.easting)}_N${Math.round(entry.northing)}`;
+                }
+                if (!k && entry.lat != null && entry.lon != null) {
+                  k = `LAT${Number(entry.lat).toFixed(5)}_LON${Number(entry.lon).toFixed(5)}`;
+                }
+                if (k) localAnnotationsByKey[k] = entry;
+              });
+              saveLocalSurveyAnnotations();
+              const matched = applySurveyAnnotationsToAllFeatures();
+              renderActiveView(true);
+              const orig = btnLoadJson.textContent;
+              btnLoadJson.textContent = `Loaded ${parsed.length} (${matched} matched)!`;
+              setTimeout(() => { btnLoadJson.textContent = orig; }, 2600);
+            } catch (_err) {
+              const orig = btnLoadJson.textContent;
+              btnLoadJson.textContent = "Invalid JSON file";
+              setTimeout(() => { btnLoadJson.textContent = orig; }, 2200);
+            }
+            inpFileJson.value = "";
+          };
+          reader.readAsText(file);
+        });
+      }
+      const btnSaveJson = document.getElementById("btnSaveSurveyJson");
+      if (btnSaveJson) {
+        btnSaveJson.addEventListener("click", exportSurveyAnnotationsJson);
+      }
+      const btnSubmitPr = document.getElementById("btnSubmitSurveyPr");
+      if (btnSubmitPr) {
+        btnSubmitPr.addEventListener("click", () => copyAndOpenGithubPr(btnSubmitPr));
+      }
       const chkAerial = document.getElementById("chkAerialBasemap");
       if (chkAerial) {
         chkAerial.addEventListener("change", () => {
@@ -2023,6 +2493,10 @@
       if (!isDown && !isUp) return;
       if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
       if (currentTab === "stats") return;
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === "TEXTAREA" || (ae.tagName === "INPUT" && ae.type !== "checkbox" && ae.type !== "radio" && ae.type !== "button"))) {
+        return;
+      }
 
       ev.preventDefault();
       ev.stopPropagation();

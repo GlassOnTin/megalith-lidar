@@ -656,6 +656,72 @@ def test_environmental_and_geomorphic_false_positive_context():
     assert "meandering river" in det_note and "River Ribble" in det_note
 
 
+def test_community_and_historic_survey_annotations():
+    from megalith_lidar.arch_context import (
+        apply_community_annotations_to_candidates,
+        load_community_annotations,
+        parse_survey_annotations_payload,
+    )
+
+    # 1. Verify repository docs/community_annotations.json loads cleanly
+    repo_anns = load_community_annotations()
+    assert len(repo_anns) >= 5
+
+    # 2. Verify GeoJSON FeatureCollection of historic survey data parses and matches by coordinate proximity
+    geojson_payload = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [216305.0, 81158.0]},
+                "properties": {
+                    "her_id": "MCO-9988",
+                    "name": "Bodmin Moor Ring Cairn (1894 Survey)",
+                    "source": "Cornwall HER",
+                },
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [351067.0, 537187.0]},
+                "properties": {
+                    "os_grid_ref": "NY 51067 37187",
+                    "status": "field_rejected_confounder",
+                    "comment": "Field survey confirmed farm pond",
+                },
+            },
+        ],
+    }
+    parsed = parse_survey_annotations_payload(geojson_payload)
+    assert len(parsed) == 2
+    assert parsed[0]["status"] == "historic_survey_confirmed"
+    assert parsed[0]["reference"] == "MCO-9988"
+
+    cands = [
+        {
+            "os_grid_ref": "SX 16303 81157",
+            "easting": 216302.9,
+            "northing": 81157.1,
+            "confidence": 0.9854,
+            "context_category": "unidentified_candidate",
+        },
+        {
+            "os_grid_ref": "NY 51067 37187",
+            "easting": 351067.3,
+            "northing": 537186.8,
+            "confidence": 0.9610,
+            "context_category": "unidentified_candidate",
+        },
+    ]
+    matched = apply_community_annotations_to_candidates(cands, parsed)
+    assert matched == 2
+    assert cands[0]["user_survey_status"] == "historic_survey_confirmed"
+    assert cands[0]["user_survey_reference"] == "MCO-9988"
+    assert cands[1]["user_survey_status"] == "field_rejected_confounder"
+    assert cands[1]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert cands[1]["confidence"] < 0.40
+
+
+
 
 
 
