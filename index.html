@@ -724,6 +724,8 @@
               Survey / Notes:
               <select id="surveyFilterSelect">
                 <option value="">All Sites</option>
+                <option value="mp_match_60m">Megalithic.co.uk Direct Match (≤60 m)</option>
+                <option value="mp_nearby_250m">Megalithic.co.uk Correlated (≤250 m)</option>
                 <option value="any_note">Annotated / Surveyed Only</option>
                 <option value="field_verified_monument">✓ Field-Verified Monument</option>
                 <option value="historic_survey_confirmed">Historic / HER Confirmed</option>
@@ -1432,6 +1434,12 @@
       } else if (p.vlm_downrate_reason) {
         baseNote = p.vlm_downrate_reason;
       }
+      if (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) {
+        const mp = p.megalithic_portal_matches[0];
+        if (!baseNote.includes(mp.name) && !baseNote.includes(`sid=${mp.sid}`)) {
+          baseNote += ` · Megalithic.co.uk: ${mp.name} (${mp.site_type}, ${mp.distance_m} m)`;
+        }
+      }
       if (p.user_survey_comment || p.user_survey_status) {
         const lbl = (SURVEY_STATUS_META[p.user_survey_status] && SURVEY_STATUS_META[p.user_survey_status].fullLabel) || "Survey Note";
         const obs = p.user_survey_observer ? ` (${p.user_survey_observer})` : "";
@@ -1442,6 +1450,12 @@
 
     function matchesSurveyFilter(p, sf) {
       if (!sf) return true;
+      if (sf === "mp_match_60m") {
+        return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.some((m) => Number(m.distance_m) <= 60.0);
+      }
+      if (sf === "mp_nearby_250m") {
+        return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.length > 0;
+      }
       if (sf === "any_note") return Boolean(p.user_survey_status || p.user_survey_comment);
       return p.user_survey_status === sf;
     }
@@ -1865,6 +1879,11 @@
       const heUrl = p.matched_monument && p.matched_monument.list_entry
         ? `https://historicengland.org.uk/listing/the-list/list-entry/${p.matched_monument.list_entry}`
         : `https://historicengland.org.uk/listing/the-list/map-search?clearresults=true`;
+      const topMp = (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? p.megalithic_portal_matches[0] : null;
+      const mpUrl = topMp
+        ? topMp.url
+        : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
+      const mpMapUrl = `https://www.megalithic.co.uk/leaflet_megalith_map.php#15/${Number(p.lat).toFixed(5)}/${Number(p.lon).toFixed(5)}`;
       const copyPayload = `${p.os_grid_ref} | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} | WGS84 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
       let html = `
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -1876,6 +1895,8 @@
             <a class="btn-link" href="${osmUrl}" target="_blank" rel="noopener">OpenStreetMap ↗</a>
             <a class="btn-link" href="${gmapsUrl}" target="_blank" rel="noopener">Aerial Satellite ↗</a>
             <a class="btn-link" href="${heUrl}" target="_blank" rel="noopener">Historic England NHLE ↗</a>
+            <a class="btn-link" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk Search ↗"}</a>
+            <a class="btn-link" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
           </div>
         </div>
         ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:inherit;">${p.case_study_note}</div>` : ""}
@@ -1902,6 +1923,13 @@
           ).join(" · ");
           nearbyHtml = `<div style="margin-top:6px;font-size:0.92em;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
         }
+        let mpHtml = "";
+        if (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) {
+          const mpItems = p.megalithic_portal_matches.slice(0, 3).map((mp) =>
+            `<a href="${mp.url}" target="_blank" rel="noopener">${mp.name} (#${mp.sid})</a> <span class="muted">(${mp.site_type}, ${mp.distance_m} m${mp.accuracy ? `, acc ${mp.accuracy}/5` : ""})</span>`
+          ).join(" · ");
+          mpHtml = `<div style="margin-top:5px;font-size:0.92em;"><strong style="color:#38bdf8;">Megalithic.co.uk Correlation:</strong> ${mpItems}</div>`;
+        }
         let envHintsHtml = "";
         if (p.environmental_confounder_hints && p.environmental_confounder_hints.length > 0) {
           const hintItems = p.environmental_confounder_hints.slice(0, 2).map((h) => `<span style="display:block;margin-top:2px;">• ${h}</span>`).join("");
@@ -1915,6 +1943,7 @@
             </div>
             <div>${p.arch_context_note}</div>
             ${nearbyHtml}
+            ${mpHtml}
             ${envHintsHtml}
           </div>
         `;
@@ -2451,8 +2480,11 @@
         const knownTip = (p.matched_monument && p.matched_monument.name)
           ? `<br/><span style="color:#00e676;">★ ${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry})</span>`
           : "";
+        const mpTip = (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0)
+          ? `<br/><span style="color:#38bdf8;">◈ Megalithic.co.uk: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)</span>`
+          : "";
         marker.bindTooltip(
-          `<strong>${st.glyph} ${p.os_grid_ref}</strong> · <span class="muted">${st.catLabel}</span><br/>${formatClass(p.predicted_class)} · Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${knownTip}${surveyTip}<br/><em>Click to select &amp; view 6-panel LiDAR + Cropmarks</em>`
+          `<strong>${st.glyph} ${p.os_grid_ref}</strong> · <span class="muted">${st.catLabel}</span><br/>${formatClass(p.predicted_class)} · Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${knownTip}${mpTip}${surveyTip}<br/><em>Click to select &amp; view 6-panel LiDAR + Cropmarks</em>`
         );
         marker.on("click", (ev) => {
           L.DomEvent.stopPropagation(ev);
@@ -2483,7 +2515,7 @@
           <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
+          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? ` <span class="badge ${p.megalithic_portal_matches[0].distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" title="Megalithic.co.uk #${p.megalithic_portal_matches[0].sid}: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)">Megalithic.co.uk</span>` : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
           <td class="muted">${contextNote(p)}</td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");

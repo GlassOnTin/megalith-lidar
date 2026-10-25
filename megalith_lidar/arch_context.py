@@ -384,6 +384,15 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
         parts = [f"{m['name']} (NHLE #{m['list_entry']}, {int(m['distance_m'])} m {m['bearing']})" for m in top_n]
         nearest_str = " and ".join(parts)
 
+    mp_matches = list(cand.get("megalithic_portal_matches") or [])
+    mp_clause = ""
+    if mp_matches:
+        top_mp = mp_matches[0]
+        mp_clause = (
+            f" Correlated with The Megalithic Portal (megalithic.co.uk #{top_mp['sid']}: "
+            f"'{top_mp['name']}', {top_mp['site_type']}, {float(top_mp['distance_m']):.1f} m)."
+        )
+
     if cat == "rediscovered_nhle_scheduled" and cand.get("matched_monument"):
         mm = cand["matched_monument"]
         return (
@@ -392,17 +401,27 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
             f"In 1 m bare-earth LiDAR, the earthwork survives as {form_phrase} with {rel_m:+.2f} m of 16 m local relief "
             f"and a mean scarp gradient of {slope:.3f} ({slope_deg:.1f}°; surface canopy nDSM {ndsm:.2f} m). "
             f"The site lies within a recorded monument cluster containing {n2k} scheduled monuments ({p2k} prehistoric) "
-            f"within 2 km and {n5k} within 5 km."
+            f"within 2 km and {n5k} within 5 km.{mp_clause}"
         )
 
     if cat == "rediscovered_osm_archaeology" and cand.get("osm_archaeology_matches"):
         om = cand["osm_archaeology_matches"][0]
+        om_id = str(om.get("osm_id") or "")
+        if om_id.startswith("megalithic.co.uk/"):
+            return (
+                f"Located in the {landscape}, this detection independently recovers an unscheduled monument "
+                f"recorded in The Megalithic Portal ('{om.get('name')}', {om.get('subtype')}, {om_id}, "
+                f"offset {float(om.get('distance_m', 0.0)):.1f} m) outside Historic England's Scheduled Monument register. "
+                f"The 1 m DTM resolves {form_phrase} with {rel_m:+.2f} m local relief "
+                f"and {slope:.3f} ({slope_deg:.1f}°) mean scarp slope (nDSM {ndsm:.2f} m). "
+                f"Nearest scheduled parallels include {nearest_str or 'regional barrow groups'} ({n5k} scheduled monuments within 5 km)."
+            )
         return (
             f"Located in the {landscape}, this detection corresponds to an unscheduled archaeological feature "
             f"recorded in OpenStreetMap ({om.get('name') or om.get('subtype')}, {om['osm_id']}) outside Historic England's "
             f"Scheduled Monument polygon register. The 1 m DTM resolves {form_phrase} with {rel_m:+.2f} m local relief "
             f"and {slope:.3f} ({slope_deg:.1f}°) mean scarp slope (nDSM {ndsm:.2f} m). "
-            f"Nearest scheduled parallels include {nearest_str or 'regional barrow groups'} ({n5k} scheduled monuments within 5 km)."
+            f"Nearest scheduled parallels include {nearest_str or 'regional barrow groups'} ({n5k} scheduled monuments within 5 km).{mp_clause}"
         )
 
     if cat == "flagged_modern_or_karst_confounder":
@@ -439,7 +458,7 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     return (
         f"Situated in the {landscape} {cluster_clause}, the 1 m DTM isolates {form_phrase} rising {rel_m:+.2f} m "
         f"above its 16 m local trend surface with weathered scarp gradients of {slope:.3f} ({slope_deg:.1f}°), "
-        f"morphologically consistent with a {arch_parallel}. {canopy_clause} "
+        f"morphologically consistent with a {arch_parallel}.{mp_clause} {canopy_clause} "
         f"Critical false-positive & HER check — {primary_hint}"
     )
 
@@ -674,6 +693,13 @@ def query_local_vlm_academic_context(
     ]
     env_block = "\n".join(env_lines) if env_lines else "- No mapped OSM waterways, quarries, dunes, or military features within 400 m"
 
+    mp_feats = list(cand.get("megalithic_portal_matches") or [])
+    mp_lines = [
+        f"- Megalithic Portal #{mp['sid']} '{mp['name']}' ({mp['site_type']}, accuracy={mp.get('accuracy')}/5): {float(mp.get('distance_m', 0.0)):.1f} m away ({mp['url']})"
+        for mp in mp_feats[:4]
+    ]
+    mp_block = "\n".join(mp_lines) if mp_lines else "- None within 250 m"
+
     fp_hints = list(cand.get("environmental_confounder_hints") or derive_false_positive_context_hints(cand, nearby_nhle, cluster))
     fp_block = "\n".join(f"- {h}" for h in fp_hints)
 
@@ -701,6 +727,7 @@ def query_local_vlm_academic_context(
         f"Scheduled Monuments within 2 km: {cluster.get('nhle_within_2km')} ({cluster.get('prehistoric_within_2km')} prehistoric); "
         f"within 5 km: {cluster.get('nhle_within_5km')}.\n"
         f"Nearest Historic England Scheduled Monuments:\n{nearest_block}\n"
+        f"Correlated Megalithic Portal (megalithic.co.uk) Records within 250 m:\n{mp_block}\n"
         f"Nearby Environmental & Land-Use Features (OSM within 400 m):\n{env_block}\n"
         f"Site-Specific Geomorphic, Geological & Land-Use False-Positive Considerations:\n{fp_block}\n\n"
         f"{shape_prefix_instr}"

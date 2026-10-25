@@ -631,6 +631,213 @@ def is_active_holocene_coastal_dune_belt(easting: float, northing: float) -> Opt
     return None
 
 
+MEGALITHIC_PORTAL_ARCHAEOLOGY_TYPE_IDS = frozenset(
+    {
+        1,          # Ancient Trackway
+        2,          # Ancient Village or Settlement
+        3,          # Artificial Mound
+        4,          # Barrow Cemetery
+        6,          # Burial Chamber or Dolmen
+        7,          # Cairn
+        8,          # Chambered Tomb
+        11,         # Henge
+        12,         # Hill Figure or Geoglyph
+        13,         # Hillfort
+        15,         # Long Barrow
+        16,         # Multiple Stone Rows / Avenue
+        17,         # Passage Grave
+        18,         # Round Barrow(s)
+        19,         # Round Cairn
+        20,         # Souterrain (Fogou, Earth House)
+        21,         # Standing Stone (Menhir)
+        22,         # Standing Stones
+        23,         # Stone Circle
+        24,         # Stone Fort or Dun
+        25,         # Stone Row / Alignment
+        26,         # Vitrified Fort
+        27,         # Maze or Labyrinth
+        28,         # Ring Cairn
+        33,         # Chambered Cairn
+        34,         # Cursus
+        47,         # Causewayed Enclosure
+        59,         # Misc. Earthwork
+        61,         # Ancient Palace
+        62,         # Promontory Fort / Cliff Castle
+        64,         # Ancient Temple
+        68,         # Rock Cut Tomb
+        69,         # Cist
+        1050034310, # Timber Circle
+        1050034311, # Portal Tomb
+    }
+)
+
+MEGALITHIC_PORTAL_CONFOUNDER_TYPE_IDS = frozenset(
+    {
+        31,         # Ancient Mine, Quarry or other Industry
+        36,         # Natural Stone / Erratic / Other Natural Feature
+        37,         # Rock Outcrop
+        38,         # Museum
+        60,         # Modern Stone Circle etc
+    }
+)
+
+
+def classify_megalithic_portal_type(type_id: int) -> str:
+    """Classify a Megalithic Portal `TypeID` into `'mp_archaeology'`, `'mp_confounder'`, or `'mp_context'`."""
+    if type_id in MEGALITHIC_PORTAL_ARCHAEOLOGY_TYPE_IDS:
+        return "mp_archaeology"
+    if type_id in MEGALITHIC_PORTAL_CONFOUNDER_TYPE_IDS:
+        return "mp_confounder"
+    return "mp_context"
+
+
+class MegalithicPortalIndex:
+    """
+    Fast spatial index over The Megalithic Portal (`megalithic.co.uk`) England site catalog
+    (`12,944` geo-referenced entries from `https://www.megalithic.co.uk/cache/csvmap_country1.csv`).
+    """
+
+    _DEFAULT_INSTANCE: Optional["MegalithicPortalIndex"] = None
+
+    def __init__(self, sites: List[Dict], cell_size_m: float = 500.0) -> None:
+        self.sites = sites
+        self.cell_size_m = float(cell_size_m)
+        self.grid: Dict[Tuple[int, int], List[Dict]] = {}
+        for s in sites:
+            gx = int(float(s["easting"]) // self.cell_size_m)
+            gy = int(float(s["northing"]) // self.cell_size_m)
+            self.grid.setdefault((gx, gy), []).append(s)
+
+    @classmethod
+    def fetch_and_save_catalog(
+        cls,
+        cache_path: Path,
+        url: str = "https://www.megalithic.co.uk/cache/csvmap_country1.csv",
+        timeout_s: float = 30.0,
+    ) -> List[Dict]:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; megalith-lidar-research/1.0)",
+                "Referer": "https://www.megalithic.co.uk/leaflet_megalith_map.php",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            raw_text = resp.read().decode("utf-8", errors="replace")
+
+        lines = [ln for ln in raw_text.splitlines() if ln.strip()]
+        parsed_rows = []
+        lons: List[float] = []
+        lats: List[float] = []
+        for ln in lines[1:]:
+            parts = ln.split("|")
+            if len(parts) < 14:
+                continue
+            try:
+                sid = parts[0].strip()
+                name = parts[1].strip()
+                site_type = parts[2].strip()
+                accuracy = int(parts[4] or 0)
+                condition = int(parts[5] or 0)
+                ambience = int(parts[6] or 0)
+                type_id = int(parts[8] or 0)
+                lat = float(parts[12])
+                lon = float(parts[13])
+            except Exception:
+                continue
+            if not sid or not (-7.5 <= lon <= 2.5 and 49.5 <= lat <= 56.2):
+                continue
+            parsed_rows.append((sid, name, site_type, type_id, accuracy, condition, ambience, lat, lon))
+            lons.append(lon)
+            lats.append(lat)
+
+        sites: List[Dict] = []
+        if parsed_rows:
+            es, ns = _TRANSFORMER_4326_TO_27700.transform(lons, lats)
+            for row, e_val, n_val in zip(parsed_rows, es, ns):
+                sid, name, site_type, type_id, accuracy, condition, ambience, lat, lon = row
+                sites.append(
+                    {
+                        "sid": sid,
+                        "name": name,
+                        "site_type": site_type,
+                        "type_id": type_id,
+                        "category": classify_megalithic_portal_type(type_id),
+                        "accuracy": accuracy,
+                        "condition": condition,
+                        "ambience": ambience,
+                        "lat": round(float(lat), 6),
+                        "lon": round(float(lon), 6),
+                        "easting": round(float(e_val), 1),
+                        "northing": round(float(n_val), 1),
+                        "url": f"https://www.megalithic.co.uk/article.php?sid={sid}",
+                    }
+                )
+
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps({"sites": sites}, indent=2), encoding="utf-8")
+        return sites
+
+    @classmethod
+    def load_default(cls, cache_path: Optional[Path] = None) -> Optional["MegalithicPortalIndex"]:
+        if cls._DEFAULT_INSTANCE is not None and cache_path is None:
+            return cls._DEFAULT_INSTANCE
+
+        resolved_path = cache_path or (
+            Path(__file__).resolve().parents[1] / "data" / "megalithic_portal_england.json"
+        )
+        sites: List[Dict] = []
+        if resolved_path.exists():
+            try:
+                payload = json.loads(resolved_path.read_text(encoding="utf-8"))
+                sites = payload.get("sites", []) if isinstance(payload, dict) else payload
+            except Exception:
+                sites = []
+        if not sites:
+            try:
+                sites = cls.fetch_and_save_catalog(resolved_path)
+            except Exception:
+                return None
+
+        inst = cls(sites)
+        if cache_path is None:
+            cls._DEFAULT_INSTANCE = inst
+        return inst
+
+    def query_point(
+        self,
+        easting: float,
+        northing: float,
+        radius_m: float = 250.0,
+        max_items: int = 5,
+    ) -> List[Dict]:
+        """Return all Megalithic Portal entries within `radius_m` metres, sorted by ascending distance."""
+        cell_span = max(1, int(math.ceil(radius_m / self.cell_size_m)))
+        gx = int(easting // self.cell_size_m)
+        gy = int(northing // self.cell_size_m)
+        matches: List[Dict] = []
+        for dx in range(-cell_span, cell_span + 1):
+            for dy in range(-cell_span, cell_span + 1):
+                for s in self.grid.get((gx + dx, gy + dy), ()):
+                    dist_m = math.hypot(easting - float(s["easting"]), northing - float(s["northing"]))
+                    if dist_m <= radius_m:
+                        matches.append(
+                            {
+                                "sid": s["sid"],
+                                "name": s["name"],
+                                "site_type": s["site_type"],
+                                "type_id": s["type_id"],
+                                "category": s["category"],
+                                "accuracy": s.get("accuracy", 0),
+                                "condition": s.get("condition", 0),
+                                "distance_m": round(float(dist_m), 1),
+                                "url": s["url"],
+                            }
+                        )
+        matches.sort(key=lambda m: m["distance_m"])
+        return matches[:max_items]
+
+
 def fetch_or_load_osm_context(
     e_min: int,
     n_min: int,
@@ -689,15 +896,16 @@ def annotate_candidates_with_spatial_context(
     max_canopy_ndsm_m: float = 2.8,
     min_positive_relief_m: float = 0.25,
     target_domain: str = "prehistoric",
+    mp_index: Optional[MegalithicPortalIndex] = None,
 ) -> List[Dict]:
     """
-    Annotate each candidate detection with OpenStreetMap archaeological and confounder context
-    plus intrinsic 1m LiDAR physical confounder checks (tree canopy / standing structure nDSM,
-    sunken marl/chalk pits, or LiDAR void/TIN facets) WITHOUT altering `confidence`,
-    `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
+    Annotate each candidate detection with OpenStreetMap archaeological and confounder context,
+    The Megalithic Portal (`megalithic.co.uk`) spatial correlation, and intrinsic 1m LiDAR physical
+    confounder checks WITHOUT altering `confidence`, `peak_prob`, `mean_prob`, or `calibrated_tile_prob`.
     """
     is_roman = target_domain in ("roman", "enclosure")
     is_enclosure = target_domain == "enclosure"
+    resolved_mp = mp_index if mp_index is not None else MegalithicPortalIndex.load_default()
     for cand in candidates:
         osm_arch = []
         osm_conf = []
@@ -706,7 +914,7 @@ def annotate_candidates_with_spatial_context(
         n_pt = float(cand["northing"])
         if osm_index is not None:
             res = osm_index.query_point(e_pt, n_pt)
-            osm_arch = res["osm_archaeology_matches"]
+            osm_arch = list(res["osm_archaeology_matches"])
             raw_conf = list(res["osm_confounder_matches"])
             env_feats = osm_index.query_environmental_context(e_pt, n_pt, radius_m=400.0)
             if is_roman:
@@ -722,6 +930,38 @@ def annotate_candidates_with_spatial_context(
             else:
                 osm_conf = raw_conf
         cand["nearby_environmental_features"] = env_feats
+
+        mp_matches: List[Dict] = []
+        if resolved_mp is not None:
+            mp_matches = resolved_mp.query_point(e_pt, n_pt, radius_m=250.0, max_items=5)
+            for mpm in mp_matches:
+                dist_m = float(mpm.get("distance_m", 999.0))
+                mp_cat = mpm.get("category")
+                if mp_cat == "mp_archaeology" and dist_m <= 60.0 and int(mpm.get("accuracy", 0)) >= 3:
+                    osm_arch.append(
+                        {
+                            "osm_id": f"megalithic.co.uk/sid={mpm['sid']}",
+                            "subtype": f"megalithic_portal={mpm['site_type']}",
+                            "name": mpm["name"],
+                            "wikidata": None,
+                            "url": mpm["url"],
+                            "distance_m": dist_m,
+                            "inside_polygon": False,
+                        }
+                    )
+                elif mp_cat == "mp_confounder" and dist_m <= 50.0:
+                    osm_conf.append(
+                        {
+                            "osm_id": f"megalithic.co.uk/sid={mpm['sid']}",
+                            "subtype": f"megalithic_portal_confounder={mpm['site_type']}",
+                            "name": f"{mpm['name']} ({mpm['site_type']})",
+                            "wikidata": None,
+                            "url": mpm["url"],
+                            "distance_m": dist_m,
+                            "inside_polygon": False,
+                        }
+                    )
+        cand["megalithic_portal_matches"] = mp_matches
 
         dune_belt = is_active_holocene_coastal_dune_belt(e_pt, n_pt)
         near_coastal_dune_osm = next(

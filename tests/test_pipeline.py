@@ -721,6 +721,62 @@ def test_community_and_historic_survey_annotations():
     assert cands[1]["confidence"] < 0.40
 
 
+def test_megalithic_portal_correlation():
+    from megalith_lidar.osm_context import MegalithicPortalIndex, annotate_candidates_with_spatial_context
+
+    mp_idx = MegalithicPortalIndex(
+        [
+            {
+                "sid": "29628",
+                "name": "Advent Ring Cairn",
+                "site_type": "Ring Cairn",
+                "type_id": 28,
+                "category": "mp_archaeology",
+                "accuracy": 5,
+                "condition": 3,
+                "easting": 212854.0,
+                "northing": 82352.0,
+                "url": "https://www.megalithic.co.uk/article.php?sid=29628",
+            },
+            {
+                "sid": "13823",
+                "name": "Little Almscliff",
+                "site_type": "Rock Outcrop",
+                "type_id": 37,
+                "category": "mp_confounder",
+                "accuracy": 3,
+                "condition": 4,
+                "easting": 423180.0,
+                "northing": 452310.0,
+                "url": "https://www.megalithic.co.uk/article.php?sid=13823",
+            },
+        ]
+    )
+    cands = [
+        {
+            "easting": 212850.0,
+            "northing": 82356.0,
+            "confidence": 0.962,
+            "est_local_relief_m": 0.72,
+            "is_known_monument": False,
+        },
+        {
+            "easting": 423160.0,
+            "northing": 452329.0,
+            "confidence": 0.941,
+            "est_local_relief_m": 0.85,
+            "is_known_monument": False,
+        },
+    ]
+    annotate_candidates_with_spatial_context(cands, None, mp_index=mp_idx)
+    assert cands[0]["context_category"] == "rediscovered_osm_archaeology"
+    assert cands[0]["megalithic_portal_matches"][0]["sid"] == "29628"
+    assert cands[0]["osm_archaeology_matches"][0]["osm_id"] == "megalithic.co.uk/sid=29628"
+    assert cands[1]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert cands[1]["osm_confounder_matches"][0]["osm_id"] == "megalithic.co.uk/sid=13823"
+
+
+
 
 
 
