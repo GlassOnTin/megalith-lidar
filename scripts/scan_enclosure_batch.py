@@ -147,7 +147,7 @@ def run_enclosure_scan(
         extractor=extractor,
         cache_path=data_dir / "enclosure_arch_context_cache.json",
         docs_diag_dir=docs_diag_dir,
-        max_vlm_calls=45,
+        max_vlm_calls=200,
     )
 
     eval_metrics = json.loads(eval_metrics_path.read_text(encoding="utf-8")) if eval_metrics_path.exists() else {}

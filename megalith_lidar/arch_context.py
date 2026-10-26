@@ -746,6 +746,38 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "explicitly labelled \"camp\"",
     "roman road on the 1888",
     "depicts it with earthwork symbols",
+    "hachured 'tumulus'",
+    "hachured \"tumulus\"",
+    "labelled 'tumulus'",
+    "labeled 'tumulus'",
+    "labelled \"tumulus\"",
+    "labeled \"tumulus\"",
+    "labels the red reticle as a 'beacon'",
+    "labels the red reticle as 'beacon'",
+    "hachured earthwork symbols at the reticle",
+    "explicit 1888 os hachuring",
+    "explicit 1888 cartographic designation",
+    "displays a distinct hachured circular earthwork",
+)
+
+_VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES = (
+    "old coal shaft",
+    "old trial shaft",
+    "bell-pit spoil ring",
+    "sluice valve",
+    "water-management utility",
+    "historic water source",
+    "effectively dismissing",
+    "is a false positive",
+    "strongly indicates a false positive",
+    "confirming this feature is a natural",
+    "confirming this earthwork is a post-medieval",
+    "confirming this doughnut-shaped earthwork is a",
+    "natural fenland roddon",
+    "generic hachured sand-dune symbols",
+    "positioned at a field boundary junction with no hachures",
+    "woodland false-positive",
+    "tree-throw pit or forestry feature",
 )
 
 
@@ -792,7 +824,15 @@ def classify_vlm_note_downrating(
             "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
         )
 
-    if is_roman:
+    for os_rej in _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES:
+        if os_rej in low:
+            return (
+                "OBVIOUS_FALSE_POSITIVE",
+                0.35,
+                f"VLM & 1888 OS Audit: Flagged as historic/geomorphic confounder ({os_rej})",
+            )
+
+    if is_roman or cand.get("target_domain") == "enclosure":
         if shape_tag == "OBVIOUS_MODERN_CONFOUNDER":
             return (
                 "OBVIOUS_FALSE_POSITIVE",
@@ -804,7 +844,7 @@ def classify_vlm_note_downrating(
                 return (
                     "OBVIOUS_FALSE_POSITIVE",
                     0.35,
-                    f"VLM & Historic OS Audit: Rejected as non-Roman / confounder ({r_phrase})",
+                    f"VLM & Historic OS Audit: Rejected as confounder ({r_phrase})",
                 )
 
     area_m2 = float(cand.get("area_m2", 0.0))
@@ -1190,22 +1230,31 @@ def enrich_candidates_with_archaeological_context(
         if not cand.get("county") and cand.get("lat") is not None and cand.get("lon") is not None:
             cand["county"] = lookup_ceremonial_county(float(cand["lat"]), float(cand["lon"]))
 
-        cached_entry = cache.get(ckey)
-        if cached_entry and cached_entry.get("note") and str(cached_entry["note"]).strip().endswith((".", "!", "?")):
-            cand["arch_context_note"] = cached_entry["note"]
-            cand["arch_context_source"] = cached_entry.get("source", "nhle_grounded_synthesis")
-            cand["vlm_shape_verdict"] = cached_entry.get("shape_tag", "ROUNDED_MOUND_OR_RING")
-            _apply_vlm_verdict(cand, cand["arch_context_note"], cand["vlm_shape_verdict"])
-            continue
-
         is_priority_unid = (
             cat == "unidentified_candidate"
             and (
                 bool(cand.get("passes_fpr_0_01"))
                 or bool(cand.get("diagnostic_png"))
-                or cand.get("target_domain") == "roman"
+                or cand.get("target_domain") in {"roman", "enclosure"}
             )
         )
+        cached_entry = cache.get(ckey)
+        cached_note = str((cached_entry or {}).get("note") or "").strip()
+        has_1888_os_in_cache = any(
+            w in cached_note.lower()
+            for w in ("1888", "ordnance survey", "6-inch", "six-inch", "historic os")
+        )
+        needs_1888_os_upgrade = (
+            is_priority_unid
+            and vlm_calls < max_vlm_calls
+            and not has_1888_os_in_cache
+        )
+        if cached_entry and cached_note.endswith((".", "!", "?")) and not needs_1888_os_upgrade:
+            cand["arch_context_note"] = cached_note
+            cand["arch_context_source"] = cached_entry.get("source", "nhle_grounded_synthesis")
+            cand["vlm_shape_verdict"] = cached_entry.get("shape_tag", "ROUNDED_MOUND_OR_RING")
+            _apply_vlm_verdict(cand, cand["arch_context_note"], cand["vlm_shape_verdict"])
+            continue
         if is_priority_unid and vlm_calls < max_vlm_calls:
             diag_p: Optional[Path] = None
             if docs_diag_dir is not None and cand.get("diagnostic_png"):
@@ -1223,6 +1272,12 @@ def enrich_candidates_with_archaeological_context(
                 _apply_vlm_verdict(cand, vlm_note, shape_tag)
                 cache[ckey] = {"note": vlm_note, "source": src, "shape_tag": shape_tag}
                 cache_dirty = True
+                continue
+            elif cached_entry and cached_note.endswith((".", "!", "?")):
+                cand["arch_context_note"] = cached_note
+                cand["arch_context_source"] = cached_entry.get("source", "nhle_grounded_synthesis")
+                cand["vlm_shape_verdict"] = cached_entry.get("shape_tag", "ROUNDED_MOUND_OR_RING")
+                _apply_vlm_verdict(cand, cand["arch_context_note"], cand["vlm_shape_verdict"])
                 continue
 
         det_note = build_deterministic_academic_context(cand, nearby_nhle, cluster)

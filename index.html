@@ -996,11 +996,23 @@
           <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Reset England View</button>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-          <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:center;font-size:12px;" class="muted">
-            <span><strong style="color:var(--gold-marker);font-size:13px;">●</strong> Prehistoric</span>
-            <span><strong style="color:var(--roman);font-size:13px;">■</strong> Roman</span>
-            <span><strong style="color:var(--iron);font-size:13px;">◆</strong> Iron Age</span>
-            <span><strong style="color:var(--green);font-size:13px;">★</strong> Rediscovered</span>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;" class="muted">
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Show or hide Prehistoric candidate markers (●) on the map">
+              <input type="checkbox" id="chkMapDomPrehistoric" checked style="margin:0;" />
+              <strong style="color:var(--gold-marker);font-size:13px;">●</strong> Prehistoric
+            </label>
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Show or hide Roman candidate markers (■) on the map">
+              <input type="checkbox" id="chkMapDomRoman" checked style="margin:0;" />
+              <strong style="color:var(--roman);font-size:13px;">■</strong> Roman
+            </label>
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Show or hide Iron Age &amp; Settlement candidate markers (◆) on the map">
+              <input type="checkbox" id="chkMapDomEnclosure" checked style="margin:0;" />
+              <strong style="color:var(--iron);font-size:13px;">◆</strong> Iron Age
+            </label>
+            <label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="Show or hide rediscovered NHLE Scheduled Monument &amp; OpenStreetMap Archaeology stars (★) on the map">
+              <input type="checkbox" id="chkShowRediscoveredTop" checked style="margin:0;" />
+              <strong style="color:var(--green);font-size:13px;">★</strong> Rediscovered
+            </label>
             <span>
               <span class="dot" style="background:var(--green);border-radius:2px;"></span> Monument Sq ·
               <span class="dot" style="background:var(--accent);border-radius:2px;"></span> Null Sq
@@ -1010,6 +1022,10 @@
             </span>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:4px 9px;" title="Overlay Roman roads (Margary routes, Watling St, Ermine St, Fosse Way, Dere St, Stanegate) &amp; prehistoric ridgeways (The Ridgeway, Icknield Way)">
+              <input type="checkbox" id="chkAncientRoadsLayer" />
+              <strong>Roman &amp; Ancient Roads</strong>
+            </label>
             <label style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:4px 9px;" title="Hide all candidate pins, rediscovered stars, and 2 km square boxes to inspect only the national density contours">
               <input type="checkbox" id="chkContoursOnly" />
               <strong>Contours Only</strong>
@@ -1050,6 +1066,10 @@
                   <input type="checkbox" id="chkHistoricOsBasemap" />
                   1888 OS 6-Inch Map
                 </label>
+                <label title="Switch basemap from modern OpenStreetMap to the Digital Atlas of the Roman Empire (DARE) + Roman &amp; Ancient Roads network">
+                  <input type="checkbox" id="chkRomanEmpireBasemap" />
+                  Roman Empire Basemap (DARE)
+                </label>
               </div>
             </details>
           </div>
@@ -1083,19 +1103,79 @@
       maxNativeZoom: 17,
       attribution: "Historic OS Six-Inch (1888–1913) &copy; National Library of Scotland"
     });
+    const dareRomanBaseLayer = L.tileLayer("https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      maxNativeZoom: 11,
+      attribution: "Digital Atlas of the Roman Empire (DARE) &copy; Lund / Gothenburg University"
+    });
 
     map.createPane("densityPane");
     map.getPane("densityPane").style.zIndex = 350;
     map.createPane("squaresPane");
     map.getPane("squaresPane").style.zIndex = 380;
+    map.createPane("roadsPane");
+    map.getPane("roadsPane").style.zIndex = 420;
     map.createPane("candidatesPane");
     map.getPane("candidatesPane").style.zIndex = 650;
 
     const densityContourLayer = L.layerGroup().addTo(map);
     const squaresLayer = L.layerGroup().addTo(map);
     const countyBoundaryLayer = L.layerGroup().addTo(map);
+    const ancientRoadsLayer = L.layerGroup().addTo(map);
     const markersLayer = L.layerGroup().addTo(map);
     const selectedHaloLayer = L.layerGroup().addTo(map);
+
+    let ancientRoadsGeoJSON = null;
+    async function ensureAncientRoadsLoaded() {
+      if (ancientRoadsGeoJSON) return ancientRoadsGeoJSON;
+      try {
+        const resp = await fetch(`${DATA_BASE}docs/roman_and_ancient_roads.geojson?v=${Date.now()}`);
+        if (resp.ok) {
+          ancientRoadsGeoJSON = await resp.json();
+        }
+      } catch (_e) {}
+      return ancientRoadsGeoJSON;
+    }
+
+    async function renderAncientRoadsOverlay() {
+      ancientRoadsLayer.clearLayers();
+      const chkRoads = document.getElementById("chkAncientRoadsLayer");
+      if (!chkRoads || !chkRoads.checked) return;
+      const gj = await ensureAncientRoadsLoaded();
+      if (!gj || !gj.features) return;
+      if (!chkRoads.checked) return;
+      // Outer casing for contrast over Aerial, 1888 OS, DARE, and OSM basemaps
+      L.geoJSON(gj, {
+        pane: "roadsPane",
+        interactive: false,
+        style: (feat) => {
+          const isPrehist = feat.properties && feat.properties.road_type === "prehistoric_trackway";
+          return {
+            color: "#faf7f0",
+            weight: isPrehist ? 4.2 : 4.6,
+            opacity: 0.72
+          };
+        }
+      }).addTo(ancientRoadsLayer);
+      L.geoJSON(gj, {
+        pane: "roadsPane",
+        style: (feat) => {
+          const isPrehist = feat.properties && feat.properties.road_type === "prehistoric_trackway";
+          return {
+            color: isPrehist ? "#b45309" : "#7e22ce",
+            weight: isPrehist ? 2.4 : 2.6,
+            opacity: 0.92,
+            dashArray: isPrehist ? "6,4" : null
+          };
+        },
+        onEachFeature: (feat, layer) => {
+          const p = (feat && feat.properties) || {};
+          const rTypeLbl = p.road_type === "prehistoric_trackway" ? "Prehistoric Ridgeway / Ancient Trackway" : "Roman Road";
+          const margLbl = p.margary ? ` · Margary ${p.margary}` : "";
+          layer.bindTooltip(`<strong>${p.name || rTypeLbl}</strong><br/><span class="muted">${rTypeLbl}${margLbl}</span>`, { sticky: true });
+        }
+      }).addTo(ancientRoadsLayer);
+    }
 
     const DATA_BASE = window.location.hostname.endsWith("github.io")
       ? "https://raw.githubusercontent.com/GlassOnTin/megalith-lidar/main/"
@@ -2750,12 +2830,21 @@
       const showCandEl = document.getElementById("chkShowCandidateMarkers");
       const showRediscEl = document.getElementById("chkShowRediscoveredOnMap");
       const showAllDomEl = document.getElementById("chkShowAllDomainsOnMap");
+      const chkDomPreEl = document.getElementById("chkMapDomPrehistoric");
+      const chkDomRomEl = document.getElementById("chkMapDomRoman");
+      const chkDomEncEl = document.getElementById("chkMapDomEnclosure");
       const contoursOnly = contoursOnlyEl ? contoursOnlyEl.checked : false;
       const showCand = !contoursOnly && (showCandEl ? showCandEl.checked : true);
       const showRedisc = !contoursOnly && (showRediscEl ? showRediscEl.checked : true);
       const showAllDom = !contoursOnly && (showAllDomEl ? showAllDomEl.checked : false);
-      if (contoursOnly) {
-        selectedHaloLayer.clearLayers();
+      const showDomPre = chkDomPreEl ? chkDomPreEl.checked : true;
+      const showDomRom = chkDomRomEl ? chkDomRomEl.checked : true;
+      const showDomEnc = chkDomEncEl ? chkDomEncEl.checked : true;
+      function isDomainVisibleOnMap(p) {
+        const dom = getCandidateDomain(p);
+        if (dom === "roman") return showDomRom;
+        if (dom === "enclosure") return showDomEnc;
+        return showDomPre;
       }
 
       const allCombined = geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures);
@@ -2764,7 +2853,13 @@
 
       if (showCand) {
         filtered.forEach((f) => {
-          if (f && f.properties) mapFeaturesByKey.set(featureKey(f.properties), f);
+          const p = f && f.properties;
+          if (!p) return;
+          if (matchesTab(p, "known")) {
+            if (showRedisc) mapFeaturesByKey.set(featureKey(p), f);
+          } else if (isDomainVisibleOnMap(p)) {
+            mapFeaturesByKey.set(featureKey(p), f);
+          }
         });
       }
 
@@ -2783,13 +2878,16 @@
             contourFeaturesByKey.set(k, f);
           }
         }
-        if ((showRedisc && isKnown) || (showCand && showAllDom && isUnid && currentTab !== "confounders")) {
+        if ((showRedisc && isKnown) || (showCand && showAllDom && isUnid && isDomainVisibleOnMap(p) && currentTab !== "confounders")) {
           const k = featureKey(p);
           if (!mapFeaturesByKey.has(k)) {
             mapFeaturesByKey.set(k, f);
           }
         }
       });
+      if (contoursOnly || (selectedFeatureKey && !mapFeaturesByKey.has(selectedFeatureKey))) {
+        selectedHaloLayer.clearLayers();
+      }
 
       // Draw markers on the map in ascending confidence order so highest-score & rediscovered markers sit on top
       const mapOrdered = Array.from(mapFeaturesByKey.values()).sort((a, b) => {
@@ -3110,10 +3208,35 @@
         });
       }
       const chkRediscMap = document.getElementById("chkShowRediscoveredOnMap");
+      const chkRediscTop = document.getElementById("chkShowRediscoveredTop");
       if (chkRediscMap) {
         chkRediscMap.addEventListener("change", (ev) => {
           ev.target.blur();
+          if (chkRediscTop) chkRediscTop.checked = chkRediscMap.checked;
           renderActiveView(false);
+        });
+      }
+      if (chkRediscTop) {
+        chkRediscTop.addEventListener("change", (ev) => {
+          ev.target.blur();
+          if (chkRediscMap) chkRediscMap.checked = chkRediscTop.checked;
+          renderActiveView(false);
+        });
+      }
+      ["chkMapDomPrehistoric", "chkMapDomRoman", "chkMapDomEnclosure"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", (ev) => {
+            ev.target.blur();
+            renderActiveView(false);
+          });
+        }
+      });
+      const chkAncRoads = document.getElementById("chkAncientRoadsLayer");
+      if (chkAncRoads) {
+        chkAncRoads.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderAncientRoadsOverlay();
         });
       }
       const chkAllDomMap = document.getElementById("chkShowAllDomainsOnMap");
@@ -3245,13 +3368,18 @@
       }
       const chkAerial = document.getElementById("chkAerialBasemap");
       const chkHistOs = document.getElementById("chkHistoricOsBasemap");
+      const chkRomanEmp = document.getElementById("chkRomanEmpireBasemap");
       function updateBasemapLayers() {
-        const useHist = chkHistOs && chkHistOs.checked;
-        const useAer = chkAerial && chkAerial.checked;
+        const useRoman = chkRomanEmp && chkRomanEmp.checked;
+        const useHist = !useRoman && chkHistOs && chkHistOs.checked;
+        const useAer = !useRoman && !useHist && chkAerial && chkAerial.checked;
         if (map.hasLayer(osmBaseLayer)) map.removeLayer(osmBaseLayer);
         if (map.hasLayer(aerialBaseLayer)) map.removeLayer(aerialBaseLayer);
         if (map.hasLayer(historicOsBaseLayer)) map.removeLayer(historicOsBaseLayer);
-        if (useHist) {
+        if (map.hasLayer(dareRomanBaseLayer)) map.removeLayer(dareRomanBaseLayer);
+        if (useRoman) {
+          dareRomanBaseLayer.addTo(map);
+        } else if (useHist) {
           historicOsBaseLayer.addTo(map);
         } else if (useAer) {
           aerialBaseLayer.addTo(map);
@@ -3261,13 +3389,33 @@
       }
       if (chkAerial) {
         chkAerial.addEventListener("change", () => {
-          if (chkAerial.checked && chkHistOs) chkHistOs.checked = false;
+          if (chkAerial.checked) {
+            if (chkHistOs) chkHistOs.checked = false;
+            if (chkRomanEmp) chkRomanEmp.checked = false;
+          }
           updateBasemapLayers();
         });
       }
       if (chkHistOs) {
         chkHistOs.addEventListener("change", () => {
-          if (chkHistOs.checked && chkAerial) chkAerial.checked = false;
+          if (chkHistOs.checked) {
+            if (chkAerial) chkAerial.checked = false;
+            if (chkRomanEmp) chkRomanEmp.checked = false;
+          }
+          updateBasemapLayers();
+        });
+      }
+      if (chkRomanEmp) {
+        chkRomanEmp.addEventListener("change", () => {
+          if (chkRomanEmp.checked) {
+            if (chkAerial) chkAerial.checked = false;
+            if (chkHistOs) chkHistOs.checked = false;
+            const chkRoads = document.getElementById("chkAncientRoadsLayer");
+            if (chkRoads && !chkRoads.checked) {
+              chkRoads.checked = true;
+              renderAncientRoadsOverlay();
+            }
+          }
           updateBasemapLayers();
         });
       }
