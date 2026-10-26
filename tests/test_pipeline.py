@@ -871,6 +871,7 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
                     "lat": 50.82456,
                     "lon": -0.07585,
                     "target_domain": "prehistoric",
+                    "predicted_class": "round_barrow_cairn",
                     "predicted_class_label": "Round barrow / cairn mound",
                     "confidence": 0.989,
                     "est_local_relief_m": 0.86,
@@ -886,19 +887,41 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
     res = export_osmand_files(tmp_path)
     assert res["total_waypoints"] == 1
     assert res["counts_by_group"]["1888 OS Confirmed Antiquities ★"] == 1
+    assert res["os1888_osm_export_count"] == 1
 
     gpx_root = ET.parse(tmp_path / "megalith_lidar_osmand.gpx").getroot()
     assert gpx_root.tag.endswith("gpx")
+
+    mr_gj = json.loads((tmp_path / "maproulette_os1888_antiquities.geojson").read_text(encoding="utf-8"))
+    assert mr_gj["type"] == "FeatureCollection"
+    assert len(mr_gj["features"]) == 1
+    assert mr_gj["features"][0]["properties"]["historic"] == "archaeological_site"
+    assert mr_gj["features"][0]["properties"]["archaeological_site"] == "tumulus"
+
+    osm_root = ET.parse(tmp_path / "josm_os1888_antiquities.osm").getroot()
+    assert osm_root.tag == "osm"
+    osm_tags = {t.attrib["k"]: t.attrib["v"] for t in osm_root.findall("./node/tag")}
+    assert osm_tags["historic"] == "archaeological_site"
+    assert osm_tags["archaeological_site"] == "tumulus"
+    assert osm_tags["ref:gb:os_grid"] == "TQ 35621 04544"
 
     with zipfile.ZipFile(tmp_path / "megalith-lidar.osf", "r") as zf:
         names = set(zf.namelist())
         assert "items.json" in names
         manifest = json.loads(zf.read("items.json").decode("utf-8"))
         assert manifest["version"] == 3
+        map_source_names = set()
         for item in manifest["items"]:
+            if item.get("type") == "MAP_SOURCES":
+                for ms in item.get("items", []):
+                    map_source_names.add(ms.get("name"))
             if "file" in item:
                 # OsmAnd SettingsImporter.updateFilesInfo requires exact match with zipEntry.getName() or folder prefix
                 assert not item["file"].startswith("/")
                 assert item["file"] in names or any(n.startswith(item["file"] + "/") for n in names)
+        assert "UK 1 m LiDAR Hillshade (EA DTM)" in map_source_names
+        assert "UK 1888 OS 6-Inch Map" in map_source_names
+        assert "Roman Empire Atlas (DARE)" in map_source_names
+
 
 

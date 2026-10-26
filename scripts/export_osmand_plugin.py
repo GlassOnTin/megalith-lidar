@@ -390,6 +390,96 @@ def _build_plugin_graphics() -> Tuple[bytes, bytes]:
     return icon_buf.getvalue(), banner_buf.getvalue()
 
 
+def _osm_tags_for_candidate(domain: str, p: Dict[str, Any]) -> Dict[str, str]:
+    cls_key = str(p.get("predicted_class") or "")
+    tags: Dict[str, str] = {"historic": "archaeological_site"}
+    if cls_key == "megalithic_tomb_long_barrow":
+        tags["archaeological_site"] = "tumulus"
+        tags["tumulus"] = "long_barrow"
+    elif cls_key == "round_barrow_cairn":
+        tags["archaeological_site"] = "tumulus"
+        tags["tumulus"] = "round_barrow"
+    elif cls_key == "stone_circle_henge_alignment":
+        tags["archaeological_site"] = "henge"
+    elif cls_key == "roman_villa_building":
+        tags["archaeological_site"] = "roman_villa"
+        tags["historic:civilization"] = "ancient_roman"
+    elif cls_key == "roman_road_agger_trackway":
+        tags["historic"] = "roman_road"
+        tags["historic:civilization"] = "ancient_roman"
+    elif cls_key == "roman_fort_camp_settlement":
+        tags["archaeological_site"] = "fortification"
+        tags["historic:civilization"] = "ancient_roman"
+    elif cls_key == "hut_circle_pound_settlement":
+        tags["archaeological_site"] = "settlement"
+    elif cls_key == "iron_age_hillfort_banjo_enclosure" or domain == "enclosure":
+        tags["archaeological_site"] = "enclosure"
+    elif cls_key == "cross_ridge_dyke_field_system":
+        tags["archaeological_site"] = "earthwork"
+    else:
+        lbl_low = str(p.get("predicted_class_label") or "").lower()
+        if "barrow" in lbl_low or "cairn" in lbl_low:
+            tags["archaeological_site"] = "tumulus"
+        elif "enclosure" in lbl_low or "hillfort" in lbl_low:
+            tags["archaeological_site"] = "enclosure"
+        else:
+            tags["archaeological_site"] = "earthwork"
+
+    gref = str(p.get("os_grid_ref") or "").strip()
+    gref_id = _clean_grid_id(gref)
+    if gref:
+        tags["ref:gb:os_grid"] = gref
+    tags["source"] = "Environment Agency 1m LiDAR; OS Six-Inch 1888-1913"
+    tags["url"] = f"{SITE_BASE_URL}?site={gref_id}&domain={domain}"
+    note_txt = str(p.get("arch_context_note") or "").strip()
+    if note_txt:
+        tags["note"] = note_txt[:250]
+    return tags
+
+
+def build_os1888_osm_exports(
+    candidates: List[Tuple[str, Dict[str, Any]]],
+) -> Tuple[Dict[str, Any], str, int]:
+    """Build MapRoulette GeoJSON and JOSM .osm XML for 1888 OS Confirmed Antiquities missing from OSM."""
+    features: List[Dict[str, Any]] = []
+    osm_lines: List[str] = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<osm version="0.6" upload="discouraged" generator="megalith-lidar">',
+    ]
+    node_id = -1
+    for domain, p in candidates:
+        if _classify_group(p, domain) != "1888 OS Confirmed Antiquities ★":
+            continue
+        lat = float(p.get("lat") or 0.0)
+        lon = float(p.get("lon") or 0.0)
+        tags = _osm_tags_for_candidate(domain, p)
+        gref = str(p.get("os_grid_ref") or "").strip()
+        props = dict(tags)
+        props["os_grid_ref"] = gref
+        props["county"] = str(p.get("county") or "")
+        props["confidence"] = round(float(p.get("confidence") or 0.0), 3)
+        props["est_local_relief_m"] = round(float(p.get("est_local_relief_m") or 0.0), 2)
+        props["id_editor_url"] = (
+            f"https://www.openstreetmap.org/edit?editor=id#map=18/{lat:.6f}/{lon:.6f}"
+        )
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
+                "properties": props,
+            }
+        )
+        osm_lines.append(f'  <node id="{node_id}" lat="{lat:.6f}" lon="{lon:.6f}" version="1">')
+        for k, v in tags.items():
+            osm_lines.append(f'    <tag k="{escape(k)}" v="{escape(str(v))}" />')
+        osm_lines.append("  </node>")
+        node_id -= 1
+
+    osm_lines.append("</osm>")
+    mr_fc = {"type": "FeatureCollection", "features": features}
+    return mr_fc, "\n".join(osm_lines) + "\n", len(features)
+
+
 def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     updated_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     candidates = _load_candidates(docs_dir)
@@ -397,6 +487,12 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
 
     gpx_path = docs_dir / "megalith_lidar_osmand.gpx"
     gpx_path.write_text(gpx_xml, encoding="utf-8")
+
+    mr_fc, josm_xml, os1888_count = build_os1888_osm_exports(candidates)
+    mr_path = docs_dir / "maproulette_os1888_antiquities.geojson"
+    mr_path.write_text(json.dumps(mr_fc, indent=2, ensure_ascii=False), encoding="utf-8")
+    josm_path = docs_dir / "josm_os1888_antiquities.osm"
+    josm_path.write_text(josm_xml, encoding="utf-8")
 
     roads_xml = build_ancient_roads_gpx_xml(docs_dir / "roman_and_ancient_roads.geojson", updated_utc)
     icon_png, banner_png = _build_plugin_graphics()
@@ -416,8 +512,8 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "Unrecorded Prehistoric, Iron Age, and Roman earthwork candidates detected by "
                         "1 m LiDAR & 16 m aerial cropmarks across England, cross-checked against "
                         "1888–1913 Historic OS 6-Inch maps, Historic England NHLE, OpenStreetMap, "
-                        "and Megalithic.co.uk. Includes monument Favourites, Roman & Ancient Road "
-                        "tracks, and 1888 OS / Roman Empire map overlays."
+                        "and Megalithic.uk. Includes monument Favourites, Roman & Ancient Road "
+                        "tracks, live 1 m EA LiDAR Hillshade, and 1888 OS / Roman Empire map overlays."
                     )
                 },
             },
@@ -430,6 +526,36 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                 "type": "MAP_SOURCES",
                 "pluginId": "uk.megalith.lidar",
                 "items": [
+                    {
+                        "name": "UK 1 m LiDAR Hillshade (EA DTM)",
+                        "minZoom": 11,
+                        "maxZoom": 19,
+                        "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Lidar_Composite_Hillshade_DTM_1m&STYLES=&SRS=EPSG:4326&BBOX={bbox}&WIDTH=256&HEIGHT=256&FORMAT=image/png",
+                        "ext": ".png",
+                        "tileSize": 256,
+                        "bitDensity": 16,
+                        "avgSize": 32000,
+                        "ellipsoid": False,
+                        "inverted_y": False,
+                        "randoms": "",
+                        "rule": "",
+                        "sql": False,
+                    },
+                    {
+                        "name": "UK 1 m LiDAR Surface (EA DSM)",
+                        "minZoom": 11,
+                        "maxZoom": 19,
+                        "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-surface-model-last-return-dsm-1m/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Lidar_Composite_Hillshade_LZ_DSM_1m&STYLES=&SRS=EPSG:4326&BBOX={bbox}&WIDTH=256&HEIGHT=256&FORMAT=image/png",
+                        "ext": ".png",
+                        "tileSize": 256,
+                        "bitDensity": 16,
+                        "avgSize": 32000,
+                        "ellipsoid": False,
+                        "inverted_y": False,
+                        "randoms": "",
+                        "rule": "",
+                        "sql": False,
+                    },
                     {
                         "name": "UK 1888 OS 6-Inch Map",
                         "minZoom": 6,
@@ -517,6 +643,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     return {
         "total_waypoints": len(candidates),
         "counts_by_group": counts_by_group,
+        "os1888_osm_export_count": os1888_count,
         "gpx_path": str(gpx_path),
         "gpx_size_kb": round(gpx_path.stat().st_size / 1024.0, 1),
         "osf_path": str(osf_path),

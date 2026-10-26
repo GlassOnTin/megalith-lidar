@@ -138,9 +138,10 @@ Evaluated on `109` positives and `179` negatives (`docs/enclosure_summary.json`,
 
 - **One-Tap OsmAnd Custom Plugin (`docs/megalith-lidar.osf`)**: Downloading and opening [`megalith-lidar.osf`](https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf) (or via [GitHub Releases](https://github.com/GlassOnTin/megalith-lidar/releases/latest)) on Android or iOS installs the **UK 1 m LiDAR Monument Survey** plugin into [OsmAnd](https://osmand.net/), bundling:
   - Categorised monument Favourites (`1888 OS Confirmed Antiquities ★`, `Prehistoric Candidates ●`, `Iron Age & Settlement ◆`, `Roman Candidates ■`) with earthwork relief, walkability notes, Qwen3.8 VLM / 1888 OS assessments, and clickable `#site=...` deep-links back to the 7-panel LiDAR inspector.
-  - Searchable GPX tracks (`UK_Megalith_LiDAR_Candidates.gpx` and `UK_Roman_and_Ancient_Roads.gpx` covering `360` British Roman road and prehistoric ridgeway segments).
-  - Custom online tile sources for **UK 1888–1913 OS 6-Inch Map** (`uk-osgb1888`) and **Digital Atlas of the Roman Empire (DARE)** so fieldwalkers can underlay 19th-century Ordnance Survey mapping beneath their live GPS position.
-- **Standalone GPX &Filtered Export (`docs/megalith_lidar_osmand.gpx`)**: Compatible with OsmAnd, Garmin, Organic Maps, Memory-Map, and QGIS. The web viewer also includes an **Export Visible (.gpx)** button to export any filtered county or category subset on the fly.
+  - Searchable GPX tracks (`UK_Megalith_LiDAR_Candidates.gpx` and `UK_Roman_and_Ancient_Roads.gpx` covering `210` British Roman road and prehistoric ridgeway segments).
+  - Custom online tile sources for **UK 1 m LiDAR Hillshade (EA DTM)**, **UK 1 m LiDAR Surface (EA DSM)**, **UK 1888–1913 OS 6-Inch Map** (`uk-osgb1888`), and **Digital Atlas of the Roman Empire (DARE)** so fieldwalkers can drape live 1 m bare-earth LiDAR relief or 19th-century Ordnance Survey mapping beneath their GPS position.
+- **Standalone GPX & Filtered Export (`docs/megalith_lidar_osmand.gpx`)**: Compatible with OsmAnd, Garmin, Organic Maps, Memory-Map, and QGIS. The web viewer also includes an **Export Visible (.gpx)** button to export any filtered county or category subset on the fly.
+- **OpenStreetMap & MapRoulette Curation (`docs/maproulette_os1888_antiquities.geojson` & `docs/josm_os1888_antiquities.osm`)**: Exports the `1888 OS Confirmed Antiquities ★` sites (confirmed in both 1888–1913 OS 6-Inch mapping and 1 m LiDAR, but absent from OSM) with pre-populated `historic=archaeological_site` tags and iD/JOSM links so verified sites flow into OpenStreetMap and OsmAnd's default offline `.obf` England vector maps.
 
 ## Limitations and Unverified Scope
 
