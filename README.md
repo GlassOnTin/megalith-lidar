@@ -6,10 +6,12 @@
 
 <p align="center">
   <a href="https://glassontin.github.io/megalith-lidar/"><img src="https://img.shields.io/badge/Live_Interactive_Survey_Map-glassontin.github.io%2Fmegalith--lidar-8f3d1e?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="Live Interactive Survey Map" /></a>
+  <a href="https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf"><img src="https://img.shields.io/badge/OsmAnd_Android_Plugin-megalith--lidar.osf-15803d?style=for-the-badge&logo=android&logoColor=white" alt="OsmAnd Custom Plugin (.osf)" /></a>
 </p>
 
 <p align="center">
   <a href="https://glassontin.github.io/megalith-lidar/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fglassontin.github.io%2Fmegalith-lidar%2F&style=flat-square&label=GitHub%20Pages&up_message=live&up_color=2f6b48" alt="GitHub Pages Live Viewer" /></a>
+  <a href="https://glassontin.github.io/megalith-lidar/docs/megalith_lidar_osmand.gpx"><img src="https://img.shields.io/badge/GPS_Waypoints-megalith__lidar__osmand.gpx-1b5e6f?style=flat-square" alt="OsmAnd & Garmin GPX" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-orange?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+" />
   <img src="https://img.shields.io/badge/PyTorch-ResNet--34_U--Net-ee4c2c?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch" />
@@ -20,6 +22,8 @@
 
 <p align="center">
   <a href="https://glassontin.github.io/megalith-lidar/">Live Survey Map &amp; 7-Panel Inspector</a> &bull;
+  <a href="docs/megalith-lidar.osf">OsmAnd Plugin (.osf)</a> &bull;
+  <a href="docs/megalith_lidar_osmand.gpx">OsmAnd / GPS (.gpx)</a> &bull;
   <a href="docs/candidates.geojson">Prehistoric GeoJSON</a> &bull;
   <a href="docs/enclosure_candidates.geojson">Iron Age GeoJSON</a> &bull;
   <a href="docs/roman_candidates.geojson">Roman GeoJSON</a>
@@ -118,9 +122,17 @@ Evaluated on `109` positives and `179` negatives (`docs/enclosure_summary.json`,
    - `2,708` `uniform_national_null` squares (`10,832.0 km²`): `275` unidentified candidates at the strict `1%` FPR operating point (`0.025 / km²`) and `1,269` at the `5%` FPR operating point (`0.117 / km²`).
    - `4,957` `heldout_test_landscape` squares (`19,828.0 km²`): **`1,598` rediscovered NHLE Scheduled Monuments**, **`86` rediscovered unscheduled OSM archaeological monuments**, **`808` unidentified candidates at the strict `1%` FPR operating point** (`0.041 / km²`), and `3,305` at the `5%` FPR operating point (`0.167 / km²`).
 2. **Iron Age & Prehistoric Enclosure Survey (`docs/enclosure_candidates.geojson`)**:
-   - Across `7,569` squares (`30,276.0 km²`): **`3,105` rediscovered NHLE Scheduled Monuments**, **`127` rediscovered OSM archaeological sites**, and **`159` unidentified enclosure/settlement candidates** (`58` passing the strict `1%` FPR operating point).
+   - Across `7,719` squares (`30,876.0 km²`): **`3,118` rediscovered NHLE Scheduled Monuments**, **`129` rediscovered OSM archaeological sites**, and **`11` unidentified enclosure/settlement candidates** (`4` passing the strict `1%` FPR operating point after 1888 OS 6-Inch map and geomorphic screening, with `7` explicitly marked `'Camp'`, `'Tumulus'`, or hachured on the 1888 OS map).
 3. **Roman & Romano-British Survey (`docs/roman_candidates.geojson`)**:
-   - Across `7,575` squares (`30,300.0 km²`): **`4,869` rediscovered NHLE Scheduled Monuments**, **`486` rediscovered OSM archaeological sites**, and **`26` unidentified candidates** (`5` passing the strict `1%` FPR operating point after geometric subtype and 1888 OS / intrinsic LiDAR screening).
+   - Across `7,719` squares (`30,876.0 km²`): **`4,884` rediscovered NHLE Scheduled Monuments**, **`488` rediscovered OSM archaeological sites**, and **`36` unidentified candidates** (`11` passing the strict `1%` FPR operating point after geometric subtype and 1888 OS / intrinsic LiDAR screening).
+
+## OsmAnd & Field Navigation (`docs/megalith-lidar.osf` & `docs/megalith_lidar_osmand.gpx`)
+
+- **One-Tap OsmAnd Custom Plugin (`docs/megalith-lidar.osf`)**: Downloading and opening [`megalith-lidar.osf`](https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf) on Android or iOS installs the **UK 1 m LiDAR Monument Survey** plugin into [OsmAnd](https://osmand.net/), bundling:
+  - Categorised monument Favourites (`1888 OS Confirmed Antiquities ★`, `Prehistoric Candidates ●`, `Iron Age & Settlement ◆`, `Roman Candidates ■`) with earthwork relief, walkability notes, Qwen3.8 VLM / 1888 OS assessments, and clickable `#site=...` deep-links back to the 7-panel LiDAR inspector.
+  - Searchable GPX tracks (`UK_Megalith_LiDAR_Candidates.gpx` and `UK_Roman_and_Ancient_Roads.gpx` covering `360` British Roman road and prehistoric ridgeway segments).
+  - Custom online tile sources for **UK 1888–1913 OS 6-Inch Map** (`uk-osgb1888`) and **Digital Atlas of the Roman Empire (DARE)** so fieldwalkers can underlay 19th-century Ordnance Survey mapping beneath their live GPS position.
+- **Standalone GPX &Filtered Export (`docs/megalith_lidar_osmand.gpx`)**: Compatible with OsmAnd, Garmin, Organic Maps, Memory-Map, and QGIS. The web viewer also includes an **Export Visible (.gpx)** button to export any filtered county or category subset on the fly.
 
 ## Limitations and Unverified Scope
 

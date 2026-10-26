@@ -1021,6 +1021,7 @@ def main() -> None:
         if args.num_shards > 1:
             return
 
+    from scripts.export_osmand_plugin import export_osmand_files
     from scripts.scan_enclosure_batch import run_enclosure_scan
     from scripts.scan_roman_batch import run_roman_scan
 
@@ -1157,6 +1158,15 @@ def main() -> None:
                     f"{enc_sum['squares_scanned']} squares ({enc_sum['area_km2']} km²), "
                     f"Unid={enc_sum['unidentified_candidates']} (1% FPR={enc_sum['unidentified_candidates_fpr_0_01']})."
                 )
+
+        try:
+            osmand_res = export_osmand_files(args.docs_dir)
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] OsmAnd GPX & .osf updated: "
+                f"{osmand_res['total_waypoints']} waypoints ({osmand_res['osf_size_kb']} KB .osf)."
+            )
+        except Exception as exc:
+            print(f"[cycle {cycle_idx}/{total_cycles}] Warning: OsmAnd export failed: {exc}")
 
         if args.git_push:
             repo_root = Path(__file__).resolve().parents[1]
