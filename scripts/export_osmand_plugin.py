@@ -445,6 +445,129 @@ def _simplify_and_chain_road_segments(
     return merged
 
 
+_GENERIC_ROMAN_NAMES = {
+    "roman road",
+    "roman road - unnamed",
+    "roman road (course)",
+    "roman road (course of)",
+    "roman road (route of)",
+    "roman road (mapped course)",
+    "course of roman road",
+    "path of roman road",
+    "route of roman road",
+    "the roman road",
+    "old roman road",
+}
+
+_NAMED_ROMAN_SUFFIXES = {
+    "dere street",
+    "stane street",
+    "stone street",
+    "ermin street",
+    "ermine street",
+    "icknield street",
+    "via devana",
+    "fen causeway",
+    "devil's causeway",
+    "cade's road",
+    "pye road",
+    "bath way",
+    "maiden way",
+    "greensand way",
+    "the long lane",
+}
+
+
+def _normalize_roman_road_name(raw_name: str, margary: str = "") -> str:
+    import re
+
+    n = (raw_name or "Roman Road").strip()
+    if n.lower() in _GENERIC_ROMAN_NAMES:
+        base = "Roman Road"
+    elif n.startswith("ROMAN ROAD RR8") and "Dere Street" in n:
+        base = "Dere Street (Margary 8)"
+    elif n.startswith("ROMAN ROAD RR84") and "Maiden Way" in n:
+        base = "Maiden Way (Margary 84)"
+    else:
+        m = re.match(r"^(?:ROMAN ROAD|Roman Road)\s*[-:]\s*(.+)$", n)
+        if m:
+            suffix = m.group(1).strip()
+            if suffix.lower() in _NAMED_ROMAN_SUFFIXES:
+                base = f"{suffix} (Roman Road)"
+            else:
+                base = f"Roman Road: {suffix}"
+        elif n.startswith("ROMAN ROAD "):
+            base = "Roman Road " + n[len("ROMAN ROAD ") :].strip()
+        elif n == "Maiden way":
+            base = "Maiden Way"
+        else:
+            base = n
+    if margary and f"margary {margary}".lower() not in base.lower():
+        base = f"{base} (Margary {margary})"
+    return base
+
+
+def build_roman_roads_addon_render_xml() -> str:
+    """Build OsmAnd .addon.render.xml for curved path-following Roman road & ridgeway names."""
+    return """<renderingStyle name="uk_roman_roads" addon="yes" depends="" defaultColor="#ebe7e4" version="1">
+
+	<renderingProperty attr="appMode" name="Rendering mode" description="Map optimization for respective User Profile"
+		type="string" possibleValues="browse map,car,bicycle,pedestrian"/>
+	<renderingProperty attr="baseAppMode" name="Default Rendering mode" description="Map optimization for respective User Profile based on base (parent) profile"
+		type="string" possibleValues="default,car,bicycle,pedestrian,public_transport,boat,ski"/>
+	<renderingProperty attr="hideUkRomanRoads" name="Hide UK Roman &amp; Ancient Roads"
+		description="Hide UK Roman roads and prehistoric ridgeways vector layer"
+		type="boolean" possibleValues="" category="hide"/>
+
+	<renderingConstant name="null" value="#00000000"/>
+	<renderingProperty attr="engine_v1" type="boolean"/>
+
+	<order>
+		<switch area="false" objectType="2" order="122">
+			<case tag="historic" value="roman_road"/>
+			<case tag="historic" value="ancient_trackway"/>
+			<apply_if hideUkRomanRoads="true" order="-1"/>
+		</switch>
+	</order>
+
+	<text>
+		<switch minzoom="9" textOnPath="true" textBold="true" textWrapWidth="30" textOrder="35" textMinDistance="70">
+			<case maxzoom="12" tag="historic" value="roman_road" additional="roman_road_named=yes" nameTag="" textColor="#581c87" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#e9d5ff" textHaloColor="#cc1f0933"/>
+			</case>
+			<case minzoom="13" tag="historic" value="roman_road" nameTag="" textColor="#581c87" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#e9d5ff" textHaloColor="#cc1f0933"/>
+			</case>
+			<case tag="historic" value="ancient_trackway" nameTag="" textColor="#78350f" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#fde68a" textHaloColor="#cc2d1606"/>
+			</case>
+			<apply_if maxzoom="10" textSize="10" textMinDistance="110"/>
+			<apply_if minzoom="11" maxzoom="12" textSize="11" textMinDistance="85"/>
+			<apply_if minzoom="13" maxzoom="14" textSize="12"/>
+			<apply_if minzoom="15" textSize="13"/>
+		</switch>
+	</text>
+
+	<line>
+		<switch minzoom="8" cap="ROUND">
+			<case tag="historic" value="roman_road" color="#7e22ce" color__1="#ccffffff">
+				<apply_if nightMode="true" color="#c084fc" color__1="#aa1e1b4b"/>
+				<apply_if minzoom="12" pathEffect="10_4"/>
+			</case>
+			<case tag="historic" value="ancient_trackway" color="#b45309" color__1="#ccffffff" pathEffect="6_4">
+				<apply_if nightMode="true" color="#fbbf24" color__1="#aa271705"/>
+			</case>
+			<apply_if maxzoom="9" strokeWidth="1.4" strokeWidth__1="2.4"/>
+			<apply_if minzoom="10" maxzoom="11" strokeWidth="1.8" strokeWidth__1="3.0"/>
+			<apply_if minzoom="12" maxzoom="13" strokeWidth="2.4" strokeWidth__1="3.8"/>
+			<apply_if minzoom="14" maxzoom="15" strokeWidth="3.0" strokeWidth__1="4.6"/>
+			<apply_if minzoom="16" strokeWidth="3.6" strokeWidth__1="5.4"/>
+		</switch>
+	</line>
+</renderingStyle>
+"""
+
+
 def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> str:
     lines: List[str] = [
         '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
@@ -459,6 +582,7 @@ def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> s
     ]
     if roads_geojson_path.exists():
         gj = json.loads(roads_geojson_path.read_text(encoding="utf-8"))
+        grouped: Dict[Tuple[str, str], List[List[List[float]]]] = {}
         for feat in gj.get("features", []):
             props = feat.get("properties") or {}
             geom = feat.get("geometry") or {}
@@ -470,16 +594,19 @@ def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> s
                 raw_segments = coords
             else:
                 continue
-            name = str(props.get("name") or "Roman Road")
-            if any(fr in name for fr in ("Boulogne", "Arras", "Amiens", "Cassel", "Thérouanne", "Bavay")):
+            raw_name = str(props.get("name") or "Roman Road")
+            if any(fr in raw_name for fr in ("Boulogne", "Arras", "Amiens", "Cassel", "Thérouanne", "Bavay")):
                 continue
-            is_named = name not in ("Roman Road", "ROMAN ROAD", "Roman Road (mapped course)")
+            rtype = str(props.get("road_type") or "roman_road")
+            marg = str(props.get("margary") or "") if props.get("margary") else ""
+            label = _normalize_roman_road_name(raw_name, marg)
+            grouped.setdefault((rtype, label), []).extend(raw_segments)
+
+        for (rtype, label), raw_segments in grouped.items():
+            is_named = label != "Roman Road"
             segments = _simplify_and_chain_road_segments(raw_segments, is_named_route=is_named)
             if not segments:
                 continue
-            rtype = str(props.get("road_type") or "roman_road")
-            marg = str(props.get("margary") or "")
-            label = f"{name} (Margary {marg})" if marg else name
             desc = "Prehistoric Ridgeway / Ancient Trackway" if rtype == "prehistoric_trackway" else "Roman Road"
             lines.append("  <trk>")
             lines.append(f"    <name>{escape(label)}</name>")
@@ -652,6 +779,10 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     josm_path.write_text(josm_xml, encoding="utf-8")
 
     roads_xml = build_ancient_roads_gpx_xml(docs_dir / "roman_and_ancient_roads.geojson", updated_utc)
+    addon_render_xml = build_roman_roads_addon_render_xml()
+    addon_render_path = docs_dir / "uk_roman_roads.addon.render.xml"
+    addon_render_path.write_text(addon_render_xml, encoding="utf-8")
+    obf_path = docs_dir / "Uk_roman_roads_2.obf"
     icon_png, banner_png = _build_plugin_graphics()
 
     # Split candidates into modular, individually toggleable GPX track layers under tracks/UK_Megalith_LiDAR/
@@ -695,6 +826,24 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
         }
     )
 
+    vector_file_items: List[Dict[str, Any]] = [
+        {
+            "type": "FILE",
+            "subtype": "rendering_style",
+            "pluginId": "uk.megalith.lidar",
+            "file": "rendering/uk_roman_roads.addon.render.xml",
+        }
+    ]
+    if obf_path.exists():
+        vector_file_items.append(
+            {
+                "type": "FILE",
+                "subtype": "obf_map",
+                "pluginId": "uk.megalith.lidar",
+                "file": "Uk_roman_roads_2.obf",
+            }
+        )
+
     items_manifest = {
         "version": 3,
         "items": [
@@ -711,8 +860,9 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "1 m LiDAR & 16 m aerial cropmarks across England, cross-checked against "
                         "1888–1913 Historic OS 6-Inch maps, Historic England NHLE, OpenStreetMap, "
                         "and Megalithic.co.uk. Installs modular monument GPX layers under Tracks → "
-                        "UK_Megalith_LiDAR (leaving personal Favourites untouched), Roman & Ancient "
-                        "Road tracks, live 1 m EA LiDAR Hillshade, and 1888 OS / Roman Empire overlays."
+                        "UK_Megalith_LiDAR (leaving personal Favourites untouched), a native vector "
+                        "Roman & Ancient Roads map with curved path-following road labels, live 1 m EA "
+                        "LiDAR Hillshade, and 1888 OS / Roman Empire overlays."
                     )
                 },
             },
@@ -721,6 +871,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                 "pluginId": "uk.megalith.lidar",
                 "file": "res",
             },
+            *vector_file_items,
             {
                 "type": "MAP_SOURCES",
                 "pluginId": "uk.megalith.lidar",
@@ -796,6 +947,9 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
         zf.writestr("items.json", json.dumps(items_manifest, indent=2, ensure_ascii=False))
         zf.writestr("res/icon.png", icon_png)
         zf.writestr("res/image.png", banner_png)
+        zf.writestr("rendering/uk_roman_roads.addon.render.xml", addon_render_xml)
+        if obf_path.exists():
+            zf.write(obf_path, "Uk_roman_roads_2.obf")
         for rel_file, xml_str in gpx_payloads.items():
             zf.writestr(rel_file, xml_str)
 

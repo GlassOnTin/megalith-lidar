@@ -932,9 +932,22 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert "Roman Empire Atlas (DARE)" in map_source_names
         roads_gpx_txt = zf.read("tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx").decode("utf-8")
         assert "<osmand:show_start_finish>false</osmand:show_start_finish>" in roads_gpx_txt
+        addon_xml = zf.read("rendering/uk_roman_roads.addon.render.xml").decode("utf-8")
+        assert 'addon="yes"' in addon_xml
+        assert 'textOnPath="true"' in addon_xml
+        assert 'value="roman_road"' in addon_xml
+        assert 'value="ancient_trackway"' in addon_xml
 
     from pathlib import Path
-    from scripts.export_osmand_plugin import _curvature_aware_rdp, build_ancient_roads_gpx_xml
+    from scripts.export_osmand_plugin import (
+        _curvature_aware_rdp,
+        _normalize_roman_road_name,
+        build_ancient_roads_gpx_xml,
+    )
+
+    assert _normalize_roman_road_name("ROMAN ROAD - Dere Street") == "Dere Street (Roman Road)"
+    assert _normalize_roman_road_name("ROMAN ROAD (course)") == "Roman Road"
+    assert _normalize_roman_road_name("Watling Street", "1d") == "Watling Street (Margary 1d)"
 
     # Gentle 25m drift over 4km (turn angle < 2 deg) collapses to 2 points
     gentle_line = [[-1.0, 51.0], [-1.0, 51.018], [-0.9996, 51.036]]
@@ -943,7 +956,8 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
     sharp_bend = [[-1.0, 51.0], [-1.0, 51.0004], [-0.9995, 51.0008]]
     assert len(_curvature_aware_rdp(sharp_bend)) == 3
 
-    real_roads_gj = Path(__file__).resolve().parents[1] / "docs" / "roman_and_ancient_roads.geojson"
+    real_docs = Path(__file__).resolve().parents[1] / "docs"
+    real_roads_gj = real_docs / "roman_and_ancient_roads.geojson"
     if real_roads_gj.exists():
         roads_xml = build_ancient_roads_gpx_xml(real_roads_gj, "2026-10-26T00:00:00Z")
         r_root = ET.fromstring(roads_xml)
@@ -952,6 +966,10 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         trkpts = r_root.findall(".//g:trkpt", ns)
         assert len(trksegs) <= 340
         assert len(trkpts) <= 5000
+    if (real_docs / "megalith-lidar.osf").exists():
+        with zipfile.ZipFile(real_docs / "megalith-lidar.osf", "r") as rzf:
+            assert "Uk_roman_roads_2.obf" in rzf.namelist()
+            assert "rendering/uk_roman_roads.addon.render.xml" in rzf.namelist()
 
 
 
