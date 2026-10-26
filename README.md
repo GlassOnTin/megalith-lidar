@@ -1,14 +1,37 @@
-# megalith-lidar
+<h1 align="center">megalith-lidar</h1>
 
-Scale-space 1 m LiDAR terrain segmentation, 16 m aerial cropmark/soilmark analysis, and calibrated out-of-sample national survey pipeline for recognising prehistoric, Iron Age, and Romano-British earthworks across England.
+<p align="center">
+  Scale-space 1 m LiDAR terrain segmentation, 16 m aerial cropmark/soilmark analysis, 1888–1913 Historic Ordnance Survey 6-Inch map verification, and calibrated national survey pipeline for prehistoric, Iron Age, and Romano-British earthworks across England
+</p>
 
-Inspired by landscape archaeologist Adam Morgan Ibbotson's video on LiDAR survey in the Thornborough Henges landscape ([https://youtu.be/D_R0bgNgY2o](https://youtu.be/D_R0bgNgY2o)). This repository provides statistical terrain screening, calibrated probability maps, and open GeoJSON / 6-panel LiDAR + aerial diagnostic outputs so archaeologists and Historic Environment Record (HER) researchers can inspect and verify candidate earthworks.
+<p align="center">
+  <a href="https://glassontin.github.io/megalith-lidar/"><img src="https://img.shields.io/badge/Live_Interactive_Survey_Map-glassontin.github.io%2Fmegalith--lidar-8f3d1e?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="Live Interactive Survey Map" /></a>
+</p>
 
-Live out-of-sample survey map and 6-panel diagnostic viewer: [https://glassontin.github.io/megalith-lidar/](https://glassontin.github.io/megalith-lidar/)
+<p align="center">
+  <a href="https://glassontin.github.io/megalith-lidar/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fglassontin.github.io%2Fmegalith-lidar%2F&style=flat-square&label=GitHub%20Pages&up_message=live&up_color=2f6b48" alt="GitHub Pages Live Viewer" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-orange?style=flat-square" alt="License" /></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+" />
+  <img src="https://img.shields.io/badge/PyTorch-ResNet--34_U--Net-ee4c2c?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch" />
+  <img src="https://img.shields.io/badge/CRS-EPSG%3A27700_(1_m_LiDAR)-4a607a?style=flat-square" alt="EPSG:27700 1m LiDAR" />
+  <a href="https://github.com/GlassOnTin/megalith-lidar/commits/main"><img src="https://img.shields.io/github/last-commit/GlassOnTin/megalith-lidar?style=flat-square&label=last%20scan" alt="Last Commit" /></a>
+  <a href="https://ko-fi.com/glassontin"><img src="https://img.shields.io/badge/Ko--fi-support-ff5e5b?style=flat-square&logo=ko-fi&logoColor=white" alt="Ko-fi" /></a>
+</p>
+
+<p align="center">
+  <a href="https://glassontin.github.io/megalith-lidar/">Live Survey Map &amp; 7-Panel Inspector</a> &bull;
+  <a href="docs/candidates.geojson">Prehistoric GeoJSON</a> &bull;
+  <a href="docs/enclosure_candidates.geojson">Iron Age GeoJSON</a> &bull;
+  <a href="docs/roman_candidates.geojson">Roman GeoJSON</a>
+</p>
+
+---
+
+Inspired by landscape archaeologist Adam Morgan Ibbotson's video on LiDAR survey in the Thornborough Henges landscape ([https://youtu.be/D_R0bgNgY2o](https://youtu.be/D_R0bgNgY2o)). This repository provides statistical terrain screening, calibrated probability maps, and open GeoJSON / 7-panel diagnostic outputs (4-panel 1 m LiDAR, aerial orthophoto, 16 m scale-space cropmark, and 1888–1913 Historic Ordnance Survey 6-Inch map with [Megalithic Portal](https://www.megalithic.co.uk/) cross-referencing) so archaeologists and Historic Environment Record (HER) researchers can inspect and verify candidate earthworks.
 
 ## Multi-Domain Detectors
 
-Three domain-specific `ResNet-34` U-Net detectors (`megalith_lidar/model.py`) with differentiable $D_4$-invariant 2D geometric moment heads (`area_frac`, `log_elongation`, `ring_hollowness`, `compactness`), perimeter-ring supervision, and validation Platt calibration scan each `256 m × 256 m` British National Grid (`EPSG:27700`) window:
+Three domain-specific `ResNet-34` U-Net detectors (`megalith_lidar/model.py`) with differentiable D₄-invariant 2D geometric moment heads (`area_frac`, `log_elongation`, `ring_hollowness`, `compactness`), perimeter-ring supervision, and validation Platt calibration scan each `256 m × 256 m` British National Grid (`EPSG:27700`) window:
 
 | Detector | Target Monument Classes | Dataset Size (`train / val / test`) | Held-Out Test ROC-AUC (`95% CI`) | `random_national` Null ROC-AUC | `trackside_field` Null ROC-AUC | Strict `1%` FPR Test `LR+` |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -27,7 +50,7 @@ Remote-sensing models for archaeology fail when they overfit to regional elevati
    - Isotropic gradient magnitude (`|∇z| = sqrt((∂z/∂x)² + (∂z/∂y)²)`).
    - Isotropic Laplacian curvature (`∇²z = ∂²z/∂x² + ∂²z/∂y²`).
    - Log-compressed above-ground surface prominence (`log(1 + max(0, DSM - DTM))`).
-   Unit tests in `tests/test_pipeline.py` verify altitude shift invariance and exact equivariance under the 8-element dihedral group $D_4$ (rotations by 0°, 90°, 180°, 270° and reflections).
+   Unit tests in `tests/test_pipeline.py` verify altitude shift invariance and exact equivariance under the 8-element dihedral group D₄ (rotations by 0°, 90°, 180°, 270° and reflections).
 
 2. **16 m Scale-Space Aerial Cropmark & Soilmark Channels (`megalith_lidar/aerial_cropmarks.py`)**: Ploughed-out ring-ditches, barrows, and enclosures in arable farmland often retain `< 0.25 m` of vertical LiDAR relief while producing differential crop growth (`+ΔExG` over moisture-retaining buried ditches) or soil albedo contrast (`+ΔL` over chalk/gravel banks). To prevent overfitting to regional soil colour or seasonal flight exposure, RGB orthophotos (`1 m/px` `EPSG:27700`) are converted into two zero-mean, illumination-normalised `16 m` scale-space bandpass channels (`G_1.2 - G_16`) gated to bare/crop ground (`nDSM < 2.0 m`):
    - `band_cropmark_exg_16m` (`ΔExG_16m`): Local Excess-Green vegetation index anomaly.
@@ -45,9 +68,9 @@ Remote-sensing models for archaeology fail when they overfit to regional elevati
    - `woodland_canopy_and_pit`: Monument-free woodland canopy (`>= 20%` `nDSM > 2.5 m`) and sunken marl/chalk/quarry pits (`0.5th` percentile `16 m` relief `<= -0.95 m`).
    - `trackside_and_field_boundary`: Open agricultural land with hedgerow, trackside, and field-corner boundary relief bumps.
 
-6. **Validation-only Platt calibration and threshold locking (`megalith_lidar/stats.py`)**: Logistic Platt scaling (`P(y=1|s) = σ(a·s + b)`) and operating thresholds (`1%`, `5%`, and `10%` false positive rate, plus Youden's `J`) are fitted exclusively on the validation split and evaluated once on the held-out test split with 8-way $D_4$ test-time augmentation.
+6. **Validation-only Platt calibration and threshold locking (`megalith_lidar/stats.py`)**: Logistic Platt scaling (`P(y=1|s) = σ(a·s + b)`) and operating thresholds (`1%`, `5%`, and `10%` false positive rate, plus Youden's `J`) are fitted exclusively on the validation split and evaluated once on the held-out test split with 8-way D₄ test-time augmentation.
 
-7. **OpenStreetMap, intrinsic LiDAR, and Vision-Language confounder cross-check (`megalith_lidar/scanner.py`, `megalith_lidar/osm_context.py`, `scripts/vlm_audit_candidates.py`)**: Connected components are extracted from the calibrated probability map, conditioned on 2D footprint geometry (area, elongation, hollowness), and cross-checked against NHLE Layer 6 polygons, the OpenStreetMap v0.6 API, intrinsic 1 m LiDAR observables (tall canopy, steep silage/manure clamps, sunken pits, river-meander/lynchet scarps, or interpolated TIN voids), and Qwen3.8 Vision multi-panel inspection:
+7. **OpenStreetMap, 1888–1913 Historic Ordnance Survey 6-Inch Map, Megalithic Portal, intrinsic LiDAR, and Vision-Language confounder cross-check (`megalith_lidar/scanner.py`, `megalith_lidar/osm_context.py`, `megalith_lidar/arch_context.py`, `scripts/vlm_audit_candidates.py`)**: Connected components are extracted from the calibrated probability map, conditioned on 2D footprint geometry (area, elongation, hollowness), and cross-checked against NHLE Layer 6 polygons, the OpenStreetMap v0.6 API, [Megalithic Portal](https://www.megalithic.co.uk/) monument records, intrinsic 1 m LiDAR observables (tall canopy, steep silage/manure clamps, sunken pits, river-meander/lynchet scarps, or interpolated TIN voids), and Qwen3.8 Vision 3-panel inspection (1 m LiDAR Relief + Aerial RGB + 1888–1913 Historic Ordnance Survey Six-Inch map):
    - `rediscovered_nhle_scheduled` (within 45 m of a Scheduled Monument polygon)
    - `rediscovered_osm_archaeology` (within 45 m of an unscheduled OSM `man_made=cairn`, `historic=megalith|archaeological_site|tumulus|barrow|hillfort|roman_villa`, or `megalith_type=*`)
    - `flagged_modern_or_karst_confounder` (inside or within feature-specific radii of mapped quarries, sinkholes, farmyards, tracks/roads, hedges/fences, power poles, woodlands, covered reservoirs, golf bunkers, or steep surface clamps/pits)
@@ -87,18 +110,17 @@ Evaluated on `83` positives and `182` negatives (`docs/enclosure_evaluation_metr
 Evaluated on `109` positives and `179` negatives (`docs/enclosure_summary.json`, `docs/roman_summary.json`):
 - **Overall Test ROC-AUC**: `0.7967` (`95% CI: [0.7406, 0.8495]`), with `0.8647` vs `trackside_and_field_boundary`, `0.8330` vs `matched_environment`, and `0.7898` vs `anthropogenic_non_roman`.
 
-## Completed Out-of-Sample National Survey (`1,306` Squares / `5,224.0 km²` / `4.01%` of England)
+## National Survey Progress (`7,669` Squares / `30,660.0 km²` / `23.5%` of England)
 
-All `1,306` valid `2 km × 2 km` held-out test squares (`5,224.0 km²`, `4.01%` of England's `130,279 km²` land area; `111` coastal/upland squares lacked 1 m EA LiDAR coverage) have been scanned across all three detectors and enriched with `16 m` scale-space aerial cropmark/soilmark metrics (`docs/survey_summary.json`, `docs/roman_summary.json`, `docs/enclosure_summary.json`):
+`7,669` valid `2 km × 2 km` squares (`30,660.0 km²`, `23.5%` of England's `130,279 km²` land area) have been scanned so far across the three detectors and enriched with `16 m` scale-space aerial cropmark/soilmark metrics, 1888–1913 Historic Ordnance Survey 6-Inch map verification, and [Megalithic Portal](https://www.megalithic.co.uk/) cross-references (`docs/survey_summary.json`, `docs/roman_summary.json`, `docs/enclosure_summary.json`):
 
 1. **Prehistoric Survey (`docs/candidates.geojson`)**:
-   - `498` `uniform_national_null` squares (`1,992.0 km²`): `64` unidentified candidates at the strict `1%` FPR operating point (`0.032 / km²`, or `1` per `31.1 km²`) and `261` at the `5%` FPR operating point (`0.131 / km²`).
-   - `808` `heldout_test_landscape` squares (`3,232.0 km²`): **`524` rediscovered NHLE Scheduled Monuments**, **`20` rediscovered unscheduled OSM archaeological monuments**, **`201` unidentified candidates at the strict `1%` FPR operating point** (`0.062 / km²`), and `874` at the `5%` FPR operating point (`0.270 / km²`).
-   - Across all `2,099` published Prehistoric detections, `1,658` (`79.0%`) exhibit a measurable `16 m` scale-space aerial cropmark or soilmark anomaly (`792` among unidentified candidates).
+   - `2,708` `uniform_national_null` squares (`10,832.0 km²`): `275` unidentified candidates at the strict `1%` FPR operating point (`0.025 / km²`) and `1,269` at the `5%` FPR operating point (`0.117 / km²`).
+   - `4,957` `heldout_test_landscape` squares (`19,828.0 km²`): **`1,598` rediscovered NHLE Scheduled Monuments**, **`86` rediscovered unscheduled OSM archaeological monuments**, **`808` unidentified candidates at the strict `1%` FPR operating point** (`0.041 / km²`), and `3,305` at the `5%` FPR operating point (`0.167 / km²`).
 2. **Iron Age & Prehistoric Enclosure Survey (`docs/enclosure_candidates.geojson`)**:
-   - Across `1,306` squares (`5,224.0 km²`): **`844` rediscovered NHLE Scheduled Monuments**, **`49` rediscovered OSM archaeological sites**, and **`35` unidentified enclosure/settlement candidates** (`17` passing the strict `1%` FPR operating point; `934 / 1,328` total detections with distinct aerial cropmark/soilmark contrast).
+   - Across `7,569` squares (`30,276.0 km²`): **`3,105` rediscovered NHLE Scheduled Monuments**, **`127` rediscovered OSM archaeological sites**, and **`159` unidentified enclosure/settlement candidates** (`58` passing the strict `1%` FPR operating point).
 3. **Roman & Romano-British Survey (`docs/roman_candidates.geojson`)**:
-   - Across `1,306` squares (`5,224.0 km²`): **`1,109` rediscovered NHLE Scheduled Monuments**, **`138` rediscovered OSM archaeological sites**, and **`3,211` unidentified candidates** (`777` at the `1%` FPR operating point; `3,314 / 4,858` total detections with distinct aerial cropmark/soilmark contrast).
+   - Across `7,575` squares (`30,300.0 km²`): **`4,869` rediscovered NHLE Scheduled Monuments**, **`486` rediscovered OSM archaeological sites**, and **`26` unidentified candidates** (`5` passing the strict `1%` FPR operating point after geometric subtype and 1888 OS / intrinsic LiDAR screening).
 
 ## Limitations and Unverified Scope
 
@@ -113,14 +135,14 @@ All `1,306` valid `2 km × 2 km` held-out test squares (`5,224.0 km²`, `4.01%` 
 - `megalith_lidar/catalog.py`: Historic England NHLE Layer 6 `EPSG:27700` polygon downloader, multi-domain taxonomy classifier (Prehistoric, Roman, Enclosure), and 1 m polygon rasteriser.
 - `megalith_lidar/lidar_wcs.py`: Environment Agency 1 m DTM and 1 m LZ_DSM WCS client with disk caching and nodata validation.
 - `megalith_lidar/dataset.py`: SHA-256 20 km BNG block splitter, perimeter-ring mask refinement, 50% cropmark modality dropout, and 5-null dataset builder.
-- `megalith_lidar/model.py`: Reflection-padded `MegalithUNet` (`ResNet-34` encoder, multi-scale decoder, $D_4$-invariant 2D geometric moment head, LiDAR-halo-gated 8-channel cropmark branch, and MIL negative-peak + extent spill loss).
+- `megalith_lidar/model.py`: Reflection-padded `MegalithUNet` (`ResNet-34` encoder, multi-scale decoder, D₄-invariant 2D geometric moment head, LiDAR-halo-gated 8-channel cropmark branch, and MIL negative-peak + extent spill loss).
 - `megalith_lidar/stats.py`: Validation Platt scaling, operating-point selection, Bayes prior-adjusted PPV, and stratified bootstrap 95% CIs.
 - `megalith_lidar/osm_context.py`: OpenStreetMap API v0.6 bounding-box spatial index and intrinsic LiDAR confounder filters.
-- `megalith_lidar/arch_context.py`: NHLE spatial cluster synthesis and multi-modal candidate context generator.
-- `megalith_lidar/scanner.py`: Sliding-window regional scanner with 8-way $D_4$ test-time augmentation, two-stage LiDAR + aerial cropmark inference, spatial non-maximum suppression, and 4-panel PNG diagnostics.
+- `megalith_lidar/arch_context.py`: NHLE spatial cluster synthesis, 1888–1913 Historic Ordnance Survey 6-Inch map cropper (`uk-osgb1888`), [Megalithic Portal](https://www.megalithic.co.uk/) spatial cross-referencing, and 3-panel Qwen3.8 Vision candidate context generator.
+- `megalith_lidar/scanner.py`: Sliding-window regional scanner with 8-way D₄ test-time augmentation, two-stage LiDAR + aerial cropmark inference, spatial non-maximum suppression, and 4-panel PNG diagnostics.
 - `scripts/train_and_upgrade_v3.py`: Expanded `v3` manifest builder, warm-started 8-channel training, and held-out test evaluation across Prehistoric, Roman, and Enclosure domains.
 - `scripts/vlm_audit_candidates.py`: Multi-panel Qwen3.8 Vision audit and archaeological landscape synthesis over candidate detections.
-- `index.html`: Self-contained Leaflet map and 6-panel candidate diagnostic inspector (4-panel 1 m LiDAR + live `EPSG:27700` Aerial Orthophoto & `16 m` Scale-Space Cropmark `<canvas>` panels) deployed via GitHub Pages.
+- `index.html`: Self-contained Leaflet map and 7-panel candidate diagnostic inspector (4-panel 1 m LiDAR + live `EPSG:27700` Aerial Orthophoto, `16 m` Scale-Space Cropmark, 1888–1913 Historic Ordnance Survey 6-Inch Map `<canvas>` panels, and Megalithic Portal / NLS side-by-side card) deployed via GitHub Pages.
 
 ## Running Locally
 
