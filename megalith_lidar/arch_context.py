@@ -463,10 +463,87 @@ def build_deterministic_academic_context(cand: Dict, nearby_nhle: List[Dict], cl
     )
 
 
-def make_zoomed_crop_b64(png_path: Path) -> str:
+_HISTORIC_OS_CACHE_DIR = Path("/mnt/bulk/megalith-lidar/historic_os_cache")
+_HISTORIC_OS_TILE_URL = "https://api.maptiler.com/tiles/uk-osgb1888/{z}/{x}/{y}?key=7Y0Q1ck46BnB8cXXXg8X"
+
+
+def fetch_historic_os_crop(
+    lat: float,
+    lon: float,
+    zoom: int = 16,
+    crop_px: int = 256,
+    timeout: float = 4.5,
+) -> Optional[Image.Image]:
+    """
+    Fetch and cache a 256x256 crop of the 1888-1913 Ordnance Survey Six-Inch to the Mile
+    historic map (`uk-osgb1888`) centered on `(lat, lon)`, with a red cartographic reticle
+    at the candidate centroid so the VLM can read 19th-century antiquity labels ('Camp',
+    'Tumulus', 'Roman Road') or Victorian/industrial confounders ('Old Quarry', 'Gravel Pit',
+    'Reservoir', 'Plantation').
+    """
+    try:
+        from PIL import ImageDraw
+
+        lat_rad = math.radians(float(lat))
+        n = 2.0 ** zoom
+        xtile_f = (float(lon) + 180.0) / 360.0 * n
+        ytile_f = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+        cx_tile = int(math.floor(xtile_f))
+        cy_tile = int(math.floor(ytile_f))
+        px_in_tile = int(round((xtile_f - cx_tile) * 256))
+        py_in_tile = int(round((ytile_f - cy_tile) * 256))
+
+        _HISTORIC_OS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        canvas = Image.new("RGB", (256 * 2, 256 * 2), (242, 236, 225))
+        dx_start = -1 if px_in_tile < 128 else 0
+        dy_start = -1 if py_in_tile < 128 else 0
+
+        for ix, dx in enumerate((dx_start, dx_start + 1)):
+            for iy, dy in enumerate((dy_start, dy_start + 1)):
+                tx, ty = cx_tile + dx, cy_tile + dy
+                cpath = _HISTORIC_OS_CACHE_DIR / f"os1888_z{zoom}_{tx}_{ty}.jpg"
+                if cpath.exists():
+                    tile_img = Image.open(cpath).convert("RGB")
+                else:
+                    url = _HISTORIC_OS_TILE_URL.format(z=zoom, x=tx, y=ty)
+                    req = urllib.request.Request(
+                        url,
+                        headers={
+                            "User-Agent": "Mozilla/5.0 (compatible; MegalithLiDAR/1.0)",
+                            "Referer": "https://maps.nls.uk/",
+                        },
+                    )
+                    with urllib.request.urlopen(req, timeout=timeout) as r:
+                        raw = r.read()
+                    cpath.write_bytes(raw)
+                    tile_img = Image.open(io.BytesIO(raw)).convert("RGB")
+                canvas.paste(tile_img, (ix * 256, iy * 256))
+
+        center_x = (-dx_start) * 256 + px_in_tile
+        center_y = (-dy_start) * 256 + py_in_tile
+        half = crop_px // 2
+        crop = canvas.crop((center_x - half, center_y - half, center_x + half, center_y + half))
+        draw = ImageDraw.Draw(crop)
+        draw.ellipse((half - 18, half - 18, half + 18, half + 18), outline=(185, 28, 28), width=2)
+        draw.line((half - 26, half, half - 18, half), fill=(185, 28, 28), width=2)
+        draw.line((half + 18, half, half + 26, half), fill=(185, 28, 28), width=2)
+        draw.line((half, half - 26, half, half - 18), fill=(185, 28, 28), width=2)
+        draw.line((half, half + 18, half, half + 26), fill=(185, 28, 28), width=2)
+        return crop
+    except Exception:
+        return None
+
+
+def make_zoomed_crop_b64(
+    png_path: Path,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
+) -> Tuple[str, bool]:
     """
     Create a 3x-magnified 80m x 80m close-up crop of [Panel 1: Bare-Earth Slope | Panel 2: 16m Local Relief]
-    centered on the detection circle so the VLM can clearly inspect corners, scarps, and interior hollows.
+    and, when `(lat, lon)` are provided, stitch [Panel 3: 1888-1913 Historic Ordnance Survey 6-Inch Map]
+    so the VLM can simultaneously inspect 1m LiDAR micro-topography and 19th-century OS cartography.
+    Returns `(base64_png_str, has_historic_os_panel)`.
     """
     im = Image.open(png_path)
     arr = np.array(im)[:, :256, :]
@@ -482,27 +559,193 @@ def make_zoomed_crop_b64(png_path: Path) -> str:
     y0, y1 = max(0, min(256 - 2 * r, cy - r)), min(256, max(2 * r, cy + r))
     p1_crop = im.crop((x0, y0, x1, y1)).resize((256, 256), Image.Resampling.NEAREST)
     p2_crop = im.crop((260 + x0, y0, 260 + x1, y1)).resize((256, 256), Image.Resampling.NEAREST)
-    out = Image.new("RGB", (516, 256), (20, 20, 24))
-    out.paste(p1_crop, (0, 0))
-    out.paste(p2_crop, (260, 0))
+
+    os_crop = None
+    if lat is not None and lon is not None:
+        os_crop = fetch_historic_os_crop(float(lat), float(lon), zoom=16, crop_px=256)
+
+    if os_crop is not None:
+        out = Image.new("RGB", (776, 256), (20, 20, 24))
+        out.paste(p1_crop, (0, 0))
+        out.paste(p2_crop, (260, 0))
+        out.paste(os_crop, (520, 0))
+        has_os = True
+    else:
+        out = Image.new("RGB", (516, 256), (20, 20, 24))
+        out.paste(p1_crop, (0, 0))
+        out.paste(p2_crop, (260, 0))
+        has_os = False
+
     buf = io.BytesIO()
     out.save(buf, format="PNG")
-    return base64.b64encode(buf.getvalue()).decode("ascii")
+    return base64.b64encode(buf.getvalue()).decode("ascii"), has_os
 
 
 _VLM_OBVIOUS_CONFOUNDER_PAT = (
     "modern military emplacement",
     "covered reservoir",
     "modern reservoir",
+    "modern rectangular reservoir",
+    "utility scoop",
     "modern utility",
     "modern spoil",
     "modern forestry spoil",
+    "forestry plough",
+    "drainage scoop",
     "field clearance ring",
     "post-medieval chalk extraction",
     "post-medieval marl pit",
     "extractive pit",
     "quarry scoop",
+    "quarry pit",
+    "old quarry",
+    "gravel pit",
+    "marl pit",
+    "chalk pit",
+    "borrow pit",
+    "peat-cutting",
     "fighter pen",
+    "dispersal pen",
+    "military gun-pit",
+)
+
+_VLM_ROMAN_REJECT_PHRASES = (
+    "is a false positive",
+    "likely a false positive",
+    "fluvial false positive",
+    "score is rejected",
+    "classification is rejected",
+    "prediction is rejected",
+    "is rejected in favour",
+    "is rejected as a",
+    "despite the model",
+    "although the model",
+    "contradicts the",
+    "rather than a roman",
+    "rather than the roman",
+    "rather than a rectilinear",
+    "rather than a military",
+    "rather than a genuine",
+    "rather than genuine",
+    "rather than a built",
+    "rather than a confirmed",
+    "rather than an unmapped",
+    "rather than a settlement",
+    "lacking the sharp 90-degree",
+    "lacking the sharp, rectilinear",
+    "lacking the sharp rectilinear",
+    "lacking the rectilinear",
+    "lacking the enclosed, rectilinear",
+    "lacking rectilinear",
+    "lacking any rectilinear",
+    "lacks rectilinear",
+    "without rectilinear",
+    "non-rectilinear",
+    "entirely lacking the sharp",
+    "lack of rectilinear",
+    "absence of rectilinear",
+    "absence of definitive military",
+    "modern rectangular reservoir",
+    "modern reservoir",
+    "covered reservoir",
+    "utility scoop",
+    "modern utility",
+    "quarry scoop",
+    "quarry pit",
+    "old quarry",
+    "extractive pit",
+    "gravel pit",
+    "marl pit",
+    "chalk pit",
+    "borrow pit",
+    "peat-cutting",
+    "kettle-hole",
+    "kettle hole",
+    "modern agricultural",
+    "agricultural confounder",
+    "agricultural pond",
+    "agricultural bund",
+    "agricultural enclosure",
+    "modern ploughing",
+    "forestry operations",
+    "forestry drainage",
+    "modern field boundary",
+    "field boundary",
+    "plantation boundary",
+    "internal plantation",
+    "forestry track",
+    "modern rectangular enclosure",
+    "post-medieval field enclosure",
+    "modern pond",
+    "farm pond",
+    "slurry",
+    "modern spoil",
+    "industrial spoil",
+    "spoil tip",
+    "spoil heap",
+    "spoil ring",
+    "mining bell-pit",
+    "bmx track",
+    "modern recreational",
+    "forestry spoil",
+    "forestry plough",
+    "drainage scoop",
+    "modern earthwork",
+    "modern linear earthwork",
+    "modern confounder",
+    "historic or modern confounder",
+    "military gun-pit",
+    "dispersal pen",
+    "fighter pen",
+    "natural glacial",
+    "natural fluvio-glacial",
+    "natural fluvial",
+    "natural periglacial",
+    "natural chalk",
+    "natural topographic",
+    "natural confounder",
+    "natural limestone",
+    "natural feature",
+    "natural rounded",
+    "natural mound",
+    "natural hillock",
+    "natural knoll",
+    "natural bedrock",
+    "natural outcrop",
+    "natural peat",
+    "peatland formation",
+    "fluvial point-bar",
+    "point-bar scroll",
+    "fluvial scroll",
+    "meander scroll ridge",
+    "solution doline",
+    "pingo scar",
+    "kame hummock",
+    "root-plate hollow",
+    "degraded prehistoric earthwork",
+    "prehistoric ring-ditch",
+    "prehistoric ring ditch",
+    "prehistoric ringwork",
+    "prehistoric round barrow",
+)
+
+_VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
+    "labeled as a 'camp'",
+    "labelled as a 'camp'",
+    "labeled \"camp\"",
+    "labelled \"camp\"",
+    "reads \"camp\"",
+    "reads 'camp'",
+    "marked as 'camp'",
+    "marked as \"camp\"",
+    "explicitly labels this exact location as a \"camp\"",
+    "explicitly labels this exact location as 'camp'",
+    "explicitly labeled 'camp'",
+    "explicitly labelled 'camp'",
+    "explicitly labeled \"camp\"",
+    "explicitly labelled \"camp\"",
+    "roman road on the 1888",
+    "depicts it with earthwork symbols",
 )
 
 
@@ -512,11 +755,12 @@ def classify_vlm_note_downrating(
     cand: Dict,
 ) -> Tuple[str, float, Optional[str]]:
     """
-    Evaluate Qwen3.8's visual/text assessment and physical morphology to determine:
+    Evaluate Qwen3.8's visual/text assessment (including 1888-1913 Historic OS 6-Inch map reading)
+    and physical morphology to determine:
       - `verdict_tier`: 'PLAUSIBLE_MONUMENT' (1.0x), 'UNCERTAIN_OR_DEGRADED' (0.82x),
-        or 'OBVIOUS_FALSE_POSITIVE' (0.35x and routed to Tab 3 confounders).
+        or 'OBVIOUS_FALSE_POSITIVE' (0.35x and routed to Tab 5 confounders).
       - `multiplier`: factor applied to `raw_unet_confidence` to compute `confidence`.
-      - `reason`: concise explanation when downrated or routed to Tab 3.
+      - `reason`: concise explanation when downrated or routed to Tab 5.
     """
     low = (note or "").lower()
     is_roman = cand.get("target_domain") == "roman"
@@ -537,12 +781,31 @@ def classify_vlm_note_downrating(
             f"Active Holocene coastal sand-dune system ({dune_belt or 'mobile coastal dunes'}): unburied Bronze Age/Roman earthworks cannot survive on shifting blown sand",
         )
 
+    # Protect candidates where the 1888 OS 6-Inch map explicitly depicts an antiquity ('Camp', 'Tumulus', hachured earthwork)
+    if any(p in low for p in _VLM_HISTORIC_OS_ANTIQUITY_PHRASES):
+        return ("PLAUSIBLE_MONUMENT", 1.0, None)
+
     if not is_roman and shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}:
         return (
             "OBVIOUS_FALSE_POSITIVE",
             0.35,
             "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
         )
+
+    if is_roman:
+        if shape_tag == "OBVIOUS_MODERN_CONFOUNDER":
+            return (
+                "OBVIOUS_FALSE_POSITIVE",
+                0.35,
+                "VLM Visual Audit: Flagged as modern/industrial/geomorphic confounder",
+            )
+        for r_phrase in _VLM_ROMAN_REJECT_PHRASES:
+            if r_phrase in low:
+                return (
+                    "OBVIOUS_FALSE_POSITIVE",
+                    0.35,
+                    f"VLM & Historic OS Audit: Rejected as non-Roman / confounder ({r_phrase})",
+                )
 
     area_m2 = float(cand.get("area_m2", 0.0))
     max_pos_rel_m = float(cand.get("max_positive_relief_m", cand.get("est_local_relief_m", 0.0)))
@@ -575,8 +838,7 @@ def classify_vlm_note_downrating(
         or (
             is_roman
             and (
-                shape_tag == "OBVIOUS_MODERN_CONFOUNDER"
-                or (
+                (
                     shape_tag == "RECTILINEAR_OR_U_BUND"
                     and centroid_rel_m <= 0.25
                     and ((max_pos_rel_m - centroid_rel_m) >= 0.50 or patch_min_rel_m <= -0.25)
@@ -589,23 +851,6 @@ def classify_vlm_note_downrating(
                         lum_diff <= -0.038
                         or (ndsm_m >= 0.85 and ring_exg >= 0.04)
                         or (pond_tile >= 0.74 and pond_peak >= 0.45)
-                        or any(
-                            phrase in low
-                            for phrase in (
-                                "is a false positive",
-                                "likely a modern",
-                                "likely represents a modern",
-                                "confounding the model",
-                                "modern agricultural",
-                                "modern field boundary",
-                                "building platform",
-                                "modern utility",
-                                "modern pond",
-                                "farm pond",
-                                "slurry",
-                                "gravel pit",
-                            )
-                        )
                     )
                 )
             )
@@ -618,14 +863,21 @@ def classify_vlm_note_downrating(
         )
 
     for phrase in _VLM_OBVIOUS_CONFOUNDER_PAT:
-        if phrase in low and ("more likely" in low or "strongly indicates" in low or "likely represents" in low):
-            # If the note explicitly concludes it is a modern military emplacement, reservoir, or spoil/extraction pit
-            if phrase in {"modern military emplacement", "covered reservoir", "modern reservoir", "modern utility", "fighter pen"}:
-                return (
-                    "OBVIOUS_FALSE_POSITIVE",
-                    0.35,
-                    f"VLM Assessment: Flagged as {phrase}",
-                )
+        if phrase in low and (
+            "more likely" in low
+            or "strongly indicates" in low
+            or "strongly indicate" in low
+            or "strongly suggest" in low
+            or "likely represents" in low
+            or "likely a " in low
+            or "most likely a" in low
+            or "highly likely a" in low
+        ):
+            return (
+                "OBVIOUS_FALSE_POSITIVE",
+                0.35,
+                f"VLM Assessment: Flagged as {phrase}",
+            )
 
     # Check if VLM notes a contradiction between long-barrow prediction and circular/low-amplitude morphology,
     # or concludes it is likely natural scree/gravel hummock/forestry spoil
@@ -676,9 +928,10 @@ def query_local_vlm_academic_context(
 ) -> Optional[Tuple[str, str]]:
     """
     Query the local Qwen3.8-Flash-Next vision-language server (`localhost:8090`) with the exact
-    NHLE spatial fact sheet + 3x-magnified 80m x 80m 1m LiDAR close-up to produce both a shape/confounder
-    verdict ('RECTILINEAR_OR_U_BUND', 'OBVIOUS_MODERN_CONFOUNDER', or 'ROUNDED_MOUND_OR_RING') and a
-    3-sentence academic assessment.
+    NHLE spatial fact sheet + 3-panel composite ([Panel 1: 80m x 80m 1m LiDAR Slope | Panel 2:
+    80m x 80m 1m LiDAR Local Relief | Panel 3: 1888-1913 Historic Ordnance Survey 6-Inch Map])
+    to produce both a shape/confounder verdict ('RECTILINEAR_OR_U_BUND', 'OBVIOUS_MODERN_CONFOUNDER',
+    or 'ROUNDED_MOUND_OR_RING') and a 3-sentence academic assessment.
     """
     nearest_lines = [
         f"- {m['name']} (NHLE #{m['list_entry']}, {m['cls_label']}): located {int(m['distance_m'])} m {m['bearing']} of this candidate"
@@ -705,12 +958,40 @@ def query_local_vlm_academic_context(
 
     slope = float(cand.get("mean_slope_tangent", 0.08))
     slope_deg = math.degrees(math.atan(slope))
-    has_img = diag_png_path is not None and diag_png_path.exists()
+    has_lidar_img = diag_png_path is not None and diag_png_path.exists()
+    b64 = ""
+    has_os_panel = False
+    if has_lidar_img and diag_png_path is not None:
+        b64, has_os_panel = make_zoomed_crop_b64(
+            diag_png_path,
+            lat=cand.get("lat"),
+            lon=cand.get("lon"),
+        )
+    elif cand.get("lat") is not None and cand.get("lon") is not None:
+        os_only = fetch_historic_os_crop(float(cand["lat"]), float(cand["lon"]), zoom=16, crop_px=256)
+        if os_only is not None:
+            buf = io.BytesIO()
+            os_only.save(buf, format="PNG")
+            b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+            has_os_panel = True
+
+    has_img = bool(b64)
+    if has_lidar_img and has_os_panel:
+        panel_desc = (
+            "Left = 80m x 80m 1m LiDAR Bare-Earth Slope; Center = 80m x 80m 1m LiDAR 16m Local Relief (yellow=raised, blue=sunken); "
+            "Right = 1888-1913 Historic Ordnance Survey 6-Inch Map (red reticle marks the candidate location)"
+        )
+    elif has_lidar_img:
+        panel_desc = "Left = 80m x 80m 1m LiDAR Bare-Earth Slope; Right = 80m x 80m 1m LiDAR 16m Local Relief (yellow=raised, blue=sunken)"
+    else:
+        panel_desc = "1888-1913 Historic Ordnance Survey 6-Inch Map (red reticle marks the candidate location)"
+
     shape_prefix_instr = (
         "First output one tag: [SHAPE: RECTILINEAR_OR_U_BUND] (if the earthwork inside the circle in the 80m x 80m close-up "
         "has straight/square 90-degree corners, a flat rectangular reservoir/building platform, or a U-shaped bank wrapping a dark blue sunken pit), "
-        "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if it is clearly a modern road/track embankment, quarry scoop, military gun-pit, active coastal sand-dune blowout, or utility feature), "
-        "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound or ring). "
+        "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if the LiDAR or the Right 1888 OS map panel shows it is clearly a modern road/track embankment, "
+        "quarry scoop, plantation/field boundary corner, military gun-pit, active coastal sand-dune blowout, or utility feature), "
+        "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound, ring, or hachured antiquity labeled 'Camp'/'Tumulus' on the 1888 OS map). "
         if has_img
         else ""
     )
@@ -731,17 +1012,16 @@ def query_local_vlm_academic_context(
         f"Nearby Environmental & Land-Use Features (OSM within 400 m):\n{env_block}\n"
         f"Site-Specific Geomorphic, Geological & Land-Use False-Positive Considerations:\n{fp_block}\n\n"
         f"{shape_prefix_instr}"
-        "Then write a concise 3-sentence (maximum 95 words total) academic landscape-archaeology and 1m LiDAR morphological assessment of this site. "
+        "Then write a concise 3-sentence (maximum 95 words total) academic landscape-archaeology, 1m LiDAR, and 1888 Ordnance Survey map assessment of this site. "
         "Sentence 1: Landscape/geological setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
-        "Sentence 2: Critical morphological reading of the 1m LiDAR close-up (Left=Bare-Earth Slope, Right=16m Local Relief where yellow is raised and blue is sunken) and measurements. "
-        "Sentence 3: Specific archaeological vs. geomorphic/environmental false-positive evaluation — explicitly address the supplied site-specific false-positive hazards "
-        "(e.g. whether a nearby meandering river/stream could explain the mark as a scroll-bar or oxbow palaeochannel, whether shifting Holocene coastal sand dunes preclude survival of unburied Roman/Bronze Age earthworks, or whether karst sinkholes, mining bell-pits, military/airfield works, golf features, or farm ponds apply) and state the required historic map/BGS/HER check. "
+        f"Sentence 2: Critical morphological reading of the image panels ({panel_desc}) and measurements. "
+        "Sentence 3: Specific 1888 Historic OS map & false-positive evaluation — read any text labels or symbols at/near the red reticle on the Right 1888 OS map panel "
+        "(e.g. whether it is explicitly labeled 'Camp', 'Tumulus', or 'Roman Road' with earthwork hachures, OR whether the 1888 OS map reveals a Plantation boundary, Old Quarry, Gravel/Marl Pit, Reservoir, Farm enclosure, or unmapped 20th-century utility/forestry confounder) and state your verdict. "
         "Use plain, rigorous British archaeological prose with no bullet points, no markdown headers, and no invented facts."
     )
 
     user_content: object
-    if has_img and diag_png_path is not None:
-        b64 = make_zoomed_crop_b64(diag_png_path)
+    if has_img and b64:
         user_content = [
             {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}},
             {"type": "text", "text": prompt_text},
@@ -755,9 +1035,9 @@ def query_local_vlm_academic_context(
             {
                 "role": "system",
                 "content": (
-                    "You are a senior British landscape archaeologist and critical 1m LiDAR specialist inspecting a 3x-magnified 80m x 80m close-up "
-                    "(Left=Bare-Earth Slope where dark is steep scarp; Right=16m Local Relief where yellow is raised bank/mound and blue is sunken pit/hollow). "
-                    "You write concise, complete 3-sentence site assessments (under 90 words) using only the supplied NHLE records and 1m LiDAR imagery/measurements."
+                    "You are a senior British landscape archaeologist, 1m LiDAR specialist, and Historic Ordnance Survey cartographic analyst inspecting a multi-panel close-up "
+                    f"({panel_desc}). "
+                    "You write concise, complete 3-sentence site assessments (under 95 words) using only the supplied NHLE records, 1m LiDAR imagery/measurements, and 1888 OS 6-Inch map panel."
                 ),
             },
             {"role": "user", "content": user_content},
@@ -920,7 +1200,11 @@ def enrich_candidates_with_archaeological_context(
 
         is_priority_unid = (
             cat == "unidentified_candidate"
-            and bool(cand.get("passes_fpr_0_01"))
+            and (
+                bool(cand.get("passes_fpr_0_01"))
+                or bool(cand.get("diagnostic_png"))
+                or cand.get("target_domain") == "roman"
+            )
         )
         if is_priority_unid and vlm_calls < max_vlm_calls:
             diag_p: Optional[Path] = None
@@ -932,7 +1216,7 @@ def enrich_candidates_with_archaeological_context(
             vlm_calls += 1
             if res_vlm:
                 vlm_note, shape_tag = res_vlm
-                src = "qwen3.8_vlm_vision" if diag_p is not None else "qwen3.8_llm"
+                src = "qwen3.8_vlm_vision" if (diag_p is not None or cand.get("lat") is not None) else "qwen3.8_llm"
                 cand["arch_context_note"] = vlm_note
                 cand["arch_context_source"] = src
                 cand["vlm_shape_verdict"] = shape_tag

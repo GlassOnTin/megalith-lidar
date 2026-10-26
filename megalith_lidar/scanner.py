@@ -315,6 +315,13 @@ def extract_candidates_from_tile(
                 best_cls_idx = 3  # cross_ridge_dyke_field_system
             else:
                 best_cls_idx = 2  # iron_age_hillfort_banjo_enclosure
+        elif target_domain == "roman":
+            if elongation >= 2.25:
+                best_cls_idx = 2  # roman_road_agger_trackway
+            elif area_m2 <= 1450.0:
+                best_cls_idx = 1  # roman_villa_building
+            else:
+                best_cls_idx = 3  # roman_fort_camp_settlement
 
         py0, py1 = max(0, int(cy_px) - 48), min(h, int(cy_px) + 48)
         px0, px1 = max(0, int(cx_px) - 48), min(w, int(cx_px) + 48)

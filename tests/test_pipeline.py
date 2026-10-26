@@ -776,11 +776,78 @@ def test_megalithic_portal_correlation():
     assert cands[1]["osm_confounder_matches"][0]["osm_id"] == "megalithic.co.uk/sid=13823"
 
 
+def test_roman_historic_os_vlm_and_physical_confounder_filtering():
+    from megalith_lidar.arch_context import classify_vlm_note_downrating
 
+    # 1. Historic 1888 OS 6-Inch map antiquity confirmation ('Camp' at Whinny Knowe NU 07465 28090)
+    whinny_cand = {
+        "os_grid_ref": "NU 07465 28090",
+        "easting": 407465.0,
+        "northing": 628090.0,
+        "target_domain": "roman",
+        "predicted_class": "roman_fort_camp_settlement",
+        "area_m2": 8958.0,
+        "elongation": 1.33,
+        "est_local_relief_m": 1.84,
+        "est_surface_prominence_m": 6.58,
+    }
+    tier_ok, mult_ok, reason_ok = classify_vlm_note_downrating(
+        "The 1m LiDAR panels reveal a smooth, oval earthwork footprint of 8958 m2 with a +1.84 m raised scarp, "
+        "while the 1888 OS map explicitly labels the red reticle as a hachured 'Camp'.",
+        "ROUNDED_MOUND_OR_RING",
+        whinny_cand,
+    )
+    assert tier_ok == "PLAUSIBLE_MONUMENT"
+    assert mult_ok == 1.0
+    assert reason_ok is None
 
+    # 2. VLM / Historic 1888 OS rejection of non-rectilinear / Bridle Road / forestry confounder
+    reject_cand = {
+        "os_grid_ref": "SP 53290 35068",
+        "easting": 453290.0,
+        "northing": 235068.0,
+        "target_domain": "roman",
+        "predicted_class": "roman_road_agger_trackway",
+        "area_m2": 4431.0,
+        "elongation": 3.12,
+        "est_local_relief_m": 0.70,
+        "est_surface_prominence_m": 2.14,
+    }
+    tier_rej, mult_rej, reason_rej = classify_vlm_note_downrating(
+        "The 1888 OS map explicitly labels the red reticle as a 'B.R.' (Branch Road) with dashed lines, "
+        "confirming the feature is a historic trackway or road embankment rather than an unmapped antiquity.",
+        "RECTILINEAR_OR_U_BUND",
+        reject_cand,
+    )
+    assert tier_rej == "OBVIOUS_FALSE_POSITIVE"
+    assert mult_rej == 0.35
+    assert reason_rej is not None
 
-
-
-
-
+    # 3. Intrinsic 1m LiDAR Roman physical confounder checks in osm_context
+    roman_phys_cands = [
+        {
+            "easting": 434857.0,
+            "northing": 376169.0,
+            "area_m2": 17105.0,
+            "est_local_relief_m": 0.96,
+            "max_positive_relief_m": 0.96,
+            "est_surface_prominence_m": 0.0,
+            "mean_slope_tangent": 0.068,
+            "is_known_monument": False,
+        },
+        {
+            "easting": 407465.0,
+            "northing": 628090.0,
+            "area_m2": 8958.0,
+            "est_local_relief_m": 1.84,
+            "max_positive_relief_m": 1.84,
+            "patch_min_relief_m": -0.25,
+            "est_surface_prominence_m": 6.58,
+            "mean_slope_tangent": 0.104,
+            "is_known_monument": False,
+        },
+    ]
+    annotate_candidates_with_spatial_context(roman_phys_cands, None, target_domain="roman")
+    assert roman_phys_cands[0]["context_category"] == "flagged_modern_or_karst_confounder"
+    assert roman_phys_cands[1]["context_category"] == "unidentified_candidate"
 

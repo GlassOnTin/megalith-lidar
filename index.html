@@ -877,9 +877,9 @@
                 <option value="field_rejected_confounder">✗ Field-Rejected Confounder</option>
               </select>
             </label>
-            <label title="Only show candidates that have a pre-rendered 4-panel 1 m LiDAR PNG">
+            <label title="Only show candidates that have a pre-rendered 4-panel 1 m LiDAR diagnostic view">
               <input type="checkbox" id="chkOnlyDiag" />
-              Has LiDAR PNG
+              Has 4-Panel LiDAR
             </label>
           </div>
           <details class="inline-drawer" style="padding:4px 8px;">
@@ -1040,6 +1040,10 @@
                   <input type="checkbox" id="chkAerialBasemap" />
                   Aerial Basemap
                 </label>
+                <label title="Overlay 1888–1913 Ordnance Survey Six-Inch to the Mile historic map (zoom ≤ 17)">
+                  <input type="checkbox" id="chkHistoricOsBasemap" />
+                  1888 OS 6-Inch Map
+                </label>
               </div>
             </details>
           </div>
@@ -1067,6 +1071,11 @@
     const aerialBaseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
       attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    });
+    const historicOsBaseLayer = L.tileLayer("https://api.maptiler.com/tiles/uk-osgb1888/{z}/{x}/{y}?key=7Y0Q1ck46BnB8cXXXg8X", {
+      maxZoom: 19,
+      maxNativeZoom: 17,
+      attribution: "Historic OS Six-Inch (1888–1913) &copy; National Library of Scotland"
     });
 
     map.createPane("densityPane");
@@ -2014,6 +2023,70 @@
         if (mReadout) mReadout.textContent = `Cropmark Bandpass (16 m) — ${readoutStr}`;
       };
       img.src = url;
+
+      // Render Panel 7: 1888-1913 Historic Ordnance Survey 6-Inch Map centered on (p.lat, p.lon)
+      if (p.lat != null && p.lon != null) {
+        const zoom = 16;
+        const latRad = (Number(p.lat) * Math.PI) / 180.0;
+        const nTiles = Math.pow(2.0, zoom);
+        const xtileF = ((Number(p.lon) + 180.0) / 360.0) * nTiles;
+        const ytileF = ((1.0 - Math.log(Math.tan(latRad) + 1.0 / Math.cos(latRad)) / Math.PI) / 2.0) * nTiles;
+        const cxTile = Math.floor(xtileF);
+        const cyTile = Math.floor(ytileF);
+        const pxInTile = Math.round((xtileF - cxTile) * 256);
+        const pyInTile = Math.round((ytileF - cyTile) * 256);
+        const dxStart = pxInTile < 128 ? -1 : 0;
+        const dyStart = pyInTile < 128 ? -1 : 0;
+
+        const osOff = document.createElement("canvas");
+        osOff.width = 512;
+        osOff.height = 512;
+        const osCtx = osOff.getContext("2d");
+        osCtx.fillStyle = "#f2ece1";
+        osCtx.fillRect(0, 0, 512, 512);
+        let loadedCount = 0;
+
+        const finishHistoricOs = () => {
+          if (reqId !== currentAerialReqId) return;
+          const centerX = (-dxStart) * 256 + pxInTile;
+          const centerY = (-dyStart) * 256 + pyInTile;
+          [document.getElementById("desktopHistoricOsCanvas"), document.getElementById("mobileHistoricOsCanvas")].forEach((canv) => {
+            if (!canv) return;
+            const c = canv.getContext("2d");
+            c.drawImage(osOff, centerX - 128, centerY - 128, 256, 256, 0, 0, 256, 256);
+            c.strokeStyle = "#b91c1c";
+            c.lineWidth = 2;
+            c.beginPath();
+            c.arc(128, 128, 18, 0, 2 * Math.PI);
+            c.stroke();
+            c.beginPath();
+            c.moveTo(102, 128); c.lineTo(110, 128);
+            c.moveTo(146, 128); c.lineTo(154, 128);
+            c.moveTo(128, 102); c.lineTo(128, 110);
+            c.moveTo(128, 146); c.lineTo(128, 154);
+            c.stroke();
+          });
+        };
+
+        for (let ix = 0; ix < 2; ix++) {
+          for (let iy = 0; iy < 2; iy++) {
+            const tx = cxTile + dxStart + ix;
+            const ty = cyTile + dyStart + iy;
+            const tImg = new Image();
+            tImg.crossOrigin = "anonymous";
+            tImg.onload = () => {
+              osCtx.drawImage(tImg, ix * 256, iy * 256, 256, 256);
+              loadedCount++;
+              if (loadedCount === 4) finishHistoricOs();
+            };
+            tImg.onerror = () => {
+              loadedCount++;
+              if (loadedCount === 4) finishHistoricOs();
+            };
+            tImg.src = `https://api.maptiler.com/tiles/uk-osgb1888/${zoom}/${tx}/${ty}?key=7Y0Q1ck46BnB8cXXXg8X`;
+          }
+        }
+      }
     }
 
     function selectCandidate(p, zoomMap = true, scrollRow = false) {
@@ -2070,6 +2143,7 @@
         ? topMp.url
         : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
       const mpMapUrl = `https://www.megalithic.co.uk/leaflet_megalith_map.php#15/${Number(p.lat).toFixed(5)}/${Number(p.lon).toFixed(5)}`;
+      const nlsUrl = `https://maps.nls.uk/geo/explore/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&b=1&o=100`;
       const copyPayload = `${p.os_grid_ref} | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} | WGS84 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
       const mobileDock = document.getElementById("tableBottomLidarDock");
       const hasPng = Boolean(p.diagnostic_png);
@@ -2082,7 +2156,8 @@
         "3. Canopy",
         "4. Model Prob",
         "5. Aerial RGB",
-        "6. Cropmark ΔExG"
+        "6. Cropmark ΔExG",
+        "7. 1888 OS Map"
       ];
       const radiosHtml = radioLabels.map((lbl, idx) => {
         const disabled = (!hasPng && idx < 4) ? "disabled" : "";
@@ -2119,6 +2194,10 @@
           <strong>Panel 6: 16 m Scale-Space Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
           Green = +ΔExG moisture-retaining ring-ditch cropmark; Red/Magenta = +ΔL chalk/gravel soilmark or parched bank.
         </div>
+        <div data-panel-desc="6" class="${effectivePanel === 6 ? "active-panel-desc" : ""}">
+          <strong>Panel 7: 1888–1913 Historic OS 6-Inch Map</strong>
+          19th-century Ordnance Survey mapping (NLS): shows Gothic antiquity labels ('Camp', 'Tumulus') or Victorian quarries, pits &amp; plantations.
+        </div>
       `;
 
       if (mobileDock) {
@@ -2134,11 +2213,17 @@
             ${hasPng ? `<img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;display:${effectivePanel < 4 ? 'block' : 'none'};" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />` : ""}
             <canvas id="mobileAerialCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 4 ? 'block' : 'none'};"></canvas>
             <canvas id="mobileCropmarkCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 5 ? 'block' : 'none'};"></canvas>
+            <canvas id="mobileHistoricOsCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 6 ? 'block' : 'none'};"></canvas>
           </div>
           <div class="panel-legend" id="panelLegendBox">
             ${legendItemsHtml}
           </div>
           <div id="mobileCropmarkReadout" class="muted" style="margin-top:5px;font-size:12px;"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener">${topMp ? `Megalithic.co.uk: ${topMp.name} (#${topMp.sid}, ${topMp.distance_m} m) ↗` : "Search Megalithic.co.uk ↗"}</a>
+            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener">Megalithic.co.uk Map ↗</a>
+            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${nlsUrl}" target="_blank" rel="noopener">1888 OS Map (NLS) ↗</a>
+          </div>
         `;
       }
 
@@ -2164,6 +2249,7 @@
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${heUrl}" target="_blank" rel="noopener">NHLE ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk ↗"}</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${nlsUrl}" target="_blank" rel="noopener" title="Open 1888–1913 Historic Ordnance Survey 6-Inch Map on National Library of Scotland">1888 OS ↗</a>
           </div>
         </div>
         ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:var(--green-soft);border:1px solid var(--green-border);border-radius:4px;font-size:12.5px;">${p.case_study_note}</div>` : ""}
@@ -2172,27 +2258,58 @@
             <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
           ` : `
             <div style="margin-top:8px;padding:7px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:12px;" class="muted">
-              No 4-panel LiDAR PNG cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto &amp; 16 m Scale-Space Cropmark panels below.
+              No 4-panel LiDAR PNG cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto, 16 m Scale-Space Cropmark &amp; 1888 OS 6-Inch Map panels below.
             </div>
           `}
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-top:8px;">
             <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 5: Aerial Orthophoto (256 m × 256 m)</strong>
-                <span class="muted">EPSG:27700</span>
+                <strong>Panel 5: Aerial RGB</strong>
+                <span class="muted" style="font-size:10.5px;">256 m BNG</span>
               </div>
               <canvas id="desktopAerialCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
             </div>
             <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 6: 16 m Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
-                <span id="desktopCropmarkReadout" class="muted" style="font-size:11px;">Computing...</span>
+                <strong>Panel 6: 16 m Cropmark</strong>
+                <span id="desktopCropmarkReadout" class="muted" style="font-size:10px;">Computing...</span>
               </div>
               <canvas id="desktopCropmarkCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
             </div>
+            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
+                <strong>Panel 7: 1888 OS 6-Inch</strong>
+                <a href="${nlsUrl}" target="_blank" rel="noopener" style="font-size:10.5px;font-weight:600;">Full NLS Map ↗</a>
+              </div>
+              <canvas id="desktopHistoricOsCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#f2ece1;display:block;"></canvas>
+            </div>
+            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
+                  <strong>Megalithic.co.uk &amp; OS</strong>
+                  <span class="badge ${topMp ? 'badge-nhle' : 'badge-unid'}" style="font-size:10px;padding:1px 5px;">${topMp ? `${p.megalithic_portal_matches.length} within 250m` : "Unlisted"}</span>
+                </div>
+                <div style="font-size:11.5px;line-height:1.35;margin-bottom:6px;">
+                  ${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0)
+                    ? p.megalithic_portal_matches.slice(0, 3).map((mp) => `
+                        <div style="padding:3px 0;border-bottom:1px dashed var(--border);">
+                          <a href="${mp.url}" target="_blank" rel="noopener" style="font-weight:600;">${mp.name}</a>
+                          <div class="muted" style="font-size:10.5px;">${mp.site_type} · <strong>${mp.distance_m} m</strong>${mp.accuracy ? ` · acc ${mp.accuracy}/5` : ""}</div>
+                        </div>
+                      `).join("")
+                    : `<div class="muted" style="padding:4px 0;">No recorded <em>Megalithic.co.uk</em> entry within 250 m of <strong>${p.os_grid_ref}</strong>.</div>`
+                  }
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${mpUrl}" target="_blank" rel="noopener">${topMp ? `Open #${topMp.sid} on Megalithic.co.uk ↗` : `Search ${p.os_grid_ref} on Megalithic.co.uk ↗`}</a>
+                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${mpMapUrl}" target="_blank" rel="noopener">Megalithic.co.uk Interactive Map ↗</a>
+                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${nlsUrl}" target="_blank" rel="noopener">1888 OS 6-Inch Viewer (NLS) ↗</a>
+              </div>
+            </div>
           </div>
           <details class="inline-drawer" style="margin-top:8px;">
-            <summary style="font-size:12px;"><span class="muted">Panel Guide: 1. Bare-Earth Slope · 2. 16 m Local Relief · 3. Canopy · 4. Model Prob · 5. Aerial RGB · 6. Cropmark ΔExG</span></summary>
+            <summary style="font-size:12px;"><span class="muted">Panel Guide: 1. Bare-Earth Slope · 2. 16 m Local Relief · 3. Canopy · 4. Model Prob · 5. Aerial RGB · 6. Cropmark ΔExG · 7. 1888 OS Map</span></summary>
             <div class="panel-legend" style="grid-template-columns:repeat(3, 1fr);margin-top:4px;">
               ${legendItemsHtml}
             </div>
@@ -2304,6 +2421,7 @@
             const imgEl = document.getElementById("diagImgEl");
             const mobAer = document.getElementById("mobileAerialCanvas");
             const mobCrop = document.getElementById("mobileCropmarkCanvas");
+            const mobHistOs = document.getElementById("mobileHistoricOsCanvas");
             if (imgEl) {
               if (idx < 4) {
                 imgEl.style.display = "block";
@@ -2314,6 +2432,7 @@
             }
             if (mobAer) mobAer.style.display = idx === 4 ? "block" : "none";
             if (mobCrop) mobCrop.style.display = idx === 5 ? "block" : "none";
+            if (mobHistOs) mobHistOs.style.display = idx === 6 ? "block" : "none";
             switcher.querySelectorAll(".mobile-panel-radio").forEach((lbl) => {
               lbl.classList.toggle("active-radio", parseInt(lbl.dataset.panelIdx, 10) === idx);
             });
@@ -2712,6 +2831,11 @@
         const st = scoreScaledStyle(p.confidence, sMin, sMax, p);
 
         const rowCopyText = `${p.os_grid_ref} (${p.county || "England"}) | ${formatClass(p.predicted_class)} | score=${p.confidence.toFixed(3)} | relief=${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m | area=${p.area_m2} m² | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) | ${contextNote(p)}`;
+        const rowTopMp = (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? p.megalithic_portal_matches[0] : null;
+        const rowMpUrl = rowTopMp
+          ? rowTopMp.url
+          : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
+        const rowNlsUrl = `https://maps.nls.uk/geo/explore/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&b=1&o=100`;
         const tr = document.createElement("tr");
         tr.className = "cand-row" + (key === selectedFeatureKey ? " selected-row" : "");
         tr.dataset.key = key;
@@ -2728,7 +2852,7 @@
           <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR PNG available">PNG</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? ` <span class="badge ${p.megalithic_portal_matches[0].distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" title="Megalithic.co.uk #${p.megalithic_portal_matches[0].sid}: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)">MP</span>` : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
+          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR diagnostic view available">Lidar</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.85;" title="Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}">1888 OS</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
           <td class="muted"><div class="note-truncate" title="${contextNote(p).replace(/"/g, '&quot;')}">${contextNote(p)}</div></td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");
@@ -3114,15 +3238,31 @@
         btnSubmitPr.addEventListener("click", () => copyAndOpenGithubPr(btnSubmitPr));
       }
       const chkAerial = document.getElementById("chkAerialBasemap");
+      const chkHistOs = document.getElementById("chkHistoricOsBasemap");
+      function updateBasemapLayers() {
+        const useHist = chkHistOs && chkHistOs.checked;
+        const useAer = chkAerial && chkAerial.checked;
+        if (map.hasLayer(osmBaseLayer)) map.removeLayer(osmBaseLayer);
+        if (map.hasLayer(aerialBaseLayer)) map.removeLayer(aerialBaseLayer);
+        if (map.hasLayer(historicOsBaseLayer)) map.removeLayer(historicOsBaseLayer);
+        if (useHist) {
+          historicOsBaseLayer.addTo(map);
+        } else if (useAer) {
+          aerialBaseLayer.addTo(map);
+        } else {
+          osmBaseLayer.addTo(map);
+        }
+      }
       if (chkAerial) {
         chkAerial.addEventListener("change", () => {
-          if (chkAerial.checked) {
-            if (map.hasLayer(osmBaseLayer)) map.removeLayer(osmBaseLayer);
-            if (!map.hasLayer(aerialBaseLayer)) aerialBaseLayer.addTo(map);
-          } else {
-            if (map.hasLayer(aerialBaseLayer)) map.removeLayer(aerialBaseLayer);
-            if (!map.hasLayer(osmBaseLayer)) osmBaseLayer.addTo(map);
-          }
+          if (chkAerial.checked && chkHistOs) chkHistOs.checked = false;
+          updateBasemapLayers();
+        });
+      }
+      if (chkHistOs) {
+        chkHistOs.addEventListener("change", () => {
+          if (chkHistOs.checked && chkAerial) chkAerial.checked = false;
+          updateBasemapLayers();
         });
       }
 

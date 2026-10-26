@@ -1215,6 +1215,62 @@ def annotate_candidates_with_spatial_context(
                     "inside_polygon": True,
                 }
             )
+        elif target_domain == "roman":
+            if area_m2 > 11500.0 or area_m2 < 240.0:
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/whole_tile_blob",
+                        "subtype": f"oversized_floodplain_or_field_blob (area={area_m2:.0f}m2)",
+                        "name": "Oversized floodplain terrace, whole-field texture blob, or micro-bump",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+            elif ndsm_m > 12.0 or (ndsm_m > 2.5 and rel_m < 0.45):
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/ndsm",
+                        "subtype": f"canopy_or_structure (nDSM={ndsm_m:.2f}m, relief={rel_m:+.2f}m)",
+                        "name": "Commercial forestry canopy or standing structure without bare-earth rampart",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+            elif (
+                slope_m > 0.135
+                or max_pos_rel_m > 2.10
+                or abs(rel_m) > 2.10
+                or patch_min_rel_m <= -0.35
+            ):
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/scarp_or_meander",
+                        "subtype": (
+                            f"quarry_scoop_or_steep_scarp "
+                            f"(relief={rel_m:+.2f}m, min={patch_min_rel_m:+.2f}m, slope={slope_m:.3f})"
+                        ),
+                        "name": "Quarry scoop, sunken pit/pond, river scarp, or modern embankment",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
+            elif ridge_span_m >= 95.0 and channel_span_m >= 75.0:
+                osm_conf.append(
+                    {
+                        "osm_id": "lidar/meander_scroll_bar",
+                        "subtype": (
+                            f"fluvial_meander_or_palaeochannel_scroll_bar "
+                            f"(ridge={ridge_span_m:.0f}m, channel={channel_span_m:.0f}m)"
+                        ),
+                        "name": "Fluvial meander scroll-bar, levee ridge, or palaeochannel bank",
+                        "wikidata": None,
+                        "distance_m": 0.0,
+                        "inside_polygon": True,
+                    }
+                )
         if rel_m < -0.15 or max_pos_rel_m < (0.20 if is_roman else min_positive_relief_m):
             osm_conf.append(
                 {
