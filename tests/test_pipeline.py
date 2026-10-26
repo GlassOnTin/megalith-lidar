@@ -930,6 +930,22 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert "🇬🇧 ⛰ England LiDAR Terrain 1m (EA)" in map_source_names
         assert "UK 1888 OS 6-Inch Map" in map_source_names
         assert "Roman Empire Atlas (DARE)" in map_source_names
+        roads_gpx_txt = zf.read("tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx").decode("utf-8")
+        assert "<osmand:show_start_finish>false</osmand:show_start_finish>" in roads_gpx_txt
+
+    from pathlib import Path
+    from scripts.export_osmand_plugin import build_ancient_roads_gpx_xml
+
+    real_roads_gj = Path(__file__).resolve().parents[1] / "docs" / "roman_and_ancient_roads.geojson"
+    if real_roads_gj.exists():
+        roads_xml = build_ancient_roads_gpx_xml(real_roads_gj, "2026-10-26T00:00:00Z")
+        r_root = ET.fromstring(roads_xml)
+        ns = {"g": "http://www.topografix.com/GPX/1/1"}
+        trksegs = r_root.findall(".//g:trkseg", ns)
+        trkpts = r_root.findall(".//g:trkpt", ns)
+        assert len(trksegs) <= 260
+        assert len(trkpts) <= 3500
+
 
 
 

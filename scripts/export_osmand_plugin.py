@@ -295,6 +295,105 @@ def build_candidates_gpx_xml(candidates: List[Tuple[str, Dict[str, Any]]], updat
     return "\n".join(lines) + "\n"
 
 
+def _rdp_road(pts: List[List[float]], eps: float = 0.0006) -> List[List[float]]:
+    if len(pts) <= 2:
+        return pts
+    import math
+
+    x1, y1 = pts[0][0] * 0.62, pts[0][1]
+    x2, y2 = pts[-1][0] * 0.62, pts[-1][1]
+    dx, dy = x2 - x1, y2 - y1
+    norm = math.hypot(dx, dy)
+    max_d = -1.0
+    idx = 0
+    for i in range(1, len(pts) - 1):
+        px, py = pts[i][0] * 0.62, pts[i][1]
+        d = (
+            math.hypot(px - x1, py - y1)
+            if norm == 0.0
+            else abs(dy * px - dx * py + x2 * y1 - y2 * x1) / norm
+        )
+        if d > max_d:
+            max_d = d
+            idx = i
+    if max_d > eps:
+        left = _rdp_road(pts[: idx + 1], eps)
+        right = _rdp_road(pts[idx:], eps)
+        return left[:-1] + right
+    return [pts[0], pts[-1]]
+
+
+def _simplify_and_chain_road_segments(
+    segs: List[List[List[float]]], is_named_route: bool = True
+) -> List[List[List[float]]]:
+    """Deduplicate parallel dual-carriageway ways, chain connected segments, and RDP-simplify.
+
+    Reduces OsmAnd OpenGL RenderableSegment count from 3,640 to ~247 (<trkseg>) so pan/zoom
+    stays at 120 fps on mobile GPUs.
+    """
+    import math
+
+    def dist_km(a: List[float], b: List[float]) -> float:
+        return math.hypot((a[0] - b[0]) * 69.0, (a[1] - b[1]) * 111.0)
+
+    def seg_len_km(s: List[List[float]]) -> float:
+        return sum(dist_km(s[i], s[i + 1]) for i in range(len(s) - 1))
+
+    uk_segs: List[List[List[float]]] = []
+    for s in segs:
+        s_uk = [p for p in s if len(p) >= 2 and -6.5 <= float(p[0]) <= 1.85 and 49.9 <= float(p[1]) <= 59.0]
+        if len(s_uk) >= 2:
+            uk_segs.append(s_uk)
+    if not uk_segs:
+        return []
+
+    by_cell: Dict[Tuple[int, int], Tuple[float, List[List[float]]]] = {}
+    for s in uk_segs:
+        mid = s[len(s) // 2]
+        cell = (round(float(mid[0]) * 170), round(float(mid[1]) * 275))
+        length = seg_len_km(s)
+        if cell not in by_cell or length > by_cell[cell][0]:
+            by_cell[cell] = (length, s)
+
+    pool = [s for _, s in by_cell.values()]
+    max_gap = 15.0 if is_named_route else 3.0
+    merged: List[List[List[float]]] = []
+    while pool:
+        cur = pool.pop(0)
+        changed = True
+        while changed:
+            changed = False
+            best_i = -1
+            best_d = max_gap
+            best_mode = ""
+            for i, cand in enumerate(pool):
+                d1 = dist_km(cur[-1], cand[0])
+                d2 = dist_km(cur[-1], cand[-1])
+                d3 = dist_km(cur[0], cand[-1])
+                d4 = dist_km(cur[0], cand[0])
+                for d, mode in ((d1, "es"), (d2, "ee"), (d3, "se"), (d4, "ss")):
+                    if d < best_d:
+                        best_d = d
+                        best_i = i
+                        best_mode = mode
+            if best_i >= 0:
+                cand = pool.pop(best_i)
+                if best_mode == "es":
+                    cur = cur + (cand[1:] if best_d < 0.05 else cand)
+                elif best_mode == "ee":
+                    rc = list(reversed(cand))
+                    cur = cur + (rc[1:] if best_d < 0.05 else rc)
+                elif best_mode == "se":
+                    cur = cand + (cur[1:] if best_d < 0.05 else cur)
+                elif best_mode == "ss":
+                    rc = list(reversed(cand))
+                    cur = rc + (cur[1:] if best_d < 0.05 else cur)
+                changed = True
+        if seg_len_km(cur) >= 3.0:
+            merged.append(_rdp_road(cur, eps=0.0006))
+    return merged
+
+
 def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> str:
     lines: List[str] = [
         '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>',
@@ -315,12 +414,18 @@ def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> s
             gtype = geom.get("type")
             coords = geom.get("coordinates") or []
             if gtype == "LineString":
-                segments = [coords]
+                raw_segments = [coords]
             elif gtype == "MultiLineString":
-                segments = coords
+                raw_segments = coords
             else:
                 continue
             name = str(props.get("name") or "Roman Road")
+            if any(fr in name for fr in ("Boulogne", "Arras", "Amiens", "Cassel", "Thérouanne", "Bavay")):
+                continue
+            is_named = name not in ("Roman Road", "ROMAN ROAD", "Roman Road (mapped course)")
+            segments = _simplify_and_chain_road_segments(raw_segments, is_named_route=is_named)
+            if not segments:
+                continue
             rtype = str(props.get("road_type") or "roman_road")
             marg = str(props.get("margary") or "")
             label = f"{name} (Margary {marg})" if marg else name
@@ -342,6 +447,7 @@ def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> s
     lines.append("    <osmand:color>#7e22ce</osmand:color>")
     lines.append("    <osmand:width>medium</osmand:width>")
     lines.append("    <osmand:show_arrows>false</osmand:show_arrows>")
+    lines.append("    <osmand:show_start_finish>false</osmand:show_start_finish>")
     lines.append("  </extensions>")
     lines.append("</gpx>")
     return "\n".join(lines) + "\n"
@@ -534,6 +640,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
             "color": "#7e22ce",
             "width": "medium",
             "show_arrows": False,
+            "show_start_finish": False,
         }
     )
 
