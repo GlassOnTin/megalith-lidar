@@ -147,8 +147,9 @@
 
     /* Start-here onboarding bar */
     .guide-bar {
-      max-width: 1800px;
-      margin: 10px auto 0 auto;
+      width: 100%;
+      max-width: none;
+      margin: 10px 0 0 0;
       padding: 0 14px;
     }
     .guide-inner {
@@ -172,11 +173,12 @@
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
       gap: 14px;
       padding: 12px 14px 16px 14px;
-      max-width: 1800px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: none;
+      margin: 0;
     }
     .layout > div {
       min-width: 0;
@@ -383,8 +385,12 @@
     .table-scroll {
       max-height: 420px;
       overflow-y: auto;
+      overflow-x: auto;
       border: 1px solid var(--border);
       border-radius: 4px;
+    }
+    #candidateListContainer {
+      max-height: max(680px, calc(100vh - 230px));
     }
 
     .badge {
@@ -538,7 +544,8 @@
         font-size: 13px;
         padding: 5px 9px;
       }
-      .table-scroll {
+      .table-scroll,
+      #candidateListContainer {
         width: 100%;
         max-width: 100%;
         min-width: 0;
@@ -746,10 +753,9 @@
       border-bottom: 1px solid var(--border);
     }
     .note-truncate {
-      max-width: 260px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: none;
+      white-space: normal;
+      line-height: 1.35;
     }
     footer {
       padding: 12px 20px;
@@ -784,8 +790,8 @@
     </div>
   </header>
 
-  <details class="guide-bar" style="padding:8px 20px;cursor:pointer;">
-    <summary style="max-width:1680px;margin:0 auto;font-size:12.5px;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;">
+  <details class="guide-bar" style="padding:8px 14px;cursor:pointer;">
+    <summary style="width:100%;margin:0;font-size:12.5px;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;">
       <span><strong>Quick-Start Guide &amp; Survey Scope:</strong> Out-of-sample <strong>2 km × 2 km square survey</strong> (<span id="guideAreaSpan">24,424 km² across 6,106 squares</span>) — click any table row or map pin to inspect its 6-panel 1 m LiDAR &amp; 16 m Aerial Cropmark imagery.</span>
       <span class="btn-link" style="padding:2px 8px;font-size:11.5px;white-space:nowrap;">How to use ▾</span>
     </summary>
