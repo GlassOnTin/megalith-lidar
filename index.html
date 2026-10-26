@@ -12,17 +12,83 @@
   />
   <style>
     :root {
+      /* Archaeologist-Friendly Cartographic Parchment & Field-Sheet Palette (Default) */
+      --bg: #f2ece1;
+      --panel: #faf7f0;
+      --panel-alt: #ebe3d3;
+      --border: #d2c6b0;
+      --border-strong: #b5a58a;
+      --text: #26211b;
+      --heading: #15120e;
+      --muted: #655b4d;
+      --gold: #9a4406;
+      --gold-marker: #d97706;
+      --roman: #6d28d9;
+      --iron: #0369a1;
+      --green: #166534;
+      --cyan: #0f766e;
+      --orange: #b93815;
+      --accent: #1b5e6f;
+      --accent-contrast: #faf7f0;
+      --accent-soft: rgba(27, 94, 111, 0.09);
+      --accent-border: rgba(27, 94, 111, 0.34);
+      --gold-soft: rgba(180, 83, 9, 0.12);
+      --gold-border: rgba(180, 83, 9, 0.38);
+      --green-soft: rgba(22, 101, 52, 0.10);
+      --green-border: rgba(22, 101, 52, 0.34);
+      --cyan-soft: rgba(15, 118, 110, 0.10);
+      --cyan-border: rgba(15, 118, 110, 0.34);
+      --orange-soft: rgba(185, 56, 21, 0.10);
+      --orange-border: rgba(185, 56, 21, 0.34);
+      --selected-row-bg: rgba(180, 83, 9, 0.15);
+      --selected-row-outline: rgba(180, 83, 9, 0.50);
+      --selected-row-sticky: #eadcc3;
+      --th-hover-bg: #dfd5c1;
+      --header-bg: #1f2e28;
+      --header-text: #f6f2e9;
+      --header-muted: #c4cebf;
+      --header-link: #8dd5e6;
+      --header-border: #9a4406;
+      --card-shadow: 0 1px 3px rgba(38, 33, 27, 0.06);
+    }
+    html[data-theme="dark"] {
       --bg: #0f1217;
       --panel: #171b22;
       --panel-alt: #1e242d;
       --border: #2b3340;
+      --border-strong: #445063;
       --text: #e6edf3;
+      --heading: #ffffff;
       --muted: #9aa6b5;
       --gold: #ffd600;
+      --gold-marker: #facc15;
+      --roman: #c084fc;
+      --iron: #38bdf8;
       --green: #00e676;
       --cyan: #00d2ff;
       --orange: #ff6e40;
       --accent: #58a6ff;
+      --accent-contrast: #090d12;
+      --accent-soft: rgba(88, 166, 255, 0.12);
+      --accent-border: rgba(88, 166, 255, 0.38);
+      --gold-soft: rgba(255, 214, 0, 0.16);
+      --gold-border: rgba(255, 214, 0, 0.40);
+      --green-soft: rgba(0, 230, 118, 0.14);
+      --green-border: rgba(0, 230, 118, 0.38);
+      --cyan-soft: rgba(0, 210, 255, 0.14);
+      --cyan-border: rgba(0, 210, 255, 0.38);
+      --orange-soft: rgba(255, 110, 64, 0.14);
+      --orange-border: rgba(255, 110, 64, 0.38);
+      --selected-row-bg: rgba(255, 214, 0, 0.14);
+      --selected-row-outline: rgba(255, 214, 0, 0.45);
+      --selected-row-sticky: #2c2a18;
+      --th-hover-bg: #262e3a;
+      --header-bg: #171b22;
+      --header-text: #e6edf3;
+      --header-muted: #9aa6b5;
+      --header-link: #58a6ff;
+      --header-border: #2b3340;
+      --card-shadow: none;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -38,9 +104,10 @@
       line-height: 1.45;
     }
     header {
-      padding: 14px 20px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
+      padding: 13px 20px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      border-bottom: 2px solid var(--header-border);
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -49,13 +116,28 @@
     }
     header h1 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 18.5px;
+      font-weight: 700;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      letter-spacing: 0.01em;
+      color: var(--header-text);
     }
     header .sub {
-      color: var(--muted);
+      color: var(--header-muted);
       font-size: 12.5px;
       margin-top: 2px;
+    }
+    header a {
+      color: var(--header-link);
+    }
+    header .btn-link {
+      background: rgba(255, 255, 255, 0.10);
+      border-color: rgba(255, 255, 255, 0.28);
+      color: var(--header-text);
+    }
+    header .btn-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
     }
     a {
       color: var(--accent);
@@ -66,12 +148,12 @@
     /* Start-here onboarding bar */
     .guide-bar {
       max-width: 1800px;
-      margin: 12px auto 0 auto;
+      margin: 10px auto 0 auto;
       padding: 0 14px;
     }
     .guide-inner {
-      background: rgba(88, 166, 255, 0.07);
-      border: 1px solid rgba(88, 166, 255, 0.3);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
       border-radius: 6px;
       padding: 10px 14px;
       display: grid;
@@ -80,7 +162,7 @@
       font-size: 13px;
     }
     .guide-step strong {
-      color: #fff;
+      color: var(--heading);
       display: block;
       margin-bottom: 2px;
     }
@@ -106,6 +188,7 @@
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
       border-radius: 6px;
       padding: 14px;
       margin-bottom: 14px;
@@ -124,19 +207,23 @@
     }
     .card-header h2 {
       margin: 0;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 15.5px;
+      font-weight: 700;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      color: var(--heading);
     }
     .step-pill {
       display: inline-block;
       background: var(--accent);
-      color: #090d12;
+      color: var(--accent-contrast);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 10.5px;
       padding: 1px 6px;
       border-radius: 3px;
       margin-right: 6px;
       text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     /* Tabs */
@@ -163,16 +250,17 @@
       transition: all 0.12s ease;
     }
     .tab-btn:hover {
-      color: var(--text);
-      border-color: #445063;
+      color: var(--heading);
+      border-color: var(--border-strong);
     }
     .tab-btn.active {
-      background: rgba(88, 166, 255, 0.14);
-      color: #fff;
+      background: var(--accent-soft);
+      color: var(--heading);
       border-color: var(--accent);
     }
     .tab-count {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(128, 120, 105, 0.16);
+      color: var(--text);
       padding: 1px 6px;
       border-radius: 10px;
       font-size: 11px;
@@ -223,6 +311,12 @@
       border-radius: 4px;
       border: 1px solid var(--border);
     }
+    .leaflet-tooltip {
+      background: var(--panel) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border-strong) !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    }
 
     table {
       width: 100%;
@@ -250,8 +344,8 @@
       transition: color 0.12s ease, background 0.12s ease;
     }
     th.sortable:hover {
-      color: #fff;
-      background: #262e3a;
+      color: var(--heading);
+      background: var(--th-hover-bg);
     }
     th.sortable.active-sort {
       color: var(--accent);
@@ -269,12 +363,12 @@
     tr.cand-row td { user-select: text; -webkit-user-select: text; }
     tr.cand-row:hover { background: var(--panel-alt); }
     tr.cand-row.selected-row {
-      background: rgba(255, 214, 0, 0.14);
-      outline: 1px solid rgba(255, 214, 0, 0.45);
+      background: var(--selected-row-bg);
+      outline: 1px solid var(--selected-row-outline);
     }
     .row-copy-btn {
-      background: rgba(88, 166, 255, 0.12);
-      border: 1px solid rgba(88, 166, 255, 0.35);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
       color: var(--accent);
       padding: 2px 6px;
       border-radius: 3px;
@@ -283,8 +377,8 @@
       white-space: nowrap;
     }
     .row-copy-btn:hover {
-      background: rgba(88, 166, 255, 0.25);
-      color: #fff;
+      background: var(--accent);
+      color: var(--accent-contrast);
     }
     .table-scroll {
       max-height: 420px;
@@ -300,10 +394,10 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .badge-unid { background: rgba(255, 214, 0, 0.16); color: var(--gold); border: 1px solid rgba(255, 214, 0, 0.4); }
-    .badge-nhle { background: rgba(0, 230, 118, 0.16); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.4); }
-    .badge-osm  { background: rgba(0, 210, 255, 0.16); color: var(--cyan); border: 1px solid rgba(0, 210, 255, 0.4); }
-    .badge-conf { background: rgba(255, 110, 64, 0.16); color: var(--orange); border: 1px solid rgba(255, 110, 64, 0.4); }
+    .badge-unid { background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold-border); }
+    .badge-nhle { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-border); }
+    .badge-osm  { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan-border); }
+    .badge-conf { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange-border); }
 
     .diag-img {
       width: 100%;
@@ -485,7 +579,7 @@
         z-index: 3;
       }
       tr.cand-row.selected-row td:first-child {
-        background: #2c2a18;
+        background: var(--selected-row-sticky);
       }
       .row-copy-btn {
         font-size: 12px;
@@ -527,9 +621,9 @@
         accent-color: var(--accent);
       }
       .mobile-panel-radio.active-radio {
-        background: rgba(88, 166, 255, 0.16);
+        background: var(--accent-soft);
         border-color: var(--accent);
-        color: #fff;
+        color: var(--heading);
       }
       .diag-viewport {
         width: 100%;
@@ -603,8 +697,8 @@
     .hidden { display: none !important; }
     .btn-link {
       display: inline-block;
-      background: rgba(88, 166, 255, 0.15);
-      border: 1px solid rgba(88, 166, 255, 0.45);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
       color: var(--accent);
       padding: 4px 9px;
       border-radius: 4px;
@@ -612,7 +706,8 @@
       font-weight: 600;
     }
     .btn-link:hover {
-      background: rgba(88, 166, 255, 0.25);
+      background: var(--accent);
+      color: var(--accent-contrast);
       text-decoration: none;
     }
     details.inline-drawer {
@@ -683,6 +778,9 @@
       <button class="btn-link" id="btnThornboroughCase" type="button" style="cursor:pointer;">
         Inspect Thornborough Central Henge (SE 28585 79405) Case Study
       </button>
+      <button class="btn-link" id="btnToggleTheme" type="button" style="cursor:pointer;" title="Switch between Archaeologist Cartographic Paper theme and Dark Slate theme">
+        Theme: Cartographic
+      </button>
     </div>
   </header>
 
@@ -718,17 +816,17 @@
 
         <div class="tabs">
           <button class="tab-btn active" data-tab="unidentified" id="tabBtnUnid" title="Unidentified Prehistoric Candidates (Barrows, Cairns, Henges, Stone Circles)">
-            <span class="dot" style="background:var(--gold)"></span>
+            <span class="dot" style="background:var(--gold-marker)"></span>
             Prehistoric
             <span class="tab-count" id="countUnid">0</span>
           </button>
           <button class="tab-btn" data-tab="roman" id="tabBtnRoman" title="Unidentified Roman &amp; Romano-British Candidates (Villas, Forts, Camps, Road Aggers)">
-            <span class="dot" style="background:#d2a8ff"></span>
+            <span class="dot" style="background:var(--roman)"></span>
             Roman
             <span class="tab-count" id="countRoman">0</span>
           </button>
           <button class="tab-btn" data-tab="enclosure" id="tabBtnEnclosure" title="Unidentified Iron Age Enclosures, Hut Circle Settlements &amp; Cross-Ridge Dykes">
-            <span class="dot" style="background:#38bdf8"></span>
+            <span class="dot" style="background:var(--iron)"></span>
             Iron Age &amp; Settlement
             <span class="tab-count" id="countEnclosure">0</span>
           </button>
@@ -893,13 +991,13 @@
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
           <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:center;font-size:12px;" class="muted">
-            <span><strong style="color:#facc15;font-size:13px;">●</strong> Prehistoric</span>
-            <span><strong style="color:#c084fc;font-size:13px;">■</strong> Roman</span>
-            <span><strong style="color:#38bdf8;font-size:13px;">◆</strong> Iron Age</span>
-            <span><strong style="color:#00e676;font-size:13px;">★</strong> Rediscovered</span>
+            <span><strong style="color:var(--gold-marker);font-size:13px;">●</strong> Prehistoric</span>
+            <span><strong style="color:var(--roman);font-size:13px;">■</strong> Roman</span>
+            <span><strong style="color:var(--iron);font-size:13px;">◆</strong> Iron Age</span>
+            <span><strong style="color:var(--green);font-size:13px;">★</strong> Rediscovered</span>
             <span>
-              <span class="dot" style="background:#00e676;border-radius:2px;"></span> Monument Sq ·
-              <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Null Sq
+              <span class="dot" style="background:var(--green);border-radius:2px;"></span> Monument Sq ·
+              <span class="dot" style="background:var(--accent);border-radius:2px;"></span> Null Sq
             </span>
             <span id="mapScoreScaleLegend" style="display:inline-flex;align-items:center;gap:3px;">
               <span>Score <span id="scoreScaleMinLbl">0.75</span>–<span id="scoreScaleMaxLbl">0.99</span></span>
@@ -915,7 +1013,7 @@
               <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px;">
                 <label title="Show or hide candidate markers on the map">
                   <input type="checkbox" id="chkShowCandidateMarkers" checked />
-                  Candidate Pins (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
+                  Candidate Pins (<span style="color:var(--gold-marker);">●</span> <span style="color:var(--roman);">■</span> <span style="color:var(--iron);">◆</span>)
                 </label>
                 <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
                   <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
@@ -923,7 +1021,7 @@
                 </label>
                 <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
                   <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
-                  Rediscovered (<span style="color:#00e676;">★</span>)
+                  Rediscovered (<span style="color:var(--green);">★</span>)
                 </label>
                 <label>
                   <input type="checkbox" id="chkShowScannedSquares" checked />
@@ -1002,15 +1100,41 @@
     let activeMobilePanel = 1; // Default to Panel 2 (16m Local Relief) on mobile portrait
     const SURVEY_STORAGE_KEY = "megalith_lidar_survey_annotations_v1";
     const SURVEY_OBSERVER_KEY = "megalith_lidar_last_observer_v1";
+    const THEME_STORAGE_KEY = "megalith_lidar_theme_v1";
     let communityAnnotationsList = [];
     let localAnnotationsByKey = {};
 
+    function applyTheme(theme) {
+      const mode = theme === "dark" ? "dark" : "cartographic";
+      if (mode === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      const btn = document.getElementById("btnToggleTheme");
+      if (btn) {
+        btn.textContent = mode === "dark" ? "Theme: Dark Slate" : "Theme: Cartographic";
+      }
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, mode);
+      } catch (_e) {}
+    }
+
+    try {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      if (savedTheme === "dark") {
+        applyTheme("dark");
+      } else {
+        applyTheme("cartographic");
+      }
+    } catch (_e) {}
+
     const SURVEY_STATUS_META = {
-      field_verified_monument: { label: "✓ Field Verified", fullLabel: "Field-Verified Monument", badgeClass: "badge-nhle", stroke: "#00e676" },
-      historic_survey_confirmed: { label: "Historic / HER", fullLabel: "Historic / HER Survey Record", badgeClass: "badge-osm", stroke: "#00d2ff" },
-      priority_field_target: { label: "★ Priority Target", fullLabel: "Priority Field Target", badgeClass: "badge-unid", stroke: "#ffd600" },
-      uncertain_needs_check: { label: "? Needs Check", fullLabel: "Uncertain / Needs Ground Check", badgeClass: "badge-unid", stroke: "#f59e0b" },
-      field_rejected_confounder: { label: "✗ Field Rejected", fullLabel: "Field-Rejected Confounder / Pond", badgeClass: "badge-conf", stroke: "#ff6e40" }
+      field_verified_monument: { label: "✓ Field Verified", fullLabel: "Field-Verified Monument", badgeClass: "badge-nhle", stroke: "#15803d" },
+      historic_survey_confirmed: { label: "Historic / HER", fullLabel: "Historic / HER Survey Record", badgeClass: "badge-osm", stroke: "#0f766e" },
+      priority_field_target: { label: "★ Priority Target", fullLabel: "Priority Field Target", badgeClass: "badge-unid", stroke: "#b45309" },
+      uncertain_needs_check: { label: "? Needs Check", fullLabel: "Uncertain / Needs Ground Check", badgeClass: "badge-unid", stroke: "#d97706" },
+      field_rejected_confounder: { label: "✗ Field Rejected", fullLabel: "Field-Rejected Confounder / Pond", badgeClass: "badge-conf", stroke: "#b93815" }
     };
 
     function normGridRef(val) {
@@ -1394,10 +1518,10 @@
     }
 
     function categoryColor(cat) {
-      if (cat === "rediscovered_nhle_scheduled") return "#00e676";
-      if (cat === "rediscovered_osm_archaeology") return "#00d2ff";
-      if (cat === "flagged_modern_or_karst_confounder") return "#ff6e40";
-      return "#ffd600";
+      if (cat === "rediscovered_nhle_scheduled") return "#16a34a";
+      if (cat === "rediscovered_osm_archaeology") return "#0e7490";
+      if (cat === "flagged_modern_or_karst_confounder") return "#ea580c";
+      return "#d97706";
     }
 
     function scoreScaledStyle(score, sMin, sMax, p) {
@@ -1416,28 +1540,28 @@
         glyph = "★";
         catLabel = cat === "rediscovered_nhle_scheduled" ? "Rediscovered NHLE Scheduled Monument" : "Rediscovered OSM Archaeology";
         stops = cat === "rediscovered_nhle_scheduled"
-          ? [[5, 150, 105], [16, 185, 129], [0, 230, 118], [167, 243, 208]]
-          : [[2, 132, 199], [6, 182, 212], [0, 210, 255], [165, 243, 252]];
+          ? [[21, 128, 61], [22, 163, 74], [34, 197, 94], [74, 222, 128]]
+          : [[14, 116, 144], [8, 145, 178], [6, 182, 212], [34, 211, 238]];
       } else if (cat === "flagged_modern_or_karst_confounder") {
         shape = "triangle_down";
         glyph = "▼";
         catLabel = "Filtered Modern / Geomorphic Confounder";
-        stops = [[154, 52, 18], [234, 88, 12], [251, 146, 60], [254, 215, 170]];
+        stops = [[154, 52, 18], [194, 65, 12], [234, 88, 12], [249, 115, 22]];
       } else if (dom === "roman") {
         shape = "square";
         glyph = "■";
         catLabel = "Roman Candidate";
-        stops = [[109, 40, 217], [147, 51, 234], [192, 132, 252], [245, 208, 254]];
+        stops = [[88, 28, 135], [109, 40, 217], [126, 34, 206], [168, 85, 247]];
       } else if (dom === "enclosure") {
         shape = "diamond";
         glyph = "◆";
         catLabel = "Iron Age / Settlement Candidate";
-        stops = [[3, 105, 161], [2, 132, 199], [56, 189, 248], [186, 230, 253]];
+        stops = [[12, 74, 110], [3, 105, 161], [2, 132, 199], [14, 165, 233]];
       } else {
         shape = "circle";
         glyph = "●";
         catLabel = "Prehistoric Candidate";
-        stops = [[180, 83, 9], [245, 158, 11], [250, 204, 21], [254, 240, 138]];
+        stops = [[146, 64, 14], [180, 83, 9], [217, 119, 6], [245, 158, 11]];
       }
 
       const pos = t * (stops.length - 1);
@@ -1452,10 +1576,10 @@
         glyph,
         catLabel,
         fillColor: `rgb(${r}, ${g}, ${b})`,
-        fillOpacity: isKnown ? 0.92 : +(0.42 + 0.56 * Math.pow(t, 0.85)).toFixed(2),
+        fillOpacity: isKnown ? 0.92 : +(0.52 + 0.45 * Math.pow(t, 0.85)).toFixed(2),
         radius: isKnown ? +(6.2 + 3.0 * Math.pow(t, 1.0)).toFixed(1) : +(4.8 + 4.8 * Math.pow(t, 1.15)).toFixed(1),
-        strokeColor: isKnown ? "#ffffff" : (t >= 0.82 ? "#ffffff" : "#0f1217"),
-        weight: isKnown ? 1.5 : (t >= 0.82 ? 1.8 : 1.1),
+        strokeColor: isKnown ? "#ffffff" : (t >= 0.82 ? "#15120e" : "#26211b"),
+        weight: isKnown ? 1.5 : (t >= 0.82 ? 1.7 : 1.1),
         normT: t
       };
     }
@@ -1927,9 +2051,9 @@
         L.circleMarker([p.lat, p.lon], {
           pane: "candidatesPane",
           radius: 13,
-          color: "#58a6ff",
+          color: "#1b5e6f",
           weight: 3,
-          fillColor: "#58a6ff",
+          fillColor: "#1b5e6f",
           fillOpacity: 0.18,
           interactive: false
         }).addTo(selectedHaloLayer);
@@ -2042,7 +2166,7 @@
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
           </div>
         </div>
-        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:12.5px;">${p.case_study_note}</div>` : ""}
+        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:var(--green-soft);border:1px solid var(--green-border);border-radius:4px;font-size:12.5px;">${p.case_study_note}</div>` : ""}
         <div class="desktop-only-lidar-dock">
           ${hasPng ? `
             <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
@@ -2094,20 +2218,20 @@
           const mpItems = p.megalithic_portal_matches.slice(0, 3).map((mp) =>
             `<a href="${mp.url}" target="_blank" rel="noopener">${mp.name} (#${mp.sid})</a> <span class="muted">(${mp.site_type}, ${mp.distance_m} m${mp.accuracy ? `, acc ${mp.accuracy}/5` : ""})</span>`
           ).join(" · ");
-          mpHtml = `<div style="margin-top:5px;font-size:0.92em;"><strong style="color:#38bdf8;">Megalithic.co.uk Correlation:</strong> ${mpItems}</div>`;
+          mpHtml = `<div style="margin-top:5px;font-size:0.92em;"><strong style="color:var(--cyan);">Megalithic.co.uk Correlation:</strong> ${mpItems}</div>`;
         }
         const hintItems = (p.environmental_confounder_hints || []).slice(0, 2).map((h) => `<div style="margin-top:3px;">• ${h}</div>`).join("");
         html += `
-          <div class="inspector-arch-note" style="margin-top:8px;padding:9px 11px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:5px;font-size:inherit;line-height:1.48;">
+          <div class="inspector-arch-note" style="margin-top:8px;padding:9px 11px;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:5px;font-size:inherit;line-height:1.48;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
-              <strong style="color:#fff;">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
+              <strong style="color:var(--heading);">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
               ${srcBadge}
             </div>
             <div>${p.arch_context_note}</div>
             ${nearbyHtml}
             ${mpHtml}
-            <details style="margin-top:6px;padding-top:5px;border-top:1px dashed rgba(88,166,255,0.22);font-size:0.90em;">
-              <summary style="cursor:pointer;color:#d29922;font-weight:600;">Geomorphic False-Positive Checks &amp; Raw Telemetry</summary>
+            <details style="margin-top:6px;padding-top:5px;border-top:1px dashed var(--border-strong);font-size:0.90em;">
+              <summary style="cursor:pointer;color:var(--gold);font-weight:600;">Geomorphic False-Positive Checks &amp; Raw Telemetry</summary>
               <div style="margin-top:5px;color:var(--muted);">
                 ${hintItems}
                 <div style="margin-top:5px;padding-top:5px;border-top:1px solid var(--border);">
@@ -2128,10 +2252,10 @@
       const curRef = (p.user_survey_reference || "").replace(/"/g, "&quot;");
       const hasSurveyNote = Boolean(curStatus || curComment);
       html += `
-        <details class="inline-drawer" style="margin-top:8px;background:rgba(0, 230, 118, 0.05);border-color:rgba(0, 230, 118, 0.30);" ${hasSurveyNote ? "open" : ""}>
+        <details class="inline-drawer" style="margin-top:8px;background:var(--green-soft);border-color:var(--green-border);" ${hasSurveyNote ? "open" : ""}>
           <summary>
             <span>
-              <strong style="color:#fff;">Field Survey &amp; Historic Record Log</strong>
+              <strong style="color:var(--heading);">Field Survey &amp; Historic Record Log</strong>
               ${p.user_survey_status ? ` · ${surveyStatusBadge(p.user_survey_status)}` : '<span class="muted" style="font-size:12px;font-weight:400;"> · Click to log ground-truthing or HER notes</span>'}
             </span>
           </summary>
@@ -2143,7 +2267,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-bottom:8px;">
               <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
                 <span class="muted">Survey Verdict / Radar Status:</span>
-                <select id="inpSurveyStatus" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;">
+                <select id="inpSurveyStatus" style="background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;">
                   <option value="" ${curStatus === "" ? "selected" : ""}>Unreviewed (use model default)</option>
                   <option value="field_verified_monument" ${curStatus === "field_verified_monument" ? "selected" : ""}>✓ Field-Verified Monument (ground-truthed)</option>
                   <option value="historic_survey_confirmed" ${curStatus === "historic_survey_confirmed" ? "selected" : ""}>Historic / HER Survey Record (found in HER / map)</option>
@@ -2154,17 +2278,17 @@
               </label>
               <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
                 <span class="muted">Observer / Source (e.g. Name or County HER):</span>
-                <input type="text" id="inpSurveyObserver" value="${defaultObs.replace(/"/g, "&quot;")}" placeholder="e.g. Field Surveyor or Cornwall HER" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+                <input type="text" id="inpSurveyObserver" value="${defaultObs.replace(/"/g, "&quot;")}" placeholder="e.g. Field Surveyor or Cornwall HER" style="background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
               </label>
               <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
                 <span class="muted">HER ID / Historic Survey Reference / URL:</span>
-                <input type="text" id="inpSurveyRef" value="${curRef}" placeholder="e.g. MCO12345 or 1888 OS 25-inch" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+                <input type="text" id="inpSurveyRef" value="${curRef}" placeholder="e.g. MCO12345 or 1888 OS 25-inch" style="background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
               </label>
             </div>
             <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;">
-              <input type="text" id="inpSurveyComment" value="${curComment}" placeholder="Add field survey observations, ditch/bank measurements, cropmark notes, or historic survey details..." style="flex:1;min-width:220px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12.5px;" />
-              <button class="btn-link" id="btnSaveSiteAnnotation" type="button" style="cursor:pointer;background:rgba(0,230,118,0.18);border-color:rgba(0,230,118,0.55);color:#00e676;">Save to View</button>
-              <button class="btn-link" id="btnClearSiteAnnotation" type="button" style="cursor:pointer;background:rgba(255,110,64,0.14);border-color:rgba(255,110,64,0.45);color:#ff6e40;">Clear</button>
+              <input type="text" id="inpSurveyComment" value="${curComment}" placeholder="Add field survey observations, ditch/bank measurements, cropmark notes, or historic survey details..." style="flex:1;min-width:220px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12.5px;" />
+              <button class="btn-link" id="btnSaveSiteAnnotation" type="button" style="cursor:pointer;background:var(--green-soft);border-color:var(--green-border);color:var(--green);">Save to View</button>
+              <button class="btn-link" id="btnClearSiteAnnotation" type="button" style="cursor:pointer;background:var(--orange-soft);border-color:var(--orange-border);color:var(--orange);">Clear</button>
             </div>
           </div>
         </details>
@@ -2401,11 +2525,11 @@
           const cLayer = L.geoJSON(cFeat, {
             pane: "squaresPane",
             style: {
-              color: "#58a6ff",
+              color: "#1b5e6f",
               weight: 2.2,
               dashArray: "6,4",
-              fillColor: "#58a6ff",
-              fillOpacity: 0.05
+              fillColor: "#1b5e6f",
+              fillOpacity: 0.06
             }
           }).addTo(countyBoundaryLayer);
           if (fitToCounty) {
@@ -2567,10 +2691,10 @@
           ? `<br/><strong>${(sMeta && sMeta.fullLabel) || p.user_survey_status}</strong>${p.user_survey_comment ? `: ${p.user_survey_comment}` : ""}`
           : "";
         const knownTip = (p.matched_monument && p.matched_monument.name)
-          ? `<br/><span style="color:#00e676;">★ ${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry})</span>`
+          ? `<br/><span style="color:var(--green);font-weight:600;">★ ${p.matched_monument.name} (NHLE #${p.matched_monument.list_entry})</span>`
           : "";
         const mpTip = (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0)
-          ? `<br/><span style="color:#38bdf8;">◈ Megalithic.co.uk: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)</span>`
+          ? `<br/><span style="color:var(--cyan);font-weight:600;">◈ Megalithic.co.uk: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)</span>`
           : "";
         marker.bindTooltip(
           `<strong>${st.glyph} ${p.os_grid_ref}</strong> · <span class="muted">${st.catLabel}</span><br/>${formatClass(p.predicted_class)} · Score: <strong>${p.confidence.toFixed(3)}</strong> · Relief: ${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m${knownTip}${mpTip}${surveyTip}<br/><em>Click to select &amp; view 6-panel LiDAR + Cropmarks</em>`
@@ -2777,7 +2901,7 @@
         if (cOnly && cOnly.checked) return;
         if (!document.getElementById("chkShowScannedSquares").checked) return;
         (summaryData.scanned_squares || []).forEach((sq) => {
-          const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
+          const color = sq.sampling_stream === "uniform_national_null" ? "#1b5e6f" : "#15803d";
           const tip = `<strong>Scanned 2 km × 2 km Square: ${sq.os_grid_ref}</strong><br/>Stream: ${sq.sampling_stream}<br/>Rediscovered NHLE: ${sq.rediscovered_nhle_scheduled_count} · Filtered Confounders: ${sq.flagged_modern_or_karst_confounders_count}<br/>Unidentified Candidates: ${sq.unidentified_candidates_count} (${sq.unidentified_candidates_fpr_0_01_count || 0} @ Strict 1% FPR)<br/><em>Click to zoom to this 2 km × 2 km square</em>`;
           const zoomToSq = () => {
             if (sq.bounds_latlon && sq.bounds_latlon.length === 2) {
@@ -2891,6 +3015,13 @@
         btnThorn.addEventListener("click", () => {
           selectCandidate(THORNBOROUGH_CASE_STUDY, false);
           map.setView([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon], 14);
+        });
+      }
+      const btnTheme = document.getElementById("btnToggleTheme");
+      if (btnTheme) {
+        btnTheme.addEventListener("click", () => {
+          const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+          applyTheme(isDark ? "cartographic" : "dark");
         });
       }
 
