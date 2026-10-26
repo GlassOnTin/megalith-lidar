@@ -911,14 +911,22 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         manifest = json.loads(zf.read("items.json").decode("utf-8"))
         assert manifest["version"] == 3
         map_source_names = set()
+        item_types = set()
+        gpx_files = set()
         for item in manifest["items"]:
+            item_types.add(item.get("type"))
             if item.get("type") == "MAP_SOURCES":
                 for ms in item.get("items", []):
                     map_source_names.add(ms.get("name"))
+            if item.get("type") == "GPX":
+                gpx_files.add(item.get("file"))
             if "file" in item:
                 # OsmAnd SettingsImporter.updateFilesInfo requires exact match with zipEntry.getName() or folder prefix
                 assert not item["file"].startswith("/")
                 assert item["file"] in names or any(n.startswith(item["file"] + "/") for n in names)
+        assert "FAVOURITES" not in item_types
+        assert "tracks/UK_Megalith_LiDAR/1888_OS_Confirmed_Antiquities.gpx" in gpx_files
+        assert "tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx" in gpx_files
         assert "UK 1 m LiDAR Hillshade (EA DTM)" in map_source_names
         assert "UK 1888 OS 6-Inch Map" in map_source_names
         assert "Roman Empire Atlas (DARE)" in map_source_names

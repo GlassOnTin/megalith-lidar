@@ -497,6 +497,46 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     roads_xml = build_ancient_roads_gpx_xml(docs_dir / "roman_and_ancient_roads.geojson", updated_utc)
     icon_png, banner_png = _build_plugin_graphics()
 
+    # Split candidates into modular, individually toggleable GPX track layers under tracks/UK_Megalith_LiDAR/
+    # so personal Favourites are never polluted.
+    track_buckets: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
+        "tracks/UK_Megalith_LiDAR/1888_OS_Confirmed_Antiquities.gpx": [],
+        "tracks/UK_Megalith_LiDAR/Prehistoric_High_Confidence_1pct_FPR.gpx": [],
+        "tracks/UK_Megalith_LiDAR/Prehistoric_Extended_5pct_FPR.gpx": [],
+        "tracks/UK_Megalith_LiDAR/Iron_Age_and_Settlement.gpx": [],
+        "tracks/UK_Megalith_LiDAR/Roman_Candidates.gpx": [],
+    }
+    for dom, p in candidates:
+        grp = _classify_group(p, dom)
+        if grp == "1888 OS Confirmed Antiquities ★":
+            track_buckets["tracks/UK_Megalith_LiDAR/1888_OS_Confirmed_Antiquities.gpx"].append((dom, p))
+        elif grp == "Iron Age & Settlement ◆":
+            track_buckets["tracks/UK_Megalith_LiDAR/Iron_Age_and_Settlement.gpx"].append((dom, p))
+        elif grp == "Roman Candidates ■":
+            track_buckets["tracks/UK_Megalith_LiDAR/Roman_Candidates.gpx"].append((dom, p))
+        elif p.get("passes_fpr_0_01"):
+            track_buckets["tracks/UK_Megalith_LiDAR/Prehistoric_High_Confidence_1pct_FPR.gpx"].append((dom, p))
+        else:
+            track_buckets["tracks/UK_Megalith_LiDAR/Prehistoric_Extended_5pct_FPR.gpx"].append((dom, p))
+
+    gpx_items_manifest: List[Dict[str, Any]] = []
+    gpx_payloads: Dict[str, str] = {}
+    for rel_file, bucket in track_buckets.items():
+        gpx_payloads[rel_file] = build_candidates_gpx_xml(bucket, updated_utc)
+        gpx_items_manifest.append({"type": "GPX", "file": rel_file})
+
+    roads_rel = "tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx"
+    gpx_payloads[roads_rel] = roads_xml
+    gpx_items_manifest.append(
+        {
+            "type": "GPX",
+            "file": roads_rel,
+            "color": "#7e22ce",
+            "width": "medium",
+            "show_arrows": False,
+        }
+    )
+
     items_manifest = {
         "version": 3,
         "items": [
@@ -512,8 +552,9 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "Unrecorded Prehistoric, Iron Age, and Roman earthwork candidates detected by "
                         "1 m LiDAR & 16 m aerial cropmarks across England, cross-checked against "
                         "1888–1913 Historic OS 6-Inch maps, Historic England NHLE, OpenStreetMap, "
-                        "and Megalithic.uk. Includes monument Favourites, Roman & Ancient Road "
-                        "tracks, live 1 m EA LiDAR Hillshade, and 1888 OS / Roman Empire map overlays."
+                        "and Megalithic.co.uk. Installs modular monument GPX layers under Tracks → "
+                        "UK_Megalith_LiDAR (leaving personal Favourites untouched), Roman & Ancient "
+                        "Road tracks, live 1 m EA LiDAR Hillshade, and 1888 OS / Roman Empire overlays."
                     )
                 },
             },
@@ -588,21 +629,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                     },
                 ],
             },
-            {
-                "type": "FAVOURITES",
-                "file": "favourites.gpx",
-            },
-            {
-                "type": "GPX",
-                "file": "tracks/UK_Megalith_LiDAR_Candidates.gpx",
-            },
-            {
-                "type": "GPX",
-                "file": "tracks/UK_Roman_and_Ancient_Roads.gpx",
-                "color": "#7e22ce",
-                "width": "medium",
-                "show_arrows": False,
-            },
+            *gpx_items_manifest,
         ],
     }
 
@@ -611,9 +638,8 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
         zf.writestr("items.json", json.dumps(items_manifest, indent=2, ensure_ascii=False))
         zf.writestr("res/icon.png", icon_png)
         zf.writestr("res/image.png", banner_png)
-        zf.writestr("favourites.gpx", gpx_xml)
-        zf.writestr("tracks/UK_Megalith_LiDAR_Candidates.gpx", gpx_xml)
-        zf.writestr("tracks/UK_Roman_and_Ancient_Roads.gpx", roads_xml)
+        for rel_file, xml_str in gpx_payloads.items():
+            zf.writestr(rel_file, xml_str)
 
     qr_svg_path = docs_dir / "osmand_qr.svg"
     if not qr_svg_path.exists():
