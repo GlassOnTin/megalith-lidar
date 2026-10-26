@@ -124,7 +124,12 @@ def _walkability_summary(p: Dict[str, Any]) -> str:
 def _classify_group(p: Dict[str, Any], domain: str) -> str:
     note = str(p.get("arch_context_note") or "")
     status = str(p.get("user_survey_status") or "")
-    if has_historic_os_antiquity_evidence(note) or status in ("field_verified_monument", "historic_survey_confirmed"):
+    tier = str(p.get("vlm_downrating_tier") or "")
+    if (
+        tier == "REDISCOVERED_1888_ANTIQUITY"
+        or has_historic_os_antiquity_evidence(note)
+        or status in ("field_verified_monument", "historic_survey_confirmed")
+    ):
         return "1888 OS Confirmed Antiquities ★"
     if domain == "roman":
         return "Roman Candidates ■"
@@ -408,18 +413,18 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
             },
             {
                 "type": "FAVOURITES",
-                "pluginId": "uk.megalith.lidar",
-                "file": "/favourites.gpx",
+                "file": "favourites.gpx",
             },
             {
                 "type": "GPX",
-                "pluginId": "uk.megalith.lidar",
-                "file": "/tracks/UK_Megalith_LiDAR_Candidates.gpx",
+                "file": "tracks/UK_Megalith_LiDAR_Candidates.gpx",
             },
             {
                 "type": "GPX",
-                "pluginId": "uk.megalith.lidar",
-                "file": "/tracks/UK_Roman_and_Ancient_Roads.gpx",
+                "file": "tracks/UK_Roman_and_Ancient_Roads.gpx",
+                "color": "#7e22ce",
+                "width": "medium",
+                "show_arrows": False,
             },
         ],
     }

@@ -851,3 +851,54 @@ def test_roman_historic_os_vlm_and_physical_confounder_filtering():
     assert roman_phys_cands[0]["context_category"] == "flagged_modern_or_karst_confounder"
     assert roman_phys_cands[1]["context_category"] == "unidentified_candidate"
 
+
+def test_osmand_plugin_and_gpx_export(tmp_path):
+    import json
+    import xml.etree.ElementTree as ET
+    import zipfile
+    from scripts.export_osmand_plugin import export_osmand_files
+
+    cand_gj = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [-0.07585, 50.82456]},
+                "properties": {
+                    "os_grid_ref": "TQ 35621 04544",
+                    "easting": 535621,
+                    "northing": 104544,
+                    "lat": 50.82456,
+                    "lon": -0.07585,
+                    "target_domain": "prehistoric",
+                    "predicted_class_label": "Round barrow / cairn mound",
+                    "confidence": 0.989,
+                    "est_local_relief_m": 0.86,
+                    "area_m2": 542,
+                    "context_category": "unidentified_candidate",
+                    "vlm_downrating_tier": "REDISCOVERED_1888_ANTIQUITY",
+                    "county": "East Sussex",
+                },
+            }
+        ],
+    }
+    (tmp_path / "candidates.geojson").write_text(json.dumps(cand_gj), encoding="utf-8")
+    res = export_osmand_files(tmp_path)
+    assert res["total_waypoints"] == 1
+    assert res["counts_by_group"]["1888 OS Confirmed Antiquities ★"] == 1
+
+    gpx_root = ET.parse(tmp_path / "megalith_lidar_osmand.gpx").getroot()
+    assert gpx_root.tag.endswith("gpx")
+
+    with zipfile.ZipFile(tmp_path / "megalith-lidar.osf", "r") as zf:
+        names = set(zf.namelist())
+        assert "items.json" in names
+        manifest = json.loads(zf.read("items.json").decode("utf-8"))
+        assert manifest["version"] == 3
+        for item in manifest["items"]:
+            if "file" in item:
+                # OsmAnd SettingsImporter.updateFilesInfo requires exact match with zipEntry.getName()
+                assert not item["file"].startswith("/")
+                assert item["file"] in names
+
+
