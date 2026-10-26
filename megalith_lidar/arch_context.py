@@ -1213,6 +1213,9 @@ def enrich_candidates_with_archaeological_context(
             c["osm_confounder_matches"] = confs
 
     # Prioritize Strict 1% FPR unidentified candidates with PNGs for VLM calls first
+    from megalith_lidar.osm_context import MegalithicPortalIndex
+
+    mp_idx = MegalithicPortalIndex.load_default()
     sorted_indices = sorted(
         range(len(candidates)),
         key=lambda i: (
@@ -1229,6 +1232,11 @@ def enrich_candidates_with_archaeological_context(
         n = float(cand.get("northing", 0.0))
         cat = cand.get("context_category", "unidentified_candidate")
         ckey = f"v2_{cand.get('os_grid_ref')}_{int(round(e))}_{int(round(n))}"
+
+        if mp_idx is not None and not cand.get("megalithic_portal_matches"):
+            mp_hits = mp_idx.query_point(e, n, radius_m=1000.0, max_items=4)
+            if mp_hits:
+                cand["megalithic_portal_matches"] = mp_hits
 
         nearby_nhle, cluster = extractor.query_context(e, n)
         cand["nearby_nhle_monuments"] = nearby_nhle

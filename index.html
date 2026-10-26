@@ -1553,6 +1553,12 @@
         { list_entry: 1004912, name: "Thornborough Henges, cursus and adjacent round barrows", cls_label: "Henge / stone circle / ceremonial alignment", distance_m: 12, bearing: "S" },
         { list_entry: 1011511, name: "Three Hills Barrow Group (round barrows E of Thornborough)", cls_label: "Bronze Age round barrow / cairn", distance_m: 610, bearing: "E" },
         { list_entry: 1011512, name: "Center Hill round barrow on Thornborough Moor", cls_label: "Bronze Age round barrow / cairn", distance_m: 840, bearing: "SSE" }
+      ],
+      megalithic_portal_matches: [
+        { sid: "1292629588", name: "Thornborough Central", site_type: "Henge", type_id: 11, category: "mp_archaeology", accuracy: 4, condition: 3, distance_m: 87.5, url: "https://www.megalithic.co.uk/article.php?sid=1292629588" },
+        { sid: "25602", name: "Thornborough Cursus", site_type: "Cursus", type_id: 34, category: "mp_archaeology", accuracy: 4, condition: 5, distance_m: 370.5, url: "https://www.megalithic.co.uk/article.php?sid=25602" },
+        { sid: "996787395", name: "Thornborough S", site_type: "Henge", type_id: 11, category: "mp_archaeology", accuracy: 4, condition: 3, distance_m: 667.2, url: "https://www.megalithic.co.uk/article.php?sid=996787395" },
+        { sid: "916786894", name: "Thornborough N", site_type: "Henge", type_id: 11, category: "mp_archaeology", accuracy: 4, condition: 4, distance_m: 838.0, url: "https://www.megalithic.co.uk/article.php?sid=916786894" }
       ]
     };
 
@@ -1784,7 +1790,7 @@
         return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.some((m) => Number(m.distance_m) <= 60.0);
       }
       if (sf === "mp_nearby_250m") {
-        return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.length > 0;
+        return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.some((m) => Number(m.distance_m) <= 250.0);
       }
       if (sf === "any_note") return Boolean(p.user_survey_status || p.user_survey_comment);
       return p.user_survey_status === sf;
@@ -2425,7 +2431,7 @@
               <div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
                   <strong>Megalithic.co.uk &amp; OS</strong>
-                  <span class="badge ${topMp ? 'badge-nhle' : 'badge-unid'}" style="font-size:10px;padding:1px 5px;">${topMp ? `${p.megalithic_portal_matches.length} within 250m` : "Unlisted"}</span>
+                  <span class="badge ${topMp ? (topMp.distance_m <= 250 ? 'badge-nhle' : 'badge-osm') : 'badge-unid'}" style="font-size:10px;padding:1px 5px;">${topMp ? (topMp.distance_m <= 250 ? `${p.megalithic_portal_matches.filter((m) => Number(m.distance_m) <= 250).length} within 250m` : `${p.megalithic_portal_matches.length} within 1km`) : "Unlisted <1km"}</span>
                 </div>
                 <div style="font-size:11.5px;line-height:1.35;margin-bottom:6px;">
                   ${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0)
@@ -2435,7 +2441,7 @@
                           <div class="muted" style="font-size:10.5px;">${mp.site_type} · <strong>${mp.distance_m} m</strong>${mp.accuracy ? ` · acc ${mp.accuracy}/5` : ""}</div>
                         </div>
                       `).join("")
-                    : `<div class="muted" style="padding:4px 0;">No recorded <em>Megalithic.co.uk</em> entry within 250 m of <strong>${p.os_grid_ref}</strong>.</div>`
+                    : `<div class="muted" style="padding:4px 0;">No recorded <em>Megalithic.co.uk</em> entry within 1 km of <strong>${p.os_grid_ref}</strong>.</div>`
                   }
                 </div>
               </div>

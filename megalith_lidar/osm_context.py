@@ -933,7 +933,7 @@ def annotate_candidates_with_spatial_context(
 
         mp_matches: List[Dict] = []
         if resolved_mp is not None:
-            mp_matches = resolved_mp.query_point(e_pt, n_pt, radius_m=250.0, max_items=5)
+            mp_matches = resolved_mp.query_point(e_pt, n_pt, radius_m=1000.0, max_items=4)
             for mpm in mp_matches:
                 dist_m = float(mpm.get("distance_m", 999.0))
                 mp_cat = mpm.get("category")
