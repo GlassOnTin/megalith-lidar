@@ -758,6 +758,11 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "explicit 1888 os hachuring",
     "explicit 1888 cartographic designation",
     "displays a distinct hachured circular earthwork",
+    "displays a hachured, oval earthwork",
+    "over a hachured, oval earthwork",
+    "over a hachured circular earthwork",
+    "over a hachured earthwork",
+    "accompanied by earthwork hachures",
 )
 
 _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES = (
@@ -778,6 +783,8 @@ _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES = (
     "positioned at a field boundary junction with no hachures",
     "woodland false-positive",
     "tree-throw pit or forestry feature",
+    "karst doline or periglacial scar",
+    "unconfirmed natural geomorphic feature",
 )
 
 

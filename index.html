@@ -873,6 +873,7 @@
               Filter:
               <select id="surveyFilterSelect">
                 <option value="">All Sites</option>
+                <option value="os1888_antiquity">1888 OS Map Antiquity ('Tumulus' / 'Camp')</option>
                 <option value="mp_match_60m">Megalithic.co.uk Match (≤60 m)</option>
                 <option value="mp_nearby_250m">Megalithic.co.uk Nearby (≤250 m)</option>
                 <option value="any_note">Annotated / Surveyed Only</option>
@@ -1699,6 +1700,52 @@
       return (cls || "").replace(/_/g, " ");
     }
 
+    const _OS1888_ANTIQUITY_PATTERNS = [
+      "labeled as a 'camp'",
+      "labelled as a 'camp'",
+      'labeled "camp"',
+      'labelled "camp"',
+      'reads "camp"',
+      "reads 'camp'",
+      "marked as 'camp'",
+      'marked as "camp"',
+      'explicitly labels this exact location as a "camp"',
+      "explicitly labels this exact location as 'camp'",
+      "explicitly labeled 'camp'",
+      "explicitly labelled 'camp'",
+      'explicitly labeled "camp"',
+      'explicitly labelled "camp"',
+      "roman road on the 1888",
+      "depicts it with earthwork symbols",
+      "hachured 'tumulus'",
+      'hachured "tumulus"',
+      "labelled 'tumulus'",
+      "labeled 'tumulus'",
+      'labelled "tumulus"',
+      'labeled "tumulus"',
+      "labels the red reticle as a 'tumulus'",
+      'labels the red reticle as a "tumulus"',
+      "(tumulus) with hachures",
+      "labels the red reticle as a 'beacon'",
+      "labels the red reticle as 'beacon'",
+      "hachured earthwork symbols at the reticle",
+      "explicit 1888 os hachuring",
+      "explicit 1888 os cartographic hachuring",
+      "explicit 1888 cartographic designation",
+      "displays a distinct hachured circular earthwork",
+      "displays a hachured, oval earthwork",
+      "over a hachured, oval earthwork",
+      "over a hachured circular earthwork",
+      "over a hachured earthwork",
+      "accompanied by earthwork hachures"
+    ];
+
+    function hasHistoricOsAntiquity(p) {
+      const low = String((p && p.arch_context_note) || "").toLowerCase();
+      if (!low) return false;
+      return _OS1888_ANTIQUITY_PATTERNS.some((pat) => low.includes(pat));
+    }
+
     function contextNote(p) {
       let baseNote = "Unrecorded in NHLE & OpenStreetMap";
       if (p.matched_monument) {
@@ -1711,6 +1758,8 @@
         baseNote = `${m.name ? m.name + ": " : ""}${m.subtype} (${m.osm_id}, ${m.distance_m} m)`;
       } else if (p.vlm_downrate_reason) {
         baseNote = p.vlm_downrate_reason;
+      } else if (hasHistoricOsAntiquity(p)) {
+        baseNote = "1888 OS 6-Inch Map: Marked 'Tumulus' / 'Camp' / Hachured Antiquity (Unrecorded in NHLE & OSM)";
       }
       if (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) {
         const mp = p.megalithic_portal_matches[0];
@@ -1728,6 +1777,9 @@
 
     function matchesSurveyFilter(p, sf) {
       if (!sf) return true;
+      if (sf === "os1888_antiquity") {
+        return hasHistoricOsAntiquity(p);
+      }
       if (sf === "mp_match_60m") {
         return Array.isArray(p.megalithic_portal_matches) && p.megalithic_portal_matches.some((m) => Number(m.distance_m) <= 60.0);
       }
@@ -2956,7 +3008,7 @@
           <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR diagnostic view available">Lidar</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.85;" title="Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}">1888 OS</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
+          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR diagnostic view available">Lidar</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${hasHistoricOsAntiquity(p) ? 'badge-nhle' : 'badge-unid'}" style="text-decoration:none;${hasHistoricOsAntiquity(p) ? '' : 'opacity:0.85;'}" title="${hasHistoricOsAntiquity(p) ? '1888–1913 OS 6-Inch Map explicitly depicts a Tumulus / Camp / Hachured Antiquity here — click to open on NLS' : `Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}`}">${hasHistoricOsAntiquity(p) ? '1888 OS ★' : '1888 OS'}</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
           <td class="muted"><div class="note-truncate" title="${contextNote(p).replace(/"/g, '&quot;')}">${contextNote(p)}</div></td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");
