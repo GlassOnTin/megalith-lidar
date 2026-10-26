@@ -905,36 +905,46 @@
               <span>Score <span id="scoreScaleMinLbl">0.75</span>–<span id="scoreScaleMaxLbl">0.99</span></span>
             </span>
           </div>
-          <details class="inline-drawer" style="padding:4px 9px;">
-            <summary style="font-size:12px;color:var(--accent);">Map Layers &amp; Contours</summary>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px;">
-              <label>
-                <input type="checkbox" id="chkShowScannedSquares" checked />
-                2 km × 2 km Squares
-              </label>
-              <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
-                <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
-                Rediscovered (<span style="color:#00e676;">★</span>)
-              </label>
-              <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
-                <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
-                All Categories (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
-              </label>
-              <label title="Render national kernel-density hot-spot isopleths and marching-squares contour rings">
-                <input type="checkbox" id="chkShowDensityContours" checked />
-                Hot-Spot Contours
-              </label>
-              <select id="densityModeSelect" title="Choose how hot-spot density contours are calculated" style="padding:3px 6px;font-size:11.5px;">
-                <option value="normalized_all" selected>Contours: All Categories / Scanned km²</option>
-                <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
-                <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
-              </select>
-              <label>
-                <input type="checkbox" id="chkAerialBasemap" />
-                Aerial Basemap
-              </label>
-            </div>
-          </details>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:4px 9px;" title="Hide all candidate pins, rediscovered stars, and 2 km square boxes to inspect only the national density contours">
+              <input type="checkbox" id="chkContoursOnly" />
+              <strong>Contours Only</strong>
+            </label>
+            <details class="inline-drawer" style="padding:4px 9px;">
+              <summary style="font-size:12px;color:var(--accent);">Map Layers &amp; Contours</summary>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px;">
+                <label title="Show or hide candidate markers on the map">
+                  <input type="checkbox" id="chkShowCandidateMarkers" checked />
+                  Candidate Pins (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
+                </label>
+                <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
+                  <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
+                  All Categories Together
+                </label>
+                <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
+                  <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
+                  Rediscovered (<span style="color:#00e676;">★</span>)
+                </label>
+                <label>
+                  <input type="checkbox" id="chkShowScannedSquares" checked />
+                  2 km × 2 km Squares
+                </label>
+                <label title="Render national kernel-density hot-spot isopleths and marching-squares contour rings">
+                  <input type="checkbox" id="chkShowDensityContours" checked />
+                  Hot-Spot Contours
+                </label>
+                <select id="densityModeSelect" title="Choose how hot-spot density contours are calculated" style="padding:3px 6px;font-size:11.5px;">
+                  <option value="normalized_all" selected>Contours: All Categories / Scanned km²</option>
+                  <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
+                  <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
+                </select>
+                <label>
+                  <input type="checkbox" id="chkAerialBasemap" />
+                  Aerial Basemap
+                </label>
+              </div>
+            </details>
+          </div>
         </div>
         <div id="map"></div>
       </div>
@@ -1910,7 +1920,10 @@
       }
 
       selectedHaloLayer.clearLayers();
-      if (p.lat != null && p.lon != null) {
+      const chkContOnlyHalo = document.getElementById("chkContoursOnly");
+      const chkCandPinsHalo = document.getElementById("chkShowCandidateMarkers");
+      const hideHalo = (chkContOnlyHalo && chkContOnlyHalo.checked) || (chkCandPinsHalo && !chkCandPinsHalo.checked);
+      if (!hideHalo && p.lat != null && p.lon != null) {
         L.circleMarker([p.lat, p.lon], {
           pane: "candidatesPane",
           radius: 13,
@@ -2483,36 +2496,51 @@
       if (minLbl) minLbl.textContent = sMin.toFixed(2);
       if (maxLbl) maxLbl.textContent = sMax.toFixed(2);
 
-      // Build the combined map marker list (active tab + optional All Domains + optional Rediscovered Known Monuments)
+      // Build the combined map marker list and the full contour source list
+      const contoursOnlyEl = document.getElementById("chkContoursOnly");
+      const showCandEl = document.getElementById("chkShowCandidateMarkers");
       const showRediscEl = document.getElementById("chkShowRediscoveredOnMap");
       const showAllDomEl = document.getElementById("chkShowAllDomainsOnMap");
-      const showRedisc = showRediscEl ? showRediscEl.checked : true;
-      const showAllDom = showAllDomEl ? showAllDomEl.checked : false;
+      const contoursOnly = contoursOnlyEl ? contoursOnlyEl.checked : false;
+      const showCand = !contoursOnly && (showCandEl ? showCandEl.checked : true);
+      const showRedisc = !contoursOnly && (showRediscEl ? showRediscEl.checked : true);
+      const showAllDom = !contoursOnly && (showAllDomEl ? showAllDomEl.checked : false);
+      if (contoursOnly) {
+        selectedHaloLayer.clearLayers();
+      }
 
+      const allCombined = geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures);
+      const contourFeaturesByKey = new Map();
       const mapFeaturesByKey = new Map();
-      filtered.forEach((f) => {
-        if (f && f.properties) mapFeaturesByKey.set(featureKey(f.properties), f);
-      });
 
-      if (showAllDom || showRedisc) {
-        const allCombined = geojsonFeatures.concat(romanFeatures).concat(enclosureFeatures);
-        allCombined.forEach((f) => {
-          const p = f && f.properties;
-          if (!p) return;
-          if (op === "fpr_0.01" && !p.passes_fpr_0_01) return;
-          if (onlyDiag && !p.diagnostic_png) return;
-          if (curCounty && (p.county || "England") !== curCounty) return;
-          if (!matchesSurveyFilter(p, curSf)) return;
-          const isKnown = matchesTab(p, "known");
-          const isUnid = matchesTab(p, "unidentified");
-          if ((showRedisc && isKnown) || (showAllDom && isUnid && currentTab !== "confounders")) {
-            const k = featureKey(p);
-            if (!mapFeaturesByKey.has(k)) {
-              mapFeaturesByKey.set(k, f);
-            }
-          }
+      if (showCand) {
+        filtered.forEach((f) => {
+          if (f && f.properties) mapFeaturesByKey.set(featureKey(f.properties), f);
         });
       }
+
+      allCombined.forEach((f) => {
+        const p = f && f.properties;
+        if (!p) return;
+        if (op === "fpr_0.01" && !p.passes_fpr_0_01) return;
+        if (onlyDiag && !p.diagnostic_png) return;
+        if (curCounty && (p.county || "England") !== curCounty) return;
+        if (!matchesSurveyFilter(p, curSf)) return;
+        const isKnown = matchesTab(p, "known");
+        const isUnid = matchesTab(p, "unidentified");
+        if (isKnown || isUnid) {
+          const k = featureKey(p);
+          if (!contourFeaturesByKey.has(k)) {
+            contourFeaturesByKey.set(k, f);
+          }
+        }
+        if ((showRedisc && isKnown) || (showCand && showAllDom && isUnid && currentTab !== "confounders")) {
+          const k = featureKey(p);
+          if (!mapFeaturesByKey.has(k)) {
+            mapFeaturesByKey.set(k, f);
+          }
+        }
+      });
 
       // Draw markers on the map in ascending confidence order so highest-score & rediscovered markers sit on top
       const mapOrdered = Array.from(mapFeaturesByKey.values()).sort((a, b) => {
@@ -2521,7 +2549,7 @@
         if (ka !== kb) return ka - kb;
         return (a.properties.confidence || 0) - (b.properties.confidence || 0);
       });
-      renderDensityContourLayer(mapOrdered, filtered);
+      renderDensityContourLayer(Array.from(contourFeaturesByKey.values()), filtered);
       mapOrdered.forEach((f) => {
         const p = f.properties;
         const st = scoreScaledStyle(p.confidence, sMin, sMax, p);
@@ -2745,6 +2773,8 @@
 
       function renderScannedSquares() {
         squaresLayer.clearLayers();
+        const cOnly = document.getElementById("chkContoursOnly");
+        if (cOnly && cOnly.checked) return;
         if (!document.getElementById("chkShowScannedSquares").checked) return;
         (summaryData.scanned_squares || []).forEach((sq) => {
           const color = sq.sampling_stream === "uniform_national_null" ? "#58a6ff" : "#00e676";
@@ -2806,6 +2836,25 @@
       }
       renderScannedSquares();
       document.getElementById("chkShowScannedSquares").addEventListener("change", renderScannedSquares);
+      const chkContOnly = document.getElementById("chkContoursOnly");
+      if (chkContOnly) {
+        chkContOnly.addEventListener("change", (ev) => {
+          ev.target.blur();
+          if (ev.target.checked) {
+            const dc = document.getElementById("chkShowDensityContours");
+            if (dc) dc.checked = true;
+          }
+          renderScannedSquares();
+          renderActiveView(false);
+        });
+      }
+      const chkCandMap = document.getElementById("chkShowCandidateMarkers");
+      if (chkCandMap) {
+        chkCandMap.addEventListener("change", (ev) => {
+          ev.target.blur();
+          renderActiveView(false);
+        });
+      }
       const chkRediscMap = document.getElementById("chkShowRediscoveredOnMap");
       if (chkRediscMap) {
         chkRediscMap.addEventListener("change", (ev) => {
