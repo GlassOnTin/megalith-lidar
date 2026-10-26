@@ -175,17 +175,68 @@ def run_enclosure_scan(
         "subgroup_and_confounding_analysis": eval_metrics.get("model_test_subgroup_and_confounding_analysis", {}),
     }
 
-    non_conf = [f for f in all_enclosure_features if f["properties"].get("context_category") != "flagged_modern_or_karst_confounder"]
+    priority_non_conf = [
+        f
+        for f in all_enclosure_features
+        if f["properties"].get("context_category") in {"rediscovered_nhle_scheduled", "rediscovered_osm_archaeology"}
+        or (
+            f["properties"].get("context_category") == "unidentified_candidate"
+            and (
+                f["properties"].get("passes_fpr_0_01")
+                or f["properties"].get("megalithic_portal_matches")
+                or f["properties"].get("user_survey_status")
+            )
+        )
+    ]
+    fpr05_tail = [
+        f
+        for f in all_enclosure_features
+        if f["properties"].get("context_category") == "unidentified_candidate"
+        and not (
+            f["properties"].get("passes_fpr_0_01")
+            or f["properties"].get("megalithic_portal_matches")
+            or f["properties"].get("user_survey_status")
+        )
+    ]
+    fpr05_tail.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
     conf_only = [f for f in all_enclosure_features if f["properties"].get("context_category") == "flagged_modern_or_karst_confounder"]
     conf_only.sort(
         key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
         reverse=True,
     )
-    export_enc = non_conf + conf_only[:400]
+    export_enc = priority_non_conf + fpr05_tail[:1200] + conf_only[:300]
+    _unused_web_keys = (
+        "nearby_environmental_features",
+        "nhle_cluster_summary",
+        "pond_unet_local_mean",
+        "pond_unet_local_peak",
+        "pond_unet_predicted_class",
+        "pond_unet_tile_prob",
+        "ridge_continuation_elongation",
+        "ridge_continuation_span_m",
+        "adjacent_channel_span_m",
+        "patch_min_relief_m",
+        "centroid_local_relief_m",
+        "max_positive_relief_m",
+        "mean_slope_tangent",
+        "raw_tile_logit",
+        "vlm_verdict_tier",
+        "vlm_shape_verdict",
+    )
     for f in export_enc:
         p = f["properties"]
-        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 3:
-            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:3]
+        for uk in _unused_web_keys:
+            p.pop(uk, None)
+        if isinstance(p.get("environmental_confounder_hints"), list):
+            p["environmental_confounder_hints"] = p["environmental_confounder_hints"][:1]
+        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 2:
+            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:2]
+        for k_empty in ("osm_archaeology_matches", "osm_confounder_matches", "megalithic_portal_matches"):
+            if p.get(k_empty) == []:
+                p.pop(k_empty, None)
 
     (docs_dir / "enclosure_candidates.geojson").write_text(
         json.dumps({"type": "FeatureCollection", "features": export_enc}, separators=(",", ":")),

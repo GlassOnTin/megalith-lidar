@@ -315,21 +315,23 @@ def expand_national_queue_if_needed(
     queue_state: Dict,
     catalog: MonumentCatalog,
     square_size_m: int = 2000,
-    min_pending: int = 4200,
+    min_pending: int = 8000,
     seed: int = 20261023,
 ) -> bool:
     """
-    When pending held-out test squares drop below `min_pending`, append:
+    When pending squares drop below `min_pending`, append:
       1. Full 20 km x 20 km (10x10 squares) contiguous outward spirals for the 5 seed regions,
-      2. All remaining held-out test-split 2 km x 2 km squares in England containing
-         Prehistoric, Roman, or Iron Age/Enclosure NHLE Scheduled Monuments, interleaved 1:1
-         with newly drawn uniform_national_null squares across all 53 test-split 20 km blocks.
+      2. All remaining held-out test-split and val-split 2 km x 2 km squares in England
+         (monument squares, 1/2-ring halos, and remaining uniform_national_null squares),
+      3. National expansion across all remaining England 20 km land blocks (interleaving
+         monument/halo landscape squares 1:1 with uniform national null squares) so
+         long-running national batch runs never starve.
     """
     pending_now = sum(1 for q in queue_state["queue"] if q.get("status") == "pending")
     if pending_now >= min_pending:
         return False
 
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(seed + len(queue_state["queue"]))
     existing_coords: Set[Tuple[int, int]] = {
         (int(q["e_min"]), int(q["n_min"])) for q in queue_state["queue"]
     }
@@ -400,170 +402,25 @@ def expand_national_queue_if_needed(
             if i < len(s):
                 new_seed_round_robin.append(s[i])
 
-    # 2. Remaining held-out test landscape squares across England, followed by 1-ring Halo squares
-    #    in held-out test blocks and out-of-sample val-split monument squares so multi-day runs never starve
+    # 2. Remaining held-out test/val/national monument landscape squares and 1-ring Halo squares
     new_landscape: List[Dict] = []
-    for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
-        if (sx, sy) in existing_coords:
-            continue
-        ce = sx + square_size_m // 2
-        cn = sy + square_size_m // 2
-        if assign_spatial_split(ce, cn) != "test":
-            continue
-        existing_coords.add((sx, sy))
-        lat, lon = bng_to_latlon(ce, cn)
-        new_landscape.append(
-            {
-                "square_id": f"test_landscape_E{sx}_N{sy}",
-                "sampling_stream": "heldout_test_landscape",
-                "split": "test",
-                "e_min": sx,
-                "n_min": sy,
-                "e_max": sx + square_size_m,
-                "n_max": sy + square_size_m,
-                "center_lat": round(lat, 5),
-                "center_lon": round(lon, 5),
-                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
-                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
-                "status": "pending",
-            }
-        )
-    rng.shuffle(new_landscape)
-
-    # 2b. 1-ring Halo (2 km adjacent) squares around monuments inside held-out test 20 km blocks
-    halo_test_coords: Set[Tuple[int, int]] = set()
-    for (mx, my) in monument_squares_2k.keys():
-        if assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2) != "test":
-            continue
-        bx, by = mx // 20000, my // 20000
-        for dx in (-square_size_m, 0, square_size_m):
-            for dy in (-square_size_m, 0, square_size_m):
-                nx, ny = mx + dx, my + dy
-                if (nx // 20000, ny // 20000) == (bx, by) and (nx, ny) not in existing_coords:
-                    halo_test_coords.add((nx, ny))
-    halo_test_list: List[Dict] = []
-    for sx, sy in sorted(halo_test_coords):
-        existing_coords.add((sx, sy))
-        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
-        lat, lon = bng_to_latlon(ce, cn)
-        halo_test_list.append(
-            {
-                "square_id": f"test_landscape_E{sx}_N{sy}",
-                "sampling_stream": "heldout_test_landscape",
-                "split": "test",
-                "e_min": sx,
-                "n_min": sy,
-                "e_max": sx + square_size_m,
-                "n_max": sy + square_size_m,
-                "center_lat": round(lat, 5),
-                "center_lon": round(lon, 5),
-                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
-                "known_prehistoric_monuments_in_square": 0,
-                "status": "pending",
-            }
-        )
-    rng.shuffle(halo_test_list)
-
-    # 2c. Out-of-sample val-split monument landscape squares across England
-    val_landscape_list: List[Dict] = []
-    for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
-        if (sx, sy) in existing_coords:
-            continue
-        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
-        if assign_spatial_split(ce, cn) != "val":
-            continue
-        existing_coords.add((sx, sy))
-        lat, lon = bng_to_latlon(ce, cn)
-        val_landscape_list.append(
-            {
-                "square_id": f"test_landscape_E{sx}_N{sy}",
-                "sampling_stream": "heldout_test_landscape",
-                "split": "val",
-                "e_min": sx,
-                "n_min": sy,
-                "e_max": sx + square_size_m,
-                "n_max": sy + square_size_m,
-                "center_lat": round(lat, 5),
-                "center_lon": round(lon, 5),
-                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
-                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
-                "status": "pending",
-            }
-        )
-    rng.shuffle(val_landscape_list)
-
-    # 2d. 1-ring Halo in val blocks and 2-ring Halo (4 km adjacent) in test + val blocks
-    halo_extended_coords: List[Tuple[int, int, str]] = []
-    seen_ext: Set[Tuple[int, int]] = set()
-    for (mx, my) in monument_squares_2k.keys():
-        sp_m = assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2)
-        if sp_m not in {"test", "val"}:
-            continue
-        bx, by = mx // 20000, my // 20000
-        for r_mult in (1, 2):
-            for dx in range(-r_mult * square_size_m, (r_mult + 1) * square_size_m, square_size_m):
-                for dy in range(-r_mult * square_size_m, (r_mult + 1) * square_size_m, square_size_m):
-                    nx, ny = mx + dx, my + dy
-                    if (nx // 20000, ny // 20000) == (bx, by) and (nx, ny) not in existing_coords and (nx, ny) not in seen_ext:
-                        seen_ext.add((nx, ny))
-                        halo_extended_coords.append((nx, ny, sp_m))
-    halo_extended_list: List[Dict] = []
-    for sx, sy, sp_m in sorted(halo_extended_coords):
-        existing_coords.add((sx, sy))
-        ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
-        lat, lon = bng_to_latlon(ce, cn)
-        halo_extended_list.append(
-            {
-                "square_id": f"test_landscape_E{sx}_N{sy}",
-                "sampling_stream": "heldout_test_landscape",
-                "split": sp_m,
-                "e_min": sx,
-                "n_min": sy,
-                "e_max": sx + square_size_m,
-                "n_max": sy + square_size_m,
-                "center_lat": round(lat, 5),
-                "center_lon": round(lon, 5),
-                "os_grid_ref": bng_to_os_grid_ref(ce, cn),
-                "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
-                "status": "pending",
-            }
-        )
-    rng.shuffle(halo_extended_list)
-
-    all_new_landscape = new_seed_round_robin + new_landscape + halo_test_list + val_landscape_list + halo_extended_list
-
-    # 3. Matching number of uniform_national_null squares across out-of-sample (test + val) 20 km blocks
-    test_land_blocks = sorted(
-        [
-            (bx, by)
-            for (bx, by) in land_blocks_20k
-            if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) in {"test", "val"}
-        ]
-    )
-    target_null_count = max(len(all_new_landscape), max(0, min_pending - pending_now))
-    new_null: List[Dict] = []
-    for _pass_idx in range(80):
-        if len(new_null) >= target_null_count:
-            break
-        blocks_copy = list(test_land_blocks)
-        rng.shuffle(blocks_copy)
-        for bx, by in blocks_copy:
-            sub_x = int(rng.integers(0, 20000 // square_size_m))
-            sub_y = int(rng.integers(0, 20000 // square_size_m))
-            sx = bx * 20000 + sub_x * square_size_m
-            sy = by * 20000 + sub_y * square_size_m
-            if (sx, sy) in existing_coords or (sx, sy) in monument_squares_2k:
+    for target_splits in ({"test"}, {"val"}, {"train"}):
+        tier_landscape: List[Dict] = []
+        for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
+            if (sx, sy) in existing_coords:
                 continue
-            existing_coords.add((sx, sy))
             ce = sx + square_size_m // 2
             cn = sy + square_size_m // 2
-            sp_null = assign_spatial_split(ce, cn)
+            sp = assign_spatial_split(ce, cn)
+            if sp not in target_splits:
+                continue
+            existing_coords.add((sx, sy))
             lat, lon = bng_to_latlon(ce, cn)
-            new_null.append(
+            tier_landscape.append(
                 {
-                    "square_id": f"null_test_E{sx}_N{sy}",
-                    "sampling_stream": "uniform_national_null",
-                    "split": sp_null,
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": sp,
                     "e_min": sx,
                     "n_min": sy,
                     "e_max": sx + square_size_m,
@@ -571,12 +428,119 @@ def expand_national_queue_if_needed(
                     "center_lat": round(lat, 5),
                     "center_lon": round(lon, 5),
                     "os_grid_ref": bng_to_os_grid_ref(ce, cn),
-                    "known_prehistoric_monuments_in_square": 0,
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
                     "status": "pending",
                 }
             )
-            if len(new_null) >= target_null_count:
-                break
+        rng.shuffle(tier_landscape)
+        new_landscape.extend(tier_landscape)
+
+        # 1-ring Halo (2 km adjacent) around monuments in this split tier
+        tier_halo_coords: List[Tuple[int, int, str]] = []
+        seen_tier_halo: Set[Tuple[int, int]] = set()
+        for (mx, my) in monument_squares_2k.keys():
+            sp_m = assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2)
+            if sp_m not in target_splits:
+                continue
+            bx, by = mx // 20000, my // 20000
+            for dx in (-square_size_m, 0, square_size_m):
+                for dy in (-square_size_m, 0, square_size_m):
+                    nx, ny = mx + dx, my + dy
+                    if (
+                        (nx // 20000, ny // 20000) == (bx, by)
+                        and (nx, ny) not in existing_coords
+                        and (nx, ny) not in seen_tier_halo
+                    ):
+                        seen_tier_halo.add((nx, ny))
+                        tier_halo_coords.append((nx, ny, sp_m))
+        tier_halo_items: List[Dict] = []
+        for sx, sy, sp_m in sorted(tier_halo_coords):
+            existing_coords.add((sx, sy))
+            ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
+            lat, lon = bng_to_latlon(ce, cn)
+            tier_halo_items.append(
+                {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": sp_m,
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                    "status": "pending",
+                }
+            )
+        rng.shuffle(tier_halo_items)
+        new_landscape.extend(tier_halo_items)
+        if len(new_seed_round_robin) + len(new_landscape) >= max(min_pending - pending_now, 2500):
+            break
+
+    all_new_landscape = new_seed_round_robin + new_landscape
+
+    # 3. Matching number of uniform_national_null squares (first exhausting test+val blocks, then national blocks)
+    target_null_count = max(len(all_new_landscape), max(0, min_pending - pending_now))
+    new_null: List[Dict] = []
+    for target_splits in ({"test", "val"}, {"train"}):
+        if len(new_null) >= target_null_count:
+            break
+        tier_blocks = sorted(
+            [
+                (bx, by)
+                for (bx, by) in land_blocks_20k
+                if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) in target_splits
+            ]
+        )
+        # Enumerate all unqueued 2km squares per block in random round-robin passes across blocks
+        block_candidates: Dict[Tuple[int, int], List[Tuple[int, int]]] = {}
+        for bx, by in tier_blocks:
+            coords = []
+            for sub_x in range(20000 // square_size_m):
+                for sub_y in range(20000 // square_size_m):
+                    sx = bx * 20000 + sub_x * square_size_m
+                    sy = by * 20000 + sub_y * square_size_m
+                    if (sx, sy) not in existing_coords and (sx, sy) not in monument_squares_2k:
+                        coords.append((sx, sy))
+            if coords:
+                rng.shuffle(coords)
+                block_candidates[(bx, by)] = coords
+
+        while block_candidates and len(new_null) < target_null_count:
+            active_blocks = list(block_candidates.keys())
+            rng.shuffle(active_blocks)
+            for bkey in active_blocks:
+                clist = block_candidates[bkey]
+                sx, sy = clist.pop()
+                if not clist:
+                    del block_candidates[bkey]
+                if (sx, sy) in existing_coords:
+                    continue
+                existing_coords.add((sx, sy))
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                sp_null = assign_spatial_split(ce, cn)
+                lat, lon = bng_to_latlon(ce, cn)
+                new_null.append(
+                    {
+                        "square_id": f"null_test_E{sx}_N{sy}",
+                        "sampling_stream": "uniform_national_null",
+                        "split": sp_null,
+                        "e_min": sx,
+                        "n_min": sy,
+                        "e_max": sx + square_size_m,
+                        "n_max": sy + square_size_m,
+                        "center_lat": round(lat, 5),
+                        "center_lon": round(lon, 5),
+                        "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                        "known_prehistoric_monuments_in_square": 0,
+                        "status": "pending",
+                    }
+                )
+                if len(new_null) >= target_null_count:
+                    break
 
     # Interleave 1:1
     appended: List[Dict] = []
@@ -590,7 +554,7 @@ def expand_national_queue_if_needed(
     if not appended:
         return False
     queue_state["queue"].extend(appended)
-    print(f"[queue] Expanded held-out test queue with {len(appended)} additional 2km x 2km squares.")
+    print(f"[queue] Expanded national survey queue with {len(appended)} additional 2km x 2km squares.")
     return True
 
 
@@ -849,20 +813,65 @@ def export_public_docs(
         json.dumps(public_summary, indent=2),
         encoding="utf-8",
     )
-    non_conf = [f for f in all_features if f["properties"].get("context_category") != "flagged_modern_or_karst_confounder"]
+    priority_non_conf = [
+        f
+        for f in all_features
+        if f["properties"].get("context_category") in {"rediscovered_nhle_scheduled", "rediscovered_osm_archaeology"}
+        or (
+            f["properties"].get("context_category") == "unidentified_candidate"
+            and (
+                f["properties"].get("passes_fpr_0_01")
+                or f["properties"].get("megalithic_portal_matches")
+                or f["properties"].get("user_survey_status")
+            )
+        )
+    ]
+    fpr05_tail = [
+        f
+        for f in all_features
+        if f["properties"].get("context_category") == "unidentified_candidate"
+        and not (
+            f["properties"].get("passes_fpr_0_01")
+            or f["properties"].get("megalithic_portal_matches")
+            or f["properties"].get("user_survey_status")
+        )
+    ]
+    fpr05_tail.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
     conf_only = [f for f in all_features if f["properties"].get("context_category") == "flagged_modern_or_karst_confounder"]
     conf_only.sort(
         key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
         reverse=True,
     )
-    export_feats = non_conf + conf_only[:400]
+    export_feats = priority_non_conf + fpr05_tail[:1200] + conf_only[:300]
+    _unused_web_keys = (
+        "nearby_environmental_features",
+        "nhle_cluster_summary",
+        "pond_unet_local_mean",
+        "pond_unet_local_peak",
+        "pond_unet_predicted_class",
+        "pond_unet_tile_prob",
+        "ridge_continuation_elongation",
+        "ridge_continuation_span_m",
+        "adjacent_channel_span_m",
+        "patch_min_relief_m",
+        "centroid_local_relief_m",
+        "max_positive_relief_m",
+        "mean_slope_tangent",
+        "raw_tile_logit",
+        "vlm_verdict_tier",
+        "vlm_shape_verdict",
+    )
     for f in export_feats:
         p = f["properties"]
-        p.pop("nearby_environmental_features", None)
+        for uk in _unused_web_keys:
+            p.pop(uk, None)
         if isinstance(p.get("environmental_confounder_hints"), list):
-            p["environmental_confounder_hints"] = p["environmental_confounder_hints"][:2]
-        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 3:
-            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:3]
+            p["environmental_confounder_hints"] = p["environmental_confounder_hints"][:1]
+        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 2:
+            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:2]
         for k_empty in ("osm_archaeology_matches", "osm_confounder_matches", "megalithic_portal_matches"):
             if p.get(k_empty) == []:
                 p.pop(k_empty, None)
