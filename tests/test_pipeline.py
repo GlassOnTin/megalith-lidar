@@ -927,7 +927,7 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert "FAVOURITES" not in item_types
         assert "tracks/UK_Megalith_LiDAR/1888_OS_Confirmed_Antiquities.gpx" in gpx_files
         assert "tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx" in gpx_files
-        assert "UK 1 m LiDAR Hillshade (EA DTM)" in map_source_names
+        assert "🇬🇧 ⛰ England LiDAR Terrain 1m (EA)" in map_source_names
         assert "UK 1888 OS 6-Inch Map" in map_source_names
         assert "Roman Empire Atlas (DARE)" in map_source_names
 

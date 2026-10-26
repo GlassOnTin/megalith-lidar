@@ -568,7 +568,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                 "pluginId": "uk.megalith.lidar",
                 "items": [
                     {
-                        "name": "UK 1 m LiDAR Hillshade (EA DTM)",
+                        "name": "🇬🇧 ⛰ England LiDAR Terrain 1m (EA)",
                         "minZoom": 11,
                         "maxZoom": 19,
                         "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Lidar_Composite_Hillshade_DTM_1m&STYLES=&SRS=EPSG:4326&BBOX={bbox}&WIDTH=256&HEIGHT=256&FORMAT=image/png",
@@ -583,7 +583,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "sql": False,
                     },
                     {
-                        "name": "UK 1 m LiDAR Surface (EA DSM)",
+                        "name": "🇬🇧 ⛰ England LiDAR Surface 1m (EA)",
                         "minZoom": 11,
                         "maxZoom": 19,
                         "url": "https://environment.data.gov.uk/spatialdata/lidar-composite-digital-surface-model-last-return-dsm-1m/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Lidar_Composite_Hillshade_LZ_DSM_1m&STYLES=&SRS=EPSG:4326&BBOX={bbox}&WIDTH=256&HEIGHT=256&FORMAT=image/png",
