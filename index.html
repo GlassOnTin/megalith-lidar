@@ -3,7 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UK LiDAR Prehistoric Monument Survey</title>
+  <title>UK 1 m LiDAR &amp; Aerial Cropmark Monument Survey | OsmAnd Plugin &amp; Interactive Atlas</title>
+  <meta name="description" content="Open-source 1 m LiDAR and 16 m aerial cropmark survey for unrecorded Prehistoric, Iron Age, and Roman earthworks across England, cross-checked against 1888 OS 6-Inch maps, Historic England NHLE, OpenStreetMap, and Megalithic.co.uk. Includes one-tap OsmAnd Custom Plugin (.osf) and GPX field exports." />
+  <meta name="keywords" content="OsmAnd plugin, OsmAnd GPX, UK LiDAR, prehistoric monuments, round barrow, tumulus, henge, Roman roads, Iron Age hillfort, 1888 Ordnance Survey, archaeology GIS" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "UK 1 m LiDAR & Aerial Cropmark Monument Survey (OsmAnd Plugin & GeoJSON/GPX Dataset)",
+    "description": "Calibrated out-of-sample 1 m LiDAR and 16 m aerial cropmark survey of England for unrecorded Prehistoric, Iron Age, and Roman earthwork candidates, cross-checked against 1888–1913 OS 6-Inch maps, Historic England NHLE, OpenStreetMap, and Megalithic.co.uk.",
+    "url": "https://glassontin.github.io/megalith-lidar/",
+    "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+    "keywords": ["OsmAnd", "OsmAnd Plugin", "GPX", "LiDAR", "Archaeology", "Prehistoric Monuments", "Roman Roads", "1888 Ordnance Survey", "England"],
+    "distribution": [
+      {
+        "@type": "DataDownload",
+        "name": "OsmAnd Custom Plugin Package (.osf)",
+        "encodingFormat": "application/zip",
+        "contentUrl": "https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf"
+      },
+      {
+        "@type": "DataDownload",
+        "name": "OsmAnd / Garmin / QGIS Waypoints (.gpx)",
+        "encodingFormat": "application/gpx+xml",
+        "contentUrl": "https://glassontin.github.io/megalith-lidar/docs/megalith_lidar_osmand.gpx"
+      },
+      {
+        "@type": "DataDownload",
+        "name": "Prehistoric Candidates GeoJSON",
+        "encodingFormat": "application/geo+json",
+        "contentUrl": "https://glassontin.github.io/megalith-lidar/docs/candidates.geojson"
+      }
+    ]
+  }
+  </script>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -787,6 +820,9 @@
       <a class="btn-link" href="docs/megalith_lidar_osmand.gpx" download="megalith_lidar_osmand.gpx" title="Download all monument candidates as an OsmAnd / Garmin / Organic Maps / QGIS GPX waypoint file with 7-panel deep-links">
         OsmAnd / GPS (.gpx)
       </a>
+      <button class="btn-link" id="btnOsmandQrModal" type="button" style="cursor:pointer;" onclick="document.getElementById('osmandQrDialog').showModal()" title="Scan QR code with your Android or iOS phone camera to install the OsmAnd plugin &amp; monument waypoints directly on your device">
+        📱 OsmAnd QR Install
+      </button>
       <button class="btn-link" id="btnThornboroughCase" type="button" style="cursor:pointer;">
         Inspect Thornborough Central Henge (SE 28585 79405) Case Study
       </button>
@@ -795,6 +831,27 @@
       </button>
     </div>
   </header>
+
+  <dialog id="osmandQrDialog" style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:18px 20px;max-width:420px;width:92vw;box-shadow:0 12px 32px rgba(0,0,0,0.35);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+      <strong style="font-size:15px;color:var(--heading);">Install in OsmAnd (Android &amp; iOS)</strong>
+      <button type="button" class="btn-link" style="cursor:pointer;padding:2px 8px;" onclick="document.getElementById('osmandQrDialog').close()">Close ✕</button>
+    </div>
+    <div style="text-align:center;margin:10px 0;">
+      <a href="docs/megalith-lidar.osf" download="megalith-lidar.osf">
+        <img src="docs/osmand_qr.svg" alt="QR Code for megalith-lidar.osf" style="width:190px;height:190px;background:#fff;padding:8px;border-radius:6px;border:1px solid var(--border);" />
+      </a>
+    </div>
+    <ol style="font-size:12.5px;line-height:1.45;padding-left:18px;margin:8px 0 12px 0;color:var(--text);">
+      <li><strong>Scan QR</strong> with your phone camera (or tap <a href="docs/megalith-lidar.osf" download="megalith-lidar.osf"><strong>megalith-lidar.osf</strong></a> on mobile) and open with <strong>OsmAnd</strong>.</li>
+      <li>Tap <strong>OK</strong> on <em>New plugin added</em>, check <strong>My Places</strong>, and tap <strong>Continue</strong> to import all 4 monument Favourite groups (<strong>1888 OS Confirmed Antiquities ★</strong>, Prehistoric ●, Iron Age ◆, Roman ■) and the <strong>Roman &amp; Ancient Roads</strong> track network.</li>
+      <li>In OsmAnd's <strong>Configure map (🌐) → Overlay map…</strong>, select <strong>UK 1888 OS 6-Inch Map</strong> to drape historic Ordnance Survey sheets over the map in the field.</li>
+    </ol>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn-link" href="docs/megalith-lidar.osf" download="megalith-lidar.osf">Download .osf Plugin (1.3 MB)</a>
+      <a class="btn-link" href="docs/megalith_lidar_osmand.gpx" download="megalith_lidar_osmand.gpx">Standalone GPX (5.1 MB)</a>
+    </div>
+  </dialog>
 
   <details class="guide-bar" style="padding:8px 14px;cursor:pointer;">
     <summary style="width:100%;margin:0;font-size:12.5px;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;">

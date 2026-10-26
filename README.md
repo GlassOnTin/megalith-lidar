@@ -128,7 +128,15 @@ Evaluated on `109` positives and `179` negatives (`docs/enclosure_summary.json`,
 
 ## OsmAnd & Field Navigation (`docs/megalith-lidar.osf` & `docs/megalith_lidar_osmand.gpx`)
 
-- **One-Tap OsmAnd Custom Plugin (`docs/megalith-lidar.osf`)**: Downloading and opening [`megalith-lidar.osf`](https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf) on Android or iOS installs the **UK 1 m LiDAR Monument Survey** plugin into [OsmAnd](https://osmand.net/), bundling:
+<p align="center">
+  <a href="https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf">
+    <img src="docs/osmand_qr.svg" width="160" alt="Scan to download megalith-lidar.osf for OsmAnd" />
+  </a>
+  <br />
+  <sub>Scan with your phone camera or tap to install <b>megalith-lidar.osf</b> in OsmAnd</sub>
+</p>
+
+- **One-Tap OsmAnd Custom Plugin (`docs/megalith-lidar.osf`)**: Downloading and opening [`megalith-lidar.osf`](https://glassontin.github.io/megalith-lidar/docs/megalith-lidar.osf) (or via [GitHub Releases](https://github.com/GlassOnTin/megalith-lidar/releases/latest)) on Android or iOS installs the **UK 1 m LiDAR Monument Survey** plugin into [OsmAnd](https://osmand.net/), bundling:
   - Categorised monument Favourites (`1888 OS Confirmed Antiquities ★`, `Prehistoric Candidates ●`, `Iron Age & Settlement ◆`, `Roman Candidates ■`) with earthwork relief, walkability notes, Qwen3.8 VLM / 1888 OS assessments, and clickable `#site=...` deep-links back to the 7-panel LiDAR inspector.
   - Searchable GPX tracks (`UK_Megalith_LiDAR_Candidates.gpx` and `UK_Roman_and_Ancient_Roads.gpx` covering `360` British Roman road and prehistoric ridgeway segments).
   - Custom online tile sources for **UK 1888–1913 OS 6-Inch Map** (`uk-osgb1888`) and **Digital Atlas of the Roman Empire (DARE)** so fieldwalkers can underlay 19th-century Ordnance Survey mapping beneath their live GPS position.

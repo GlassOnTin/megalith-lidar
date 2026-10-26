@@ -347,6 +347,49 @@ def build_ancient_roads_gpx_xml(roads_geojson_path: Path, updated_utc: str) -> s
     return "\n".join(lines) + "\n"
 
 
+def _build_plugin_graphics() -> Tuple[bytes, bytes]:
+    """Generate a 96x96 plugin icon PNG and 640x240 LiDAR hillshade banner PNG."""
+    import io
+    import math
+    from PIL import Image, ImageDraw
+
+    # 1. 96x96 Icon: concentric amber/gold henge & barrow reticle on dark slate circle
+    icon = Image.new("RGBA", (96, 96), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(icon)
+    draw.ellipse((4, 4, 92, 92), fill=(15, 23, 42, 255), outline=(217, 119, 6, 255), width=4)
+    draw.ellipse((18, 18, 78, 78), outline=(245, 158, 11, 230), width=4)
+    draw.ellipse((32, 32, 64, 64), outline=(34, 197, 94, 240), width=3)
+    draw.ellipse((43, 43, 53, 53), fill=(245, 158, 11, 255))
+    icon_buf = io.BytesIO()
+    icon.save(icon_buf, format="PNG", optimize=True)
+
+    # 2. 640x240 Banner: synthetic multi-azimuth LiDAR hillshade of a concentric henge & barrow
+    banner = Image.new("RGB", (640, 240), (20, 29, 43))
+    px = banner.load()
+    for y in range(240):
+        for x in range(640):
+            dx = (x - 320.0) / 85.0
+            dy = (y - 120.0) / 85.0
+            r = math.hypot(dx, dy)
+            # Concentric bank + ditch + central mound relief profile derivative (NW illumination)
+            grad = (
+                -0.45 * (dx + dy) * math.exp(-((r - 1.05) ** 2) / 0.045)
+                + 0.35 * (dx + dy) * math.exp(-((r - 0.72) ** 2) / 0.035)
+                - 0.55 * (dx + dy) * math.exp(-(r**2) / 0.08)
+            )
+            shade = max(18, min(235, int(72 + 125 * grad)))
+            px[x, y] = (int(shade * 0.88), int(shade * 0.94), min(255, int(shade * 1.06)))
+    bdraw = ImageDraw.Draw(banner)
+    bdraw.ellipse((320 - 115, 120 - 115, 320 + 115, 120 + 115), outline=(245, 158, 11), width=2)
+    bdraw.line((320 - 130, 120, 320 - 100, 120), fill=(245, 158, 11), width=2)
+    bdraw.line((320 + 100, 120, 320 + 130, 120), fill=(245, 158, 11), width=2)
+    bdraw.line((320, 120 - 130, 320, 120 - 100), fill=(245, 158, 11), width=2)
+    bdraw.line((320, 120 + 100, 320, 120 + 130), fill=(245, 158, 11), width=2)
+    banner_buf = io.BytesIO()
+    banner.save(banner_buf, format="PNG", optimize=True)
+    return icon_buf.getvalue(), banner_buf.getvalue()
+
+
 def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     updated_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     candidates = _load_candidates(docs_dir)
@@ -356,6 +399,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     gpx_path.write_text(gpx_xml, encoding="utf-8")
 
     roads_xml = build_ancient_roads_gpx_xml(docs_dir / "roman_and_ancient_roads.geojson", updated_utc)
+    icon_png, banner_png = _build_plugin_graphics()
 
     items_manifest = {
         "version": 3,
@@ -364,6 +408,8 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                 "type": "PLUGIN",
                 "pluginId": "uk.megalith.lidar",
                 "version": 1,
+                "icon": {"": "@icon.png"},
+                "image": {"": "@image.png"},
                 "name": {"": "UK 1 m LiDAR Monument Survey"},
                 "description": {
                     "": (
@@ -374,6 +420,11 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "tracks, and 1888 OS / Roman Empire map overlays."
                     )
                 },
+            },
+            {
+                "type": "RESOURCES",
+                "pluginId": "uk.megalith.lidar",
+                "file": "res",
             },
             {
                 "type": "MAP_SOURCES",
@@ -432,9 +483,31 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
     osf_path = docs_dir / "megalith-lidar.osf"
     with zipfile.ZipFile(osf_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         zf.writestr("items.json", json.dumps(items_manifest, indent=2, ensure_ascii=False))
+        zf.writestr("res/icon.png", icon_png)
+        zf.writestr("res/image.png", banner_png)
         zf.writestr("favourites.gpx", gpx_xml)
         zf.writestr("tracks/UK_Megalith_LiDAR_Candidates.gpx", gpx_xml)
         zf.writestr("tracks/UK_Roman_and_Ancient_Roads.gpx", roads_xml)
+
+    qr_svg_path = docs_dir / "osmand_qr.svg"
+    if not qr_svg_path.exists():
+        import shutil
+        import subprocess
+
+        if shutil.which("qrencode"):
+            subprocess.run(
+                [
+                    "qrencode",
+                    "-t",
+                    "SVG",
+                    "-m",
+                    "2",
+                    "-o",
+                    str(qr_svg_path),
+                    f"{SITE_BASE_URL}docs/megalith-lidar.osf",
+                ],
+                check=False,
+            )
 
     counts_by_group: Dict[str, int] = {}
     for dom, p in candidates:

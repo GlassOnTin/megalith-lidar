@@ -897,8 +897,8 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert manifest["version"] == 3
         for item in manifest["items"]:
             if "file" in item:
-                # OsmAnd SettingsImporter.updateFilesInfo requires exact match with zipEntry.getName()
+                # OsmAnd SettingsImporter.updateFilesInfo requires exact match with zipEntry.getName() or folder prefix
                 assert not item["file"].startswith("/")
-                assert item["file"] in names
+                assert item["file"] in names or any(n.startswith(item["file"] + "/") for n in names)
 
 
