@@ -615,6 +615,47 @@
       background: rgba(88, 166, 255, 0.25);
       text-decoration: none;
     }
+    details.inline-drawer {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 10px;
+      font-size: 12.5px;
+    }
+    details.inline-drawer > summary {
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      color: var(--text);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    details.inline-drawer > summary::-webkit-details-marker {
+      display: none;
+    }
+    details.inline-drawer > summary::after {
+      content: "▾";
+      color: var(--accent);
+      font-size: 12px;
+      transition: transform 0.15s ease;
+    }
+    details.inline-drawer[open] > summary::after {
+      transform: rotate(180deg);
+    }
+    details.inline-drawer[open] > summary {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .note-truncate {
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     footer {
       padding: 12px 20px;
       color: var(--muted);
@@ -645,73 +686,77 @@
     </div>
   </header>
 
-  <div class="guide-bar">
-    <div class="guide-inner">
+  <details class="guide-bar" style="padding:8px 20px;cursor:pointer;">
+    <summary style="max-width:1680px;margin:0 auto;font-size:12.5px;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;">
+      <span><strong>Quick-Start Guide &amp; Survey Scope:</strong> Out-of-sample <strong>2 km × 2 km square survey</strong> (<span id="guideAreaSpan">24,424 km² across 6,106 squares</span>) — click any table row or map pin to inspect its 6-panel 1 m LiDAR &amp; 16 m Aerial Cropmark imagery.</span>
+      <span class="btn-link" style="padding:2px 8px;font-size:11.5px;white-space:nowrap;">How to use ▾</span>
+    </summary>
+    <div class="guide-inner" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
       <div class="guide-step">
-        <strong>1. Start with "Unidentified Candidates" (Left Panel)</strong>
-        <span>The default tab lists terrain anomalies that match prehistoric earthwork geometry in 1 m LiDAR and are <em>not</em> listed in Historic England's Scheduled Monument register or mapped as modern features in OpenStreetMap.</span>
+        <strong>1. Choose a Domain Tab (Left Panel)</strong>
+        <span>Switch between <em>Prehistoric</em>, <em>Roman</em>, and <em>Iron Age &amp; Settlement</em> candidates that lie outside Historic England's Scheduled Monument register and mapped OpenStreetMap features.</span>
       </div>
       <div class="guide-step">
-        <strong>2. Click Any Row or Map Pin to Inspect (Right Panel)</strong>
-        <span>Selecting a site zooms the map to its British National Grid coordinates and displays its 6-panel 1 m LiDAR &amp; 16 m Aerial Cropmark/Soilmark breakdown on the right, with a direct link to inspect it on OpenStreetMap.</span>
+        <strong>2. Click Any Row or Map Pin (Right Panel)</strong>
+        <span>Selecting a site displays its 6-panel 1 m LiDAR &amp; 16 m Aerial Cropmark/Soilmark breakdown, academic context assessment, and links to OpenStreetMap, Historic England, and Megalithic.co.uk.</span>
       </div>
       <div class="guide-step">
-        <strong>3. Check the National Coverage Map (Right Panel)</strong>
-        <span><strong>Important:</strong> This is a statistically sampled out-of-sample survey, <em>not</em> a full wall-to-wall scan of Britain. The national map shows the exact <strong>2 km × 2 km sample squares</strong> (<span id="guideAreaSpan">5,224.0 km² across 1,306 squares</span>, ~4.01% of England) scanned across all three detectors.</span>
+        <strong>3. Explore the National Coverage Map (Bottom Right)</strong>
+        <span>Only the marked <strong>2 km × 2 km sample squares</strong> have been scanned so far. Toggle hot-spot density contours, rediscovered monuments (★), or aerial imagery using the map layer drawer.</span>
       </div>
     </div>
-  </div>
+  </details>
 
   <div class="layout">
     <!-- LEFT COLUMN: TABS + SINGLE FOCUSED LIST -->
     <div>
       <div class="card">
         <div class="card-header">
-          <h2><span class="step-pill">Start Here</span> Browse Survey Detections &amp; Benchmarks</h2>
+          <h2><span class="step-pill">Step 1</span> Survey Detections &amp; Benchmarks</h2>
           <div class="sub muted" id="surveyProgressBadge">Loading survey progress...</div>
         </div>
 
         <div class="tabs">
-          <button class="tab-btn active" data-tab="unidentified" id="tabBtnUnid">
+          <button class="tab-btn active" data-tab="unidentified" id="tabBtnUnid" title="Unidentified Prehistoric Candidates (Barrows, Cairns, Henges, Stone Circles)">
             <span class="dot" style="background:var(--gold)"></span>
-            1. Unidentified Prehistoric Candidates
+            Prehistoric
             <span class="tab-count" id="countUnid">0</span>
           </button>
-          <button class="tab-btn" data-tab="roman" id="tabBtnRoman">
+          <button class="tab-btn" data-tab="roman" id="tabBtnRoman" title="Unidentified Roman &amp; Romano-British Candidates (Villas, Forts, Camps, Road Aggers)">
             <span class="dot" style="background:#d2a8ff"></span>
-            2. Unidentified Roman Candidates
+            Roman
             <span class="tab-count" id="countRoman">0</span>
           </button>
-          <button class="tab-btn" data-tab="enclosure" id="tabBtnEnclosure">
+          <button class="tab-btn" data-tab="enclosure" id="tabBtnEnclosure" title="Unidentified Iron Age Enclosures, Hut Circle Settlements &amp; Cross-Ridge Dykes">
             <span class="dot" style="background:#38bdf8"></span>
-            3. Unidentified Iron Age &amp; Settlement Candidates
+            Iron Age &amp; Settlement
             <span class="tab-count" id="countEnclosure">0</span>
           </button>
-          <button class="tab-btn" data-tab="known" id="tabBtnKnown">
+          <button class="tab-btn" data-tab="known" id="tabBtnKnown" title="Rediscovered NHLE Scheduled Monuments, OpenStreetMap Archaeology &amp; Megalithic.co.uk Sites">
             <span class="dot" style="background:var(--green)"></span>
-            4. Rediscovered Known Monuments
+            Rediscovered
             <span class="tab-count" id="countKnown">0</span>
           </button>
-          <button class="tab-btn" data-tab="confounders" id="tabBtnConf">
+          <button class="tab-btn" data-tab="confounders" id="tabBtnConf" title="Filtered Modern, Agricultural, Military &amp; Geological Confounders">
             <span class="dot" style="background:var(--orange)"></span>
-            5. Filtered Modern / Karst Confounders
+            Confounders
             <span class="tab-count" id="countConf">0</span>
           </button>
-          <button class="tab-btn" data-tab="stats" id="tabBtnStats">
-            6. Statistical Benchmarks &amp; Null Tests
+          <button class="tab-btn" data-tab="stats" id="tabBtnStats" title="Out-of-Sample Statistical Benchmarks &amp; Null Distribution Tests">
+            Benchmarks
           </button>
         </div>
 
         <div class="tab-explainer" id="tabExplainer"></div>
 
-        <!-- Filter controls for tabs 1-3 -->
-        <div class="controls" id="listControls" style="justify-content:space-between;">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <!-- Filter controls for tabs 1-5 -->
+        <div class="controls" id="listControls" style="justify-content:space-between;gap:8px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
             <label>
-              Confidence threshold:
+              Threshold:
               <select id="opSelect">
-                <option value="fpr_0.01" selected>Strict — 1% False Positive Rate (highest confidence, LR+ = 61.1×)</option>
-                <option value="fpr_0.05">Standard — 5% False Positive Rate (wider screening, LR+ = 16.4×)</option>
+                <option value="fpr_0.01" selected>Strict — 1% FPR (LR+ 61.1×)</option>
+                <option value="fpr_0.05">Standard — 5% FPR (LR+ 16.4×)</option>
               </select>
             </label>
             <label>
@@ -721,11 +766,11 @@
               </select>
             </label>
             <label>
-              Survey / Notes:
+              Filter:
               <select id="surveyFilterSelect">
                 <option value="">All Sites</option>
-                <option value="mp_match_60m">Megalithic.co.uk Direct Match (≤60 m)</option>
-                <option value="mp_nearby_250m">Megalithic.co.uk Correlated (≤250 m)</option>
+                <option value="mp_match_60m">Megalithic.co.uk Match (≤60 m)</option>
+                <option value="mp_nearby_250m">Megalithic.co.uk Nearby (≤250 m)</option>
                 <option value="any_note">Annotated / Surveyed Only</option>
                 <option value="field_verified_monument">✓ Field-Verified Monument</option>
                 <option value="historic_survey_confirmed">Historic / HER Confirmed</option>
@@ -734,29 +779,32 @@
                 <option value="field_rejected_confounder">✗ Field-Rejected Confounder</option>
               </select>
             </label>
-            <label>
+            <label title="Only show candidates that have a pre-rendered 4-panel 1 m LiDAR PNG">
               <input type="checkbox" id="chkOnlyDiag" />
-              Only show sites with 4-panel LiDAR image rendered
+              Has LiDAR PNG
             </label>
           </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <input type="file" id="inpSurveyJsonFile" accept=".json,.geojson,application/json" style="display:none;" />
-            <button class="btn-link" id="btnLoadSurveyJson" type="button" style="cursor:pointer;" title="Import field survey comments or historic survey JSON/GeoJSON">
-              Load Notes / Historic JSON
-            </button>
-            <button class="btn-link" id="btnSaveSurveyJson" type="button" style="cursor:pointer;" title="Download all field &amp; historic survey annotations as community_annotations.json">
-              Save Notes (.json)
-            </button>
-            <button class="btn-link" id="btnSubmitSurveyPr" type="button" style="cursor:pointer;" title="Copy community_annotations.json to clipboard and open GitHub PR editor">
-              Submit PR ↗
-            </button>
-            <button class="btn-link" id="btnCopyVisibleRows" type="button" style="cursor:pointer;">
-              Copy Visible Table Rows
-            </button>
-          </div>
+          <details class="inline-drawer" style="padding:4px 8px;">
+            <summary style="font-size:12px;color:var(--accent);">Tools &amp; Survey JSON</summary>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <input type="file" id="inpSurveyJsonFile" accept=".json,.geojson,application/json" style="display:none;" />
+              <button class="btn-link" id="btnLoadSurveyJson" type="button" style="cursor:pointer;" title="Import field survey comments or historic survey JSON/GeoJSON">
+                Load Notes (.json)
+              </button>
+              <button class="btn-link" id="btnSaveSurveyJson" type="button" style="cursor:pointer;" title="Download all field &amp; historic survey annotations as community_annotations.json">
+                Save Notes (.json)
+              </button>
+              <button class="btn-link" id="btnSubmitSurveyPr" type="button" style="cursor:pointer;" title="Copy community_annotations.json to clipboard and open GitHub PR editor">
+                Submit PR ↗
+              </button>
+              <button class="btn-link" id="btnCopyVisibleRows" type="button" style="cursor:pointer;">
+                Copy Table Rows
+              </button>
+            </div>
+          </details>
         </div>
 
-        <!-- Candidate table (shown for tabs 1, 2, 3) -->
+        <!-- Candidate table (shown for tabs 1-5) -->
         <div class="table-scroll" id="candidateListContainer">
           <table>
             <thead>
@@ -764,10 +812,10 @@
                 <th class="sortable" data-sort="os_grid_ref" data-default-dir="asc">OS Grid Ref <span class="sort-arrow">⇅</span></th>
                 <th class="sortable" data-sort="predicted_class" data-default-dir="asc">Predicted Form <span class="sort-arrow">⇅</span></th>
                 <th class="sortable active-sort" data-sort="confidence" data-default-dir="desc">Score <span class="sort-arrow">▼</span></th>
-                <th class="sortable" data-sort="est_local_relief_m" data-default-dir="desc">16 m Relief <span class="sort-arrow">⇅</span></th>
-                <th class="sortable" data-sort="area_m2" data-default-dir="desc">Footprint <span class="sort-arrow">⇅</span></th>
-                <th class="sortable" data-sort="diagnostic_png" data-default-dir="desc">LiDAR Image <span class="sort-arrow">⇅</span></th>
-                <th class="sortable" data-sort="context_note" data-default-dir="asc">Spatial Cross-Check Note <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="est_local_relief_m" data-default-dir="desc">Relief <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="area_m2" data-default-dir="desc">Area <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="diagnostic_png" data-default-dir="desc">Signals <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="context_note" data-default-dir="asc">Context Note <span class="sort-arrow">⇅</span></th>
               </tr>
             </thead>
             <tbody id="candTableBody"></tbody>
@@ -837,55 +885,56 @@
 
       <div class="card">
         <div class="card-header">
-          <h2>National Survey Coverage Map — Regions Scanned So Far</h2>
-          <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Zoom Out to Full England Overview</button>
-        </div>
-        <div style="background:rgba(255, 214, 0, 0.08);border:1px solid rgba(255, 214, 0, 0.35);border-radius:4px;padding:8px 10px;margin-bottom:8px;font-size:12.5px;">
-          <strong>Coverage Note:</strong> Only the marked <strong>2 km × 2 km sample squares</strong> (<span id="mapCoverageSummary">1,306 squares = 5,224.0 km², or 4.01% of England</span>) have been scanned across all three detectors. Any region outside these boxes has <strong>not</strong> yet been evaluated by the models.
-        </div>
-        <div class="controls" style="margin-bottom:8px;justify-content:space-between;gap:8px;">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-            <label>
-              <input type="checkbox" id="chkShowScannedSquares" checked />
-              Show scanned 2 km × 2 km squares
-            </label>
-            <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
-              <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
-              Show Rediscovered Known Monuments (<span style="color:#00e676;">★</span>)
-            </label>
-            <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
-              <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
-              Show All Candidate Categories (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
-            </label>
-            <label title="Render national kernel-density hot-spot isopleths and marching-squares contour rings">
-              <input type="checkbox" id="chkShowDensityContours" checked />
-              Hot-Spot Density Contours
-            </label>
-            <select id="densityModeSelect" title="Choose how hot-spot density contours are calculated" style="padding:3px 6px;font-size:11.5px;">
-              <option value="normalized_all" selected>Contours: All Categories / Scanned km²</option>
-              <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
-              <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
-            </select>
-            <label>
-              <input type="checkbox" id="chkAerialBasemap" />
-              Aerial / Cropmark Orthophoto basemap
-            </label>
+          <div>
+            <h2>National Survey Coverage Map</h2>
+            <div class="sub muted">Sampled 2 km × 2 km squares: <span id="mapCoverageSummary">6,106 squares = 24,424 km²</span></div>
           </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11.5px;" class="muted">
+          <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Reset England View</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:center;font-size:12px;" class="muted">
             <span><strong style="color:#facc15;font-size:13px;">●</strong> Prehistoric</span>
             <span><strong style="color:#c084fc;font-size:13px;">■</strong> Roman</span>
-            <span><strong style="color:#38bdf8;font-size:13px;">◆</strong> Iron Age / Settlement</span>
-            <span><strong style="color:#00e676;font-size:13px;">★</strong> Rediscovered Monument</span>
+            <span><strong style="color:#38bdf8;font-size:13px;">◆</strong> Iron Age</span>
+            <span><strong style="color:#00e676;font-size:13px;">★</strong> Rediscovered</span>
             <span>
               <span class="dot" style="background:#00e676;border-radius:2px;"></span> Monument Sq ·
               <span class="dot" style="background:#58a6ff;border-radius:2px;"></span> Null Sq
             </span>
-            <span id="mapScoreScaleLegend" style="display:inline-flex;align-items:center;gap:4px;">
-              <span>Score:</span>
-              <span id="scoreScaleMinLbl" style="font-variant-numeric:tabular-nums;">0.75</span>–<span id="scoreScaleMaxLbl" style="font-variant-numeric:tabular-nums;">0.99</span>
-              <span style="font-size:11px;">(size &amp; brightness scaled)</span>
+            <span id="mapScoreScaleLegend" style="display:inline-flex;align-items:center;gap:3px;">
+              <span>Score <span id="scoreScaleMinLbl">0.75</span>–<span id="scoreScaleMaxLbl">0.99</span></span>
             </span>
           </div>
+          <details class="inline-drawer" style="padding:4px 9px;">
+            <summary style="font-size:12px;color:var(--accent);">Map Layers &amp; Contours</summary>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px;">
+              <label>
+                <input type="checkbox" id="chkShowScannedSquares" checked />
+                2 km × 2 km Squares
+              </label>
+              <label title="Overlay rediscovered NHLE Scheduled Monuments &amp; OSM Archaeology on the map">
+                <input type="checkbox" id="chkShowRediscoveredOnMap" checked />
+                Rediscovered (<span style="color:#00e676;">★</span>)
+              </label>
+              <label title="Show Prehistoric (●), Roman (■), and Iron Age (◆) candidates together on the map">
+                <input type="checkbox" id="chkShowAllDomainsOnMap" checked />
+                All Categories (<span style="color:#facc15;">●</span> <span style="color:#c084fc;">■</span> <span style="color:#38bdf8;">◆</span>)
+              </label>
+              <label title="Render national kernel-density hot-spot isopleths and marching-squares contour rings">
+                <input type="checkbox" id="chkShowDensityContours" checked />
+                Hot-Spot Contours
+              </label>
+              <select id="densityModeSelect" title="Choose how hot-spot density contours are calculated" style="padding:3px 6px;font-size:11.5px;">
+                <option value="normalized_all" selected>Contours: All Categories / Scanned km²</option>
+                <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
+                <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
+              </select>
+              <label>
+                <input type="checkbox" id="chkAerialBasemap" />
+                Aerial Basemap
+              </label>
+            </div>
+          </details>
         </div>
         <div id="map"></div>
       </div>
@@ -1233,17 +1282,17 @@
 
     const TAB_EXPLAINERS = {
       unidentified:
-        "<strong>What this list shows:</strong> Unrecorded prehistoric monument candidates — locations where 1 m bare-earth LiDAR has circular, oval, or linear mound/bank relief matching prehistoric barrows, henges, or chambered mounds, and which lie <strong>outside</strong> Historic England's Scheduled Monument register and <strong>outside</strong> mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.",
+        `<details style="cursor:pointer;"><summary style="list-style:none;display:flex;justify-content:space-between;align-items:center;"><span><strong>Unrecorded Prehistoric Candidates:</strong> 1 m LiDAR mounds, rings, and banks outside NHLE Scheduled Monuments &amp; OpenStreetMap.</span><span class="muted" style="font-size:11.5px;white-space:nowrap;">Method details ▾</span></summary><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);" class="muted">Circular, oval, or linear mound/bank relief matching prehistoric barrows, henges, or chambered mounds outside Historic England's Scheduled Monument register and mapped OpenStreetMap quarries, sinkholes, embankments, and buildings. Obvious modern/rectilinear confounders and circular-vs-long-barrow contradictions identified by Qwen3.8 Vision are automatically downrated.</div></details>`,
       roman:
-        "<strong>What this list shows:</strong> Unrecorded Roman &amp; Romano-British candidates — locations where our dedicated <strong>RomanUNet</strong> detector (trained on 3,928 tiles across Roman villas, Roman road aggers/trackways, and Roman forts/settlements; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) detects candidate villa platforms, enclosures, or linear road aggers that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.",
+        `<details style="cursor:pointer;"><summary style="list-style:none;display:flex;justify-content:space-between;align-items:center;"><span><strong>Unrecorded Roman &amp; Romano-British Candidates:</strong> Villas, forts, marching camps, and road aggers (Test ROC-AUC = <strong>0.7967</strong>).</span><span class="muted" style="font-size:11.5px;white-space:nowrap;">Method details ▾</span></summary><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);" class="muted">Detected by <strong>RomanUNet</strong> (trained on 3,928 tiles; held-out Test ROC-AUC = <strong>0.7967</strong> [95% CI: 0.7406–0.8495], matched-environment ROC-AUC = <strong>0.8330</strong>, trackside/field-boundary ROC-AUC = <strong>0.8647</strong>) outside Historic England's Scheduled Monument register and OpenStreetMap archaeology, including sub-canopy woodland earthworks where 1 m bare-earth LiDAR sees through the trees.</div></details>`,
       enclosure:
-        "<strong>What this list shows:</strong> Unrecorded Iron Age enclosures, banjo enclosures, prehistoric hut circle settlements, and cross-ridge dykes — locations where our dedicated 8-channel <strong>EnclosureUNet v3</strong> detector (trained on 4,323 tiles combining 1 m LiDAR + 16 m scale-space aerial cropmarks; held-out Test ROC-AUC = <strong>0.8654</strong>, uniform national null ROC-AUC = <strong>0.8941</strong>, trackside/field-boundary ROC-AUC = <strong>0.9614</strong>, Strict 1% Op LR+ = <strong>54.8×</strong>) detects candidate stone/turf hut rings, pound/round settlements, univallate/multivallate enclosures, or coaxial field boundaries that lie <strong>outside</strong> Historic England's Scheduled Monument register and OpenStreetMap archaeology.",
+        `<details style="cursor:pointer;"><summary style="list-style:none;display:flex;justify-content:space-between;align-items:center;"><span><strong>Unrecorded Iron Age &amp; Settlement Candidates:</strong> Hillforts, banjo enclosures, hut circles &amp; dykes (Test ROC-AUC = <strong>0.8654</strong>, LR+ = <strong>54.8×</strong>).</span><span class="muted" style="font-size:11.5px;white-space:nowrap;">Method details ▾</span></summary><div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);" class="muted">Detected by 8-channel <strong>EnclosureUNet v3</strong> (trained on 4,323 tiles combining 1 m LiDAR + 16 m scale-space aerial cropmarks; held-out Test ROC-AUC = <strong>0.8654</strong>, uniform national null ROC-AUC = <strong>0.8941</strong>, trackside/field-boundary ROC-AUC = <strong>0.9614</strong>) outside Historic England's Scheduled Monument register and OpenStreetMap archaeology.</div></details>`,
       known:
-        "<strong>What this list shows:</strong> Already-scheduled Historic England monuments (NHLE Layer 6) and recorded OpenStreetMap archaeological sites (prehistoric, Iron Age, and Roman) that the models independently rediscovered inside held-out test squares that were never seen during training.",
+        `<strong>Rediscovered Known Monuments:</strong> Scheduled Historic England monuments (NHLE), OpenStreetMap archaeological sites, and correlated <em>Megalithic.co.uk</em> monuments independently recovered inside held-out test squares.`,
       confounders:
-        "<strong>What this list shows:</strong> Earthworks and depressions that resemble monuments in 1 m LiDAR, but were automatically flagged by our OpenStreetMap cross-check or Qwen3.8 Visual Audit as modern or geological features (such as quarries, karst sinkholes, covered reservoirs, U-bunds, golf bunkers, embankments, or 18th-century garden temples).",
+        `<strong>Filtered Confounders:</strong> Topographic anomalies that resemble earthworks in 1 m LiDAR but were separated by OpenStreetMap, geomorphic rules (e.g., coastal sand dunes, river scroll-bars), or Qwen3.8 Visual Audit as modern/geological features.`,
       stats:
-        "<strong>What this tab shows:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across five distinct negative null distributions, plus regional density comparisons from the scheduled 2 km × 2 km batch scanner."
+        `<strong>Statistical Benchmarks:</strong> Out-of-sample ROC-AUC discrimination, 95% bootstrap confidence intervals, and false-positive rates across five negative null distributions.`
     };
 
     const THORNBOROUGH_CASE_STUDY = {
@@ -1885,115 +1934,6 @@
         : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
       const mpMapUrl = `https://www.megalithic.co.uk/leaflet_megalith_map.php#15/${Number(p.lat).toFixed(5)}/${Number(p.lon).toFixed(5)}`;
       const copyPayload = `${p.os_grid_ref} | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} | WGS84 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
-      let html = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-          <div>
-            <strong style="font-size:15px;">${p.os_grid_ref}</strong> · ${categoryBadge(p.context_category)}
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn-link" id="btnCopyCoords" type="button" style="cursor:pointer;" data-copy="${copyPayload}">Copy Grid Ref &amp; Coords</button>
-            <a class="btn-link" href="${osmUrl}" target="_blank" rel="noopener">OpenStreetMap ↗</a>
-            <a class="btn-link" href="${gmapsUrl}" target="_blank" rel="noopener">Aerial Satellite ↗</a>
-            <a class="btn-link" href="${heUrl}" target="_blank" rel="noopener">Historic England NHLE ↗</a>
-            <a class="btn-link" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk Search ↗"}</a>
-            <a class="btn-link" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
-          </div>
-        </div>
-        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:inherit;">${p.case_study_note}</div>` : ""}
-        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;font-size:inherit;background:var(--panel-alt);padding:10px;border-radius:4px;border:1px solid var(--border);">
-          <div><span class="muted">Nearest Form Class:</span><br/><strong>${formatClass(p.predicted_class)}</strong></div>
-          <div><span class="muted">Candidate Score (Tile Prob):</span><br/><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="badge badge-nhle" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">↑ from ${p.raw_unet_confidence.toFixed(3)}</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="badge badge-conf" title="${p.vlm_downrate_reason || 'Downrated by Qwen3.8 VLM'}">↓ from ${p.raw_unet_confidence.toFixed(3)}</span>` : "")} (calibrated tile p = ${(p.calibrated_tile_prob || 0).toFixed(3)})</div>
-          <div><span class="muted">16 m Bare-Earth Relief:</span><br/><strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m² footprint, ${p.elongation}× elongation)</div>
-          <div><span class="muted">Aerial Cropmark / Soilmark:</span><br/>${p.cropmark_ring_exg_diff != null ? `<strong>Ring ΔExG ${p.cropmark_ring_exg_diff >= 0 ? "+" : ""}${p.cropmark_ring_exg_diff.toFixed(3)}</strong> · Core ΔL ${p.soilmark_core_lum_diff >= 0 ? "+" : ""}${p.soilmark_core_lum_diff.toFixed(3)} ${p.has_distinct_cropmark ? '<span class="badge badge-nhle">Cropmark Signal</span>' : ""}` : '<span class="muted">Live in Panel 6 below</span>'}</div>
-          <div><span class="muted">Grid Coordinates:</span><br/>E ${p.easting}, N ${p.northing} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)})</div>
-          <div style="grid-column:1 / -1;"><span class="muted">NHLE &amp; OpenStreetMap Check:</span> <strong>${contextNote(p)}</strong></div>
-        </div>
-      `;
-
-      if (p.arch_context_note) {
-        const srcBadge = p.arch_context_source === "qwen3.8_vlm_vision"
-          ? '<span class="badge badge-osm">AI Vision + NHLE Grounded</span>'
-          : (p.arch_context_source === "qwen3.8_llm"
-            ? '<span class="badge badge-osm">AI + NHLE Grounded</span>'
-            : '<span class="badge badge-nhle">NHLE Spatial &amp; 1 m LiDAR Synthesis</span>');
-        let nearbyHtml = "";
-        if (p.nearby_nhle_monuments && p.nearby_nhle_monuments.length > 0) {
-          const items = p.nearby_nhle_monuments.slice(0, 3).map((m) =>
-            `<a href="https://historicengland.org.uk/listing/the-list/list-entry/${m.list_entry}" target="_blank" rel="noopener">${m.name} (#${m.list_entry})</a> <span class="muted">(${m.distance_m} m ${m.bearing})</span>`
-          ).join(" · ");
-          nearbyHtml = `<div style="margin-top:6px;font-size:0.92em;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
-        }
-        let mpHtml = "";
-        if (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) {
-          const mpItems = p.megalithic_portal_matches.slice(0, 3).map((mp) =>
-            `<a href="${mp.url}" target="_blank" rel="noopener">${mp.name} (#${mp.sid})</a> <span class="muted">(${mp.site_type}, ${mp.distance_m} m${mp.accuracy ? `, acc ${mp.accuracy}/5` : ""})</span>`
-          ).join(" · ");
-          mpHtml = `<div style="margin-top:5px;font-size:0.92em;"><strong style="color:#38bdf8;">Megalithic.co.uk Correlation:</strong> ${mpItems}</div>`;
-        }
-        let envHintsHtml = "";
-        if (p.environmental_confounder_hints && p.environmental_confounder_hints.length > 0) {
-          const hintItems = p.environmental_confounder_hints.slice(0, 2).map((h) => `<span style="display:block;margin-top:2px;">• ${h}</span>`).join("");
-          envHintsHtml = `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(88,166,255,0.22);font-size:0.90em;color:var(--muted);"><strong style="color:#d29922;">Geomorphic &amp; False-Positive Context Checks:</strong>${hintItems}</div>`;
-        }
-        html += `
-          <div class="inspector-arch-note" style="margin-top:10px;padding:10px 12px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:4px;font-size:inherit;line-height:1.5;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">
-              <strong style="color:#fff;">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
-              ${srcBadge}
-            </div>
-            <div>${p.arch_context_note}</div>
-            ${nearbyHtml}
-            ${mpHtml}
-            ${envHintsHtml}
-          </div>
-        `;
-      }
-
-      const curStatus = p.user_survey_status || "";
-      const curComment = (p.user_survey_comment || "").replace(/"/g, "&quot;");
-      const defaultObs = p.user_survey_observer || (typeof localStorage !== "undefined" ? (localStorage.getItem(SURVEY_OBSERVER_KEY) || "") : "");
-      const curRef = (p.user_survey_reference || "").replace(/"/g, "&quot;");
-      html += `
-        <div style="margin-top:10px;padding:10px 12px;background:rgba(0, 230, 118, 0.06);border:1px solid rgba(0, 230, 118, 0.30);border-radius:4px;font-size:13px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-            <div>
-              <strong style="color:#fff;">Field Survey &amp; Historic Record Log</strong>
-              ${p.user_survey_status ? ` · ${surveyStatusBadge(p.user_survey_status)}` : '<span class="muted" style="font-size:12px;"> · Record ground-truthing or HER / historic survey data</span>'}
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn-link" id="btnInspectorExportJson" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Save All (.json)</button>
-              <button class="btn-link" id="btnInspectorPr" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Copy &amp; Open PR ↗</button>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:8px;">
-            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
-              <span class="muted">Survey Verdict / Radar Status:</span>
-              <select id="inpSurveyStatus" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;">
-                <option value="" ${curStatus === "" ? "selected" : ""}>Unreviewed (use model default)</option>
-                <option value="field_verified_monument" ${curStatus === "field_verified_monument" ? "selected" : ""}>✓ Field-Verified Monument (ground-truthed)</option>
-                <option value="historic_survey_confirmed" ${curStatus === "historic_survey_confirmed" ? "selected" : ""}>Historic / HER Survey Record (found in HER / map)</option>
-                <option value="priority_field_target" ${curStatus === "priority_field_target" ? "selected" : ""}>★ Priority Field Target / Interesting Feature</option>
-                <option value="uncertain_needs_check" ${curStatus === "uncertain_needs_check" ? "selected" : ""}>? Uncertain / Needs Ground Check</option>
-                <option value="field_rejected_confounder" ${curStatus === "field_rejected_confounder" ? "selected" : ""}>✗ Field-Rejected False Positive / Pond (move to Tab 5)</option>
-              </select>
-            </label>
-            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
-              <span class="muted">Observer / Source (e.g. Name or County HER):</span>
-              <input type="text" id="inpSurveyObserver" value="${defaultObs.replace(/"/g, "&quot;")}" placeholder="e.g. Field Surveyor or Cornwall HER" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
-            </label>
-            <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
-              <span class="muted">HER ID / Historic Survey Reference / URL:</span>
-              <input type="text" id="inpSurveyRef" value="${curRef}" placeholder="e.g. MCO12345 or 1888 OS 25-inch" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
-            </label>
-          </div>
-          <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;">
-            <input type="text" id="inpSurveyComment" value="${curComment}" placeholder="Add field survey observations, ditch/bank measurements, cropmark notes, or historic survey details..." style="flex:1;min-width:220px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12.5px;" />
-            <button class="btn-link" id="btnSaveSiteAnnotation" type="button" style="cursor:pointer;background:rgba(0,230,118,0.18);border-color:rgba(0,230,118,0.55);color:#00e676;">Save to View</button>
-            <button class="btn-link" id="btnClearSiteAnnotation" type="button" style="cursor:pointer;background:rgba(255,110,64,0.14);border-color:rgba(255,110,64,0.45);color:#ff6e40;">Clear</button>
-          </div>
-        </div>
-      `;
-
       const mobileDock = document.getElementById("tableBottomLidarDock");
       const hasPng = Boolean(p.diagnostic_png);
       const effectivePanel = (!hasPng && activeMobilePanel < 4) ? 4 : activeMobilePanel;
@@ -2065,35 +2005,156 @@
         `;
       }
 
-      html += `
+      const scoreDeltaBadge = p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015
+        ? ` <span class="badge badge-nhle" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">↑ ${p.raw_unet_confidence.toFixed(2)}</span>`
+        : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005
+          ? ` <span class="badge badge-conf" title="${p.vlm_downrate_reason || 'Downrated by Qwen3.8 VLM'}">↓ ${p.raw_unet_confidence.toFixed(2)}</span>`
+          : "");
+
+      let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="font-size:15px;">${p.os_grid_ref}</strong>
+            ${categoryBadge(p.context_category)}
+            <span class="muted" style="font-size:12.5px;">${formatClass(p.predicted_class)}</span>
+            <span style="font-size:12.5px;">· Score <strong>${p.confidence.toFixed(3)}</strong>${scoreDeltaBadge}</span>
+            <span style="font-size:12.5px;">· Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m²)</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button class="btn-link" id="btnCopyCoords" type="button" style="cursor:pointer;padding:3px 7px;font-size:11.5px;" data-copy="${copyPayload}">Copy Coords</button>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${osmUrl}" target="_blank" rel="noopener">OSM ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${gmapsUrl}" target="_blank" rel="noopener">Satellite ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${heUrl}" target="_blank" rel="noopener">NHLE ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk ↗"}</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
+          </div>
+        </div>
+        ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(0, 230, 118, 0.09);border:1px solid rgba(0, 230, 118, 0.35);border-radius:4px;font-size:12.5px;">${p.case_study_note}</div>` : ""}
         <div class="desktop-only-lidar-dock">
           ${hasPng ? `
             <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
           ` : `
-            <div style="margin-top:8px;padding:8px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:13px;" class="muted">
-              No 4-panel LiDAR PNG was cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto &amp; 16 m Scale-Space Cropmark panels below.
+            <div style="margin-top:8px;padding:7px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:12px;" class="muted">
+              No 4-panel LiDAR PNG cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto &amp; 16 m Scale-Space Cropmark panels below.
             </div>
           `}
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
             <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 5: Aerial Orthophoto (RGB, 256 m × 256 m BNG)</strong>
+                <strong>Panel 5: Aerial Orthophoto (256 m × 256 m)</strong>
                 <span class="muted">EPSG:27700</span>
               </div>
               <canvas id="desktopAerialCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
             </div>
             <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 6: 16 m Scale-Space Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
+                <strong>Panel 6: 16 m Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
                 <span id="desktopCropmarkReadout" class="muted" style="font-size:11px;">Computing...</span>
               </div>
               <canvas id="desktopCropmarkCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
             </div>
           </div>
-          <div class="panel-legend" style="grid-template-columns:repeat(3, 1fr);">
-            ${legendItemsHtml}
-          </div>
+          <details class="inline-drawer" style="margin-top:8px;">
+            <summary style="font-size:12px;"><span class="muted">Panel Guide: 1. Bare-Earth Slope · 2. 16 m Local Relief · 3. Canopy · 4. Model Prob · 5. Aerial RGB · 6. Cropmark ΔExG</span></summary>
+            <div class="panel-legend" style="grid-template-columns:repeat(3, 1fr);margin-top:4px;">
+              ${legendItemsHtml}
+            </div>
+          </details>
         </div>
+      `;
+
+      if (p.arch_context_note) {
+        const srcBadge = p.arch_context_source === "qwen3.8_vlm_vision"
+          ? '<span class="badge badge-osm">AI Vision + NHLE Grounded</span>'
+          : (p.arch_context_source === "qwen3.8_llm"
+            ? '<span class="badge badge-osm">AI + NHLE Grounded</span>'
+            : '<span class="badge badge-nhle">NHLE Spatial &amp; 1 m LiDAR Synthesis</span>');
+        let nearbyHtml = "";
+        if (p.nearby_nhle_monuments && p.nearby_nhle_monuments.length > 0) {
+          const items = p.nearby_nhle_monuments.slice(0, 3).map((m) =>
+            `<a href="https://historicengland.org.uk/listing/the-list/list-entry/${m.list_entry}" target="_blank" rel="noopener">${m.name} (#${m.list_entry})</a> <span class="muted">(${m.distance_m} m ${m.bearing})</span>`
+          ).join(" · ");
+          nearbyHtml = `<div style="margin-top:6px;font-size:0.92em;"><strong class="muted">Nearest Scheduled Monuments:</strong> ${items}</div>`;
+        }
+        let mpHtml = "";
+        if (p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) {
+          const mpItems = p.megalithic_portal_matches.slice(0, 3).map((mp) =>
+            `<a href="${mp.url}" target="_blank" rel="noopener">${mp.name} (#${mp.sid})</a> <span class="muted">(${mp.site_type}, ${mp.distance_m} m${mp.accuracy ? `, acc ${mp.accuracy}/5` : ""})</span>`
+          ).join(" · ");
+          mpHtml = `<div style="margin-top:5px;font-size:0.92em;"><strong style="color:#38bdf8;">Megalithic.co.uk Correlation:</strong> ${mpItems}</div>`;
+        }
+        const hintItems = (p.environmental_confounder_hints || []).slice(0, 2).map((h) => `<div style="margin-top:3px;">• ${h}</div>`).join("");
+        html += `
+          <div class="inspector-arch-note" style="margin-top:8px;padding:9px 11px;background:rgba(88, 166, 255, 0.07);border:1px solid rgba(88, 166, 255, 0.32);border-radius:5px;font-size:inherit;line-height:1.48;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+              <strong style="color:#fff;">Academic Landscape &amp; 1 m LiDAR Assessment</strong>
+              ${srcBadge}
+            </div>
+            <div>${p.arch_context_note}</div>
+            ${nearbyHtml}
+            ${mpHtml}
+            <details style="margin-top:6px;padding-top:5px;border-top:1px dashed rgba(88,166,255,0.22);font-size:0.90em;">
+              <summary style="cursor:pointer;color:#d29922;font-weight:600;">Geomorphic False-Positive Checks &amp; Raw Telemetry</summary>
+              <div style="margin-top:5px;color:var(--muted);">
+                ${hintItems}
+                <div style="margin-top:5px;padding-top:5px;border-top:1px solid var(--border);">
+                  <strong>Cross-Check:</strong> ${contextNote(p)} ·
+                  <strong>BNG:</strong> E ${Math.round(p.easting)}, N ${Math.round(p.northing)} (${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}) ·
+                  <strong>Elongation:</strong> ${p.elongation}× ·
+                  <strong>Calibrated Tile p:</strong> ${(p.calibrated_tile_prob || 0).toFixed(3)}
+                </div>
+              </div>
+            </details>
+          </div>
+        `;
+      }
+
+      const curStatus = p.user_survey_status || "";
+      const curComment = (p.user_survey_comment || "").replace(/"/g, "&quot;");
+      const defaultObs = p.user_survey_observer || (typeof localStorage !== "undefined" ? (localStorage.getItem(SURVEY_OBSERVER_KEY) || "") : "");
+      const curRef = (p.user_survey_reference || "").replace(/"/g, "&quot;");
+      const hasSurveyNote = Boolean(curStatus || curComment);
+      html += `
+        <details class="inline-drawer" style="margin-top:8px;background:rgba(0, 230, 118, 0.05);border-color:rgba(0, 230, 118, 0.30);" ${hasSurveyNote ? "open" : ""}>
+          <summary>
+            <span>
+              <strong style="color:#fff;">Field Survey &amp; Historic Record Log</strong>
+              ${p.user_survey_status ? ` · ${surveyStatusBadge(p.user_survey_status)}` : '<span class="muted" style="font-size:12px;font-weight:400;"> · Click to log ground-truthing or HER notes</span>'}
+            </span>
+          </summary>
+          <div>
+            <div style="display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+              <button class="btn-link" id="btnInspectorExportJson" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Save All (.json)</button>
+              <button class="btn-link" id="btnInspectorPr" type="button" style="cursor:pointer;font-size:11.5px;padding:3px 7px;">Copy &amp; Open PR ↗</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-bottom:8px;">
+              <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+                <span class="muted">Survey Verdict / Radar Status:</span>
+                <select id="inpSurveyStatus" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;">
+                  <option value="" ${curStatus === "" ? "selected" : ""}>Unreviewed (use model default)</option>
+                  <option value="field_verified_monument" ${curStatus === "field_verified_monument" ? "selected" : ""}>✓ Field-Verified Monument (ground-truthed)</option>
+                  <option value="historic_survey_confirmed" ${curStatus === "historic_survey_confirmed" ? "selected" : ""}>Historic / HER Survey Record (found in HER / map)</option>
+                  <option value="priority_field_target" ${curStatus === "priority_field_target" ? "selected" : ""}>★ Priority Field Target / Interesting Feature</option>
+                  <option value="uncertain_needs_check" ${curStatus === "uncertain_needs_check" ? "selected" : ""}>? Uncertain / Needs Ground Check</option>
+                  <option value="field_rejected_confounder" ${curStatus === "field_rejected_confounder" ? "selected" : ""}>✗ Field-Rejected False Positive / Pond (move to Tab 5)</option>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+                <span class="muted">Observer / Source (e.g. Name or County HER):</span>
+                <input type="text" id="inpSurveyObserver" value="${defaultObs.replace(/"/g, "&quot;")}" placeholder="e.g. Field Surveyor or Cornwall HER" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+              </label>
+              <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">
+                <span class="muted">HER ID / Historic Survey Reference / URL:</span>
+                <input type="text" id="inpSurveyRef" value="${curRef}" placeholder="e.g. MCO12345 or 1888 OS 25-inch" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:12.5px;" />
+              </label>
+            </div>
+            <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;">
+              <input type="text" id="inpSurveyComment" value="${curComment}" placeholder="Add field survey observations, ditch/bank measurements, cropmark notes, or historic survey details..." style="flex:1;min-width:220px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:12.5px;" />
+              <button class="btn-link" id="btnSaveSiteAnnotation" type="button" style="cursor:pointer;background:rgba(0,230,118,0.18);border-color:rgba(0,230,118,0.55);color:#00e676;">Save to View</button>
+              <button class="btn-link" id="btnClearSiteAnnotation" type="button" style="cursor:pointer;background:rgba(255,110,64,0.14);border-color:rgba(255,110,64,0.45);color:#ff6e40;">Clear</button>
+            </div>
+          </div>
+        </details>
       `;
 
       card.innerHTML = html;
@@ -2515,8 +2576,8 @@
           <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td>${p.diagnostic_png ? '<span class="badge badge-nhle">4-Panel PNG</span>' : '<span class="muted">Coords only</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Cropmark</span>' : ""}${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? ` <span class="badge ${p.megalithic_portal_matches[0].distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" title="Megalithic.co.uk #${p.megalithic_portal_matches[0].sid}: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)">Megalithic.co.uk</span>` : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
-          <td class="muted">${contextNote(p)}</td>
+          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR PNG available">PNG</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0) ? ` <span class="badge ${p.megalithic_portal_matches[0].distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" title="Megalithic.co.uk #${p.megalithic_portal_matches[0].sid}: ${p.megalithic_portal_matches[0].name} (${p.megalithic_portal_matches[0].site_type}, ${p.megalithic_portal_matches[0].distance_m} m)">MP</span>` : ""}${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
+          <td class="muted"><div class="note-truncate" title="${contextNote(p).replace(/"/g, '&quot;')}">${contextNote(p)}</div></td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");
         if (rowBtn && navigator.clipboard) {
