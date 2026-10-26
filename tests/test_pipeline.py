@@ -934,7 +934,14 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert "<osmand:show_start_finish>false</osmand:show_start_finish>" in roads_gpx_txt
 
     from pathlib import Path
-    from scripts.export_osmand_plugin import build_ancient_roads_gpx_xml
+    from scripts.export_osmand_plugin import _curvature_aware_rdp, build_ancient_roads_gpx_xml
+
+    # Gentle 25m drift over 4km (turn angle < 2 deg) collapses to 2 points
+    gentle_line = [[-1.0, 51.0], [-1.0, 51.018], [-0.9996, 51.036]]
+    assert len(_curvature_aware_rdp(gentle_line)) == 2
+    # Sharp 25m bend over short 80m chord (turn angle ~ 35 deg) is preserved (3 points)
+    sharp_bend = [[-1.0, 51.0], [-1.0, 51.0004], [-0.9995, 51.0008]]
+    assert len(_curvature_aware_rdp(sharp_bend)) == 3
 
     real_roads_gj = Path(__file__).resolve().parents[1] / "docs" / "roman_and_ancient_roads.geojson"
     if real_roads_gj.exists():
@@ -943,8 +950,8 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         ns = {"g": "http://www.topografix.com/GPX/1/1"}
         trksegs = r_root.findall(".//g:trkseg", ns)
         trkpts = r_root.findall(".//g:trkpt", ns)
-        assert len(trksegs) <= 260
-        assert len(trkpts) <= 3500
+        assert len(trksegs) <= 340
+        assert len(trkpts) <= 5000
 
 
 

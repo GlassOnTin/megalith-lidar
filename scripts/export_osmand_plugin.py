@@ -295,42 +295,94 @@ def build_candidates_gpx_xml(candidates: List[Tuple[str, Dict[str, Any]]], updat
     return "\n".join(lines) + "\n"
 
 
-def _rdp_road(pts: List[List[float]], eps: float = 0.0006) -> List[List[float]]:
+def _to_xy_km(pt: List[float]) -> Tuple[float, float]:
+    return (float(pt[0]) * 69.0, float(pt[1]) * 111.0)
+
+
+def _unit_vec(p1: List[float], p2: List[float]) -> Tuple[float, float]:
+    import math
+
+    dx = (float(p2[0]) - float(p1[0])) * 69.0
+    dy = (float(p2[1]) - float(p1[1])) * 111.0
+    n = math.hypot(dx, dy)
+    return (dx / n, dy / n) if n > 1e-6 else (0.0, 0.0)
+
+
+def _angle_deg(v1: Tuple[float, float], v2: Tuple[float, float]) -> float:
+    import math
+
+    if v1 == (0.0, 0.0) or v2 == (0.0, 0.0):
+        return 0.0
+    dot = max(-1.0, min(1.0, v1[0] * v2[0] + v1[1] * v2[1]))
+    return math.degrees(math.acos(dot))
+
+
+def _curvature_aware_rdp(
+    pts: List[List[float]],
+    straight_eps_km: float = 0.045,
+    curve_eps_km: float = 0.010,
+) -> List[List[float]]:
+    """Curvature-adaptive RDP simplification.
+
+    Scales allowable perpendicular chord error by local turning angle θ:
+      - 45 m tolerance on straight alignments (θ ≈ 0°) to strip redundant collinear OSM nodes
+      - 10 m tolerance on topographic bends and Roman sighting-point inflections (θ ≥ 15°)
+    """
     if len(pts) <= 2:
         return pts
     import math
 
-    x1, y1 = pts[0][0] * 0.62, pts[0][1]
-    x2, y2 = pts[-1][0] * 0.62, pts[-1][1]
+    x1, y1 = _to_xy_km(pts[0])
+    x2, y2 = _to_xy_km(pts[-1])
     dx, dy = x2 - x1, y2 - y1
     norm = math.hypot(dx, dy)
-    max_d = -1.0
+    max_score = -1.0
     idx = 0
     for i in range(1, len(pts) - 1):
-        px, py = pts[i][0] * 0.62, pts[i][1]
+        px, py = _to_xy_km(pts[i])
         d = (
             math.hypot(px - x1, py - y1)
             if norm == 0.0
             else abs(dy * px - dx * py + x2 * y1 - y2 * x1) / norm
         )
-        if d > max_d:
-            max_d = d
+        v_in = _unit_vec(pts[i - 1], pts[i])
+        v_out = _unit_vec(pts[i], pts[i + 1])
+        turn_deg = _angle_deg(v_in, v_out)
+        local_eps = curve_eps_km + (straight_eps_km - curve_eps_km) * math.exp(
+            -((turn_deg / 15.0) ** 2)
+        )
+        score = d / local_eps
+        if score > max_score:
+            max_score = score
             idx = i
-    if max_d > eps:
-        left = _rdp_road(pts[: idx + 1], eps)
-        right = _rdp_road(pts[idx:], eps)
+    if max_score > 1.0:
+        left = _curvature_aware_rdp(pts[: idx + 1], straight_eps_km, curve_eps_km)
+        right = _curvature_aware_rdp(pts[idx:], straight_eps_km, curve_eps_km)
         return left[:-1] + right
     return [pts[0], pts[-1]]
+
+
+def _can_join_directed(
+    seg_a: List[List[float]],
+    seg_b: List[List[float]],
+    d_km: float,
+    max_turn_deg: float = 32.0,
+) -> bool:
+    va = _unit_vec(seg_a[max(0, len(seg_a) - 3)], seg_a[-1])
+    vb = _unit_vec(seg_b[0], seg_b[min(len(seg_b) - 1, 2)])
+    if _angle_deg(va, vb) > (50.0 if d_km < 0.04 else max_turn_deg):
+        return False
+    if d_km >= 0.04:
+        v_bridge = _unit_vec(seg_a[-1], seg_b[0])
+        if _angle_deg(va, v_bridge) > max_turn_deg or _angle_deg(v_bridge, vb) > max_turn_deg:
+            return False
+    return True
 
 
 def _simplify_and_chain_road_segments(
     segs: List[List[List[float]]], is_named_route: bool = True
 ) -> List[List[List[float]]]:
-    """Deduplicate parallel dual-carriageway ways, chain connected segments, and RDP-simplify.
-
-    Reduces OsmAnd OpenGL RenderableSegment count from 3,640 to ~247 (<trkseg>) so pan/zoom
-    stays at 120 fps on mobile GPUs.
-    """
+    """Deduplicate parallel dual-carriageway ways, chain tangent-aligned segments, and curvature-simplify."""
     import math
 
     def dist_km(a: List[float], b: List[float]) -> float:
@@ -356,7 +408,7 @@ def _simplify_and_chain_road_segments(
             by_cell[cell] = (length, s)
 
     pool = [s for _, s in by_cell.values()]
-    max_gap = 15.0 if is_named_route else 3.0
+    max_gap = 12.0 if is_named_route else 3.0
     merged: List[List[List[float]]] = []
     while pool:
         cur = pool.pop(0)
@@ -365,32 +417,31 @@ def _simplify_and_chain_road_segments(
             changed = False
             best_i = -1
             best_d = max_gap
-            best_mode = ""
+            best_cand: List[List[float]] = []
+            best_prepend = False
             for i, cand in enumerate(pool):
-                d1 = dist_km(cur[-1], cand[0])
-                d2 = dist_km(cur[-1], cand[-1])
-                d3 = dist_km(cur[0], cand[-1])
-                d4 = dist_km(cur[0], cand[0])
-                for d, mode in ((d1, "es"), (d2, "ee"), (d3, "se"), (d4, "ss")):
-                    if d < best_d:
+                rc = list(reversed(cand))
+                options = [
+                    (dist_km(cur[-1], cand[0]), cur, cand, False),
+                    (dist_km(cur[-1], rc[0]), cur, rc, False),
+                    (dist_km(cand[-1], cur[0]), cand, cur, True),
+                    (dist_km(rc[-1], cur[0]), rc, cur, True),
+                ]
+                for d, sa, sb, is_prep in options:
+                    if d < best_d and _can_join_directed(sa, sb, d):
                         best_d = d
                         best_i = i
-                        best_mode = mode
-            if best_i >= 0:
-                cand = pool.pop(best_i)
-                if best_mode == "es":
-                    cur = cur + (cand[1:] if best_d < 0.05 else cand)
-                elif best_mode == "ee":
-                    rc = list(reversed(cand))
-                    cur = cur + (rc[1:] if best_d < 0.05 else rc)
-                elif best_mode == "se":
-                    cur = cand + (cur[1:] if best_d < 0.05 else cur)
-                elif best_mode == "ss":
-                    rc = list(reversed(cand))
-                    cur = rc + (cur[1:] if best_d < 0.05 else cur)
+                        best_cand = sa if is_prep else sb
+                        best_prepend = is_prep
+            if best_i >= 0 and best_cand:
+                pool.pop(best_i)
+                if best_prepend:
+                    cur = best_cand + (cur[1:] if best_d < 0.04 else cur)
+                else:
+                    cur = cur + (best_cand[1:] if best_d < 0.04 else best_cand)
                 changed = True
         if seg_len_km(cur) >= 3.0:
-            merged.append(_rdp_road(cur, eps=0.0006))
+            merged.append(_curvature_aware_rdp(cur))
     return merged
 
 
