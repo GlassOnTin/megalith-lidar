@@ -796,16 +796,29 @@ def has_historic_os_antiquity_evidence(note: str) -> bool:
     return False
 
 
+_HISTORIC_OS_CONFOUNDER_RE = re.compile(
+    r"(?:"
+    r"labels\s+(?:the\s+red\s+reticle(?:'s\s+location)?|this\s+location|a\s+feature|it|a)\s+(?:as\s+(?:an?\s+)?)?['\"]?("
+    r"old\s+shaft|old\s+coal\s+shaft|old\s+coal\s+pit|old\s+trial\s+shaft|old\s+quarry|old\s+chalk\s+pit|"
+    r"old\s+gravel\s+pit|old\s+marl\s+pit|old\s+sand\s+pit|old\s+clay\s+pit|old\s+pit|chalk\s+pit|gravel\s+pit|"
+    r"marl\s+pit|sand\s+pit|clay\s+pit|quarry|reservoir|icehouse|spring|limekiln|old\s+limekiln|kiln|"
+    r"brick\s+works|windmill(?:\s*\(disused\)|\s+hill)?|rifle\s+range|triangulation\s+pillar|filter\s+bed|sewage\s+works|"
+    r"gas\s+works|colliery|mine|air\s+shaft|shaft|pond|fishpond|pit"
+    r")\b|"
+    r"confirming\s+(?:that\s+)?(?:this|the)\s+(?:[a-z0-9\s-]+?\s+)?is\s+a\s+(?:historic|post-medieval|modern|19th-century|20th-century|industrial|natural)\s+"
+    r"(?:mining|extraction|quarry|water-management|water\s+infrastructure|water|surveying|subterranean|spoil|utility)"
+    r")",
+    re.IGNORECASE,
+)
+
 _POSITIVE_OS_FEATURE_PAT = re.compile(
-    r"\b("
-    r"old\s+quarry|chalk\s+pit|gravel\s+pit|marl\s+pit|sand\s+pit|clay\s+pit|old\s+coal\s+pit|"
-    r"coal\s+shaft|old\s+shaft|trial\s+shaft|bell-pit|limekiln|kiln|brick\s+works|"
-    r"reservoir|sluice|icehouse|windmill|rifle\s+range|wooded\s+area\s+labelled|"
+    r"(?:"
+    r"wooded\s+area\s+labelled|"
     r"labelled\s+(?:as\s+(?:a\s+|an\s+)?)?['\"][^'\"]+['\"]|"
     r"labeled\s+(?:as\s+(?:a\s+|an\s+)?)?['\"][^'\"]+['\"]|"
-    r"labels\s+the\s+red\s+reticle(?:'s\s+location)?\s+as\s+(?:a\s+|an\s+)?['\"][^'\"]+['\"]|"
+    r"labels\s+(?:the\s+red\s+reticle(?:'s\s+location)?|the\s+adjacent\s+linear\s+feature|a)\s+(?:as\s+(?:a\s+|an\s+)?)?['\"][^'\"]+['\"]|"
     r"topographic\s+label|triangulation\s+pillar"
-    r")\b",
+    r")",
     re.IGNORECASE,
 )
 
@@ -838,7 +851,7 @@ def _clean_blank_os_sentence(s: str) -> str:
 
     if not _OS_1888_REF_PAT.search(s):
         return s
-    if has_historic_os_antiquity_evidence(s) or _POSITIVE_OS_FEATURE_PAT.search(s):
+    if has_historic_os_antiquity_evidence(s) or _HISTORIC_OS_CONFOUNDER_RE.search(s) or _POSITIVE_OS_FEATURE_PAT.search(s):
         return s
 
     s = re.sub(
@@ -983,6 +996,15 @@ def classify_vlm_note_downrating(
             "OBVIOUS_FALSE_POSITIVE",
             0.35,
             "VLM Visual Audit: Square/rectilinear embankment or U-shaped cut-and-fill bund",
+        )
+
+    m_os_conf = _HISTORIC_OS_CONFOUNDER_RE.search(note or "")
+    if m_os_conf:
+        lbl = m_os_conf.group(1) or "historic utility/extraction feature"
+        return (
+            "OBVIOUS_FALSE_POSITIVE",
+            0.35,
+            f"1888 OS 6-Inch Map Audit: Marked '{lbl.title()}'",
         )
 
     for os_rej in _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES:

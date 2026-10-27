@@ -966,6 +966,16 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
     assert "1888" not in cleaned_st
     assert "This earthwork is an unmapped feature requiring further investigation" in cleaned_st
 
+    from megalith_lidar.arch_context import classify_vlm_note_downrating
+    tier_shaft, mult_shaft, reason_shaft = classify_vlm_note_downrating(
+        "Crucially, the 1888 Historic Ordnance Survey map explicitly labels the red reticle as an 'Old Shaft', confirming this is a historic mining feature rather than a prehistoric barrow.",
+        "ROUNDED_MOUND_OR_RING",
+        {"predicted_class": "round_barrow_cairn", "easting": 184511, "northing": 53434},
+    )
+    assert tier_shaft == "OBVIOUS_FALSE_POSITIVE"
+    assert mult_shaft == 0.35
+    assert "Old Shaft" in (reason_shaft or "")
+
     assert _normalize_roman_road_name("ROMAN ROAD - Dere Street") == "Dere Street (Roman Road)"
     assert _normalize_roman_road_name("ROMAN ROAD (course)") == "Roman Road"
     assert _normalize_roman_road_name("Watling Street", "1d") == "Watling Street (Margary 1d)"
