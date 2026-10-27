@@ -1479,15 +1479,21 @@
         const rawC = Number(p.raw_unet_confidence || p._orig_confidence || p.confidence || 0);
         p.confidence = Number((rawC * 0.35).toFixed(4));
         p.vlm_downrate_reason = `Field / Survey Rejection: ${ann.comment || "Confirmed false positive / pond"}`;
-      } else if (st === "field_verified_monument" || st === "historic_survey_confirmed") {
-        if (p._orig_context_category === "flagged_modern_or_karst_confounder") {
+      } else if (st === "field_verified_monument" || st === "historic_survey_confirmed" || st === "priority_field_target") {
+        if ((st === "field_verified_monument" || st === "historic_survey_confirmed") && p._orig_context_category === "flagged_modern_or_karst_confounder") {
           p.context_category = "unidentified_candidate";
         } else {
           p.context_category = p._orig_context_category;
         }
         const rawC = Number(p.raw_unet_confidence || p._orig_confidence || p.confidence || 0);
-        p.confidence = Math.max(Number(p._orig_confidence || 0), rawC);
-        p.vlm_downrate_reason = null;
+        if (!p.raw_unet_confidence) p.raw_unet_confidence = Number(rawC.toFixed(4));
+        const boostedC = Number(Math.min(0.9995, 0.9988 + 0.007 * Math.max(0, rawC - 0.90)).toFixed(4));
+        p.confidence = Math.max(Number(p._orig_confidence || 0), rawC, boostedC);
+        if (st === "field_verified_monument" || st === "historic_survey_confirmed") {
+          p.vlm_downrate_reason = null;
+        } else {
+          p.vlm_downrate_reason = p._orig_vlm_downrate_reason;
+        }
       } else {
         p.context_category = p._orig_context_category;
         p.confidence = p._orig_confidence;
@@ -3370,7 +3376,7 @@
             ${p.county ? `<div class="muted" style="font-size:11px;margin-top:2px;">${p.county}</div>` : ""}
           </td>
           <td>${formatClass(p.predicted_class)}</td>
-          <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
+          <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="${(p.user_survey_status === 'priority_field_target' || p.user_survey_status === 'field_verified_monument' || p.user_survey_status === 'historic_survey_confirmed') ? `Priority survey target bonus (raw UNet score=${p.raw_unet_confidence.toFixed(3)})` : (hasHistoricOsAntiquity(p) ? `1888 OS 6-Inch Map confirmed antiquity bonus (raw UNet score=${p.raw_unet_confidence.toFixed(3)})` : `Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})`)}">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
           <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR diagnostic view available">Lidar</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${hasHistoricOsAntiquity(p) ? 'badge-nhle' : 'badge-unid'}" style="text-decoration:none;${hasHistoricOsAntiquity(p) ? '' : 'opacity:0.85;'}" title="${hasHistoricOsAntiquity(p) ? '1888–1913 OS 6-Inch Map explicitly depicts a Tumulus / Camp / Hachured Antiquity here — click to open on NLS' : `Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}`}">${hasHistoricOsAntiquity(p) ? '1888 OS ★' : '1888 OS'}</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>

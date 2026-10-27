@@ -981,6 +981,26 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         with zipfile.ZipFile(real_docs / "megalith-lidar.osf", "r") as rzf:
             assert "Uk_roman_roads_2.obf" in rzf.namelist()
             assert "rendering/uk_roman_roads.addon.render.xml" in rzf.namelist()
+    if (real_docs / "candidates.geojson").exists():
+        gj_cands = json.loads((real_docs / "candidates.geojson").read_text(encoding="utf-8"))
+        unid_top = [
+            f["properties"]["os_grid_ref"]
+            for f in gj_cands["features"]
+            if f["properties"].get("context_category") == "unidentified_candidate"
+            and f["properties"].get("passes_fpr_0_01")
+            and f["properties"].get("diagnostic_png")
+        ]
+        assert unid_top[:8] == [
+            "SP 15831 29395",
+            "SS 74361 02928",
+            "TQ 35621 04544",
+            "SS 46891 01629",
+            "SU 65304 33024",
+            "TR 07247 36474",
+            "NY 51218 13782",
+            "NY 56556 07034",
+        ]
+
 
 
 

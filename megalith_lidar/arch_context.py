@@ -1068,7 +1068,7 @@ def query_local_vlm_academic_context(
         "has straight/square 90-degree corners, a flat rectangular reservoir/building platform, or a U-shaped bank wrapping a dark blue sunken pit), "
         "[SHAPE: OBVIOUS_MODERN_CONFOUNDER] (if the LiDAR or the Right 1888 OS map panel shows it is clearly a modern road/track embankment, "
         "quarry scoop, plantation/field boundary corner, military gun-pit, active coastal sand-dune blowout, or utility feature), "
-        "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound, ring, or hachured antiquity labeled 'Camp'/'Tumulus' on the 1888 OS map). "
+        "or [SHAPE: ROUNDED_MOUND_OR_RING] (if it is a smooth circular/oval mound or ring in the 1m LiDAR panels). "
         if has_img
         else ""
     )
@@ -1092,8 +1092,8 @@ def query_local_vlm_academic_context(
         "Then write a concise 3-sentence (maximum 95 words total) academic landscape-archaeology, 1m LiDAR, and 1888 Ordnance Survey map assessment of this site. "
         "Sentence 1: Landscape/geological setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
         f"Sentence 2: Critical morphological reading of the image panels ({panel_desc}) and measurements. "
-        "Sentence 3: Specific 1888 Historic OS map & false-positive evaluation — read any text labels or symbols at/near the red reticle on the Right 1888 OS map panel "
-        "(e.g. whether it is explicitly labeled 'Camp', 'Tumulus', or 'Roman Road' with earthwork hachures, OR whether the 1888 OS map reveals a Plantation boundary, Old Quarry, Gravel/Marl Pit, Reservoir, Farm enclosure, or unmapped 20th-century utility/forestry confounder) and state your verdict. "
+        "Sentence 3: Specific 1888 Historic OS map & false-positive evaluation — read the Right 1888 OS map panel strictly and literally. "
+        "Do NOT claim the 1888 OS map shows a 'Tumulus', 'Camp', or 'hachured earthwork' unless those exact printed words or an explicit antiquarian star/ring symbol are visibly printed at the red reticle (do not confuse contour lines, trig-point triangles, rough-pasture tufts, tree copses, icehouses, or field boundaries with antiquities; if the 1888 OS map is blank open ground at the reticle, state plainly that the 1888 OS map is blank at the reticle). "
         "Use plain, rigorous British archaeological prose with no bullet points, no markdown headers, and no invented facts."
     )
 
@@ -1218,12 +1218,17 @@ def enrich_candidates_with_archaeological_context(
         c["vlm_downrate_reason"] = reason
         if c.get("context_category") in {"unidentified_candidate", "flagged_modern_or_karst_confounder"}:
             ring_sc = float(c.get("ring_barrow_score") or 0.0)
-            if (
-                tier == "PLAUSIBLE_MONUMENT"
-                and c.get("context_category") == "unidentified_candidate"
-                and ring_sc > 0.0
-            ):
-                c["confidence"] = round(min(0.997, raw_conf + (0.997 - raw_conf) * 0.55 * ring_sc), 4)
+            is_os1888 = has_historic_os_antiquity_evidence(note)
+            if tier == "PLAUSIBLE_MONUMENT" and c.get("context_category") == "unidentified_candidate":
+                if is_os1888:
+                    c["confidence"] = round(
+                        min(0.9989, 0.9970 + 0.018 * max(0.0, raw_conf - 0.90) + 0.0004 * ring_sc),
+                        4,
+                    )
+                elif ring_sc > 0.0:
+                    c["confidence"] = round(min(0.997, raw_conf + (0.997 - raw_conf) * 0.55 * ring_sc), 4)
+                else:
+                    c["confidence"] = round(raw_conf * mult, 4)
             else:
                 c["confidence"] = round(raw_conf * mult, 4)
         if tier == "OBVIOUS_FALSE_POSITIVE" and c.get("context_category") == "unidentified_candidate":
@@ -1545,12 +1550,18 @@ def apply_community_annotations_to_candidates(
                     },
                 )
                 cand["osm_confounder_matches"] = confs
-        elif status in {"field_verified_monument", "historic_survey_confirmed"}:
-            if cand.get("context_category") == "flagged_modern_or_karst_confounder":
+        elif status in {"field_verified_monument", "historic_survey_confirmed", "priority_field_target"}:
+            if (
+                status in {"field_verified_monument", "historic_survey_confirmed"}
+                and cand.get("context_category") == "flagged_modern_or_karst_confounder"
+            ):
                 cand["context_category"] = "unidentified_candidate"
             raw_c = float(cand.get("raw_unet_confidence", cand.get("confidence", 0.0)))
-            if float(cand.get("confidence", 0.0)) < raw_c:
-                cand["confidence"] = round(raw_c, 4)
+            cand["raw_unet_confidence"] = round(raw_c, 4)
+            boosted_c = round(min(0.9995, 0.9988 + 0.007 * max(0.0, raw_c - 0.90)), 4)
+            if float(cand.get("confidence", 0.0)) < boosted_c:
+                cand["confidence"] = boosted_c
+            if status in {"field_verified_monument", "historic_survey_confirmed"}:
                 cand["vlm_verdict_tier"] = "PLAUSIBLE_MONUMENT"
                 cand["vlm_downrate_reason"] = None
 
