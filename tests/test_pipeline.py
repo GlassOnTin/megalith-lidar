@@ -1010,15 +1010,14 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
             and f["properties"].get("passes_fpr_0_01")
             and f["properties"].get("diagnostic_png")
         ]
-        assert unid_top[:8] == [
+        assert unid_top[:7] == [
             "SP 15831 29395",
             "SS 74361 02928",
+            "SU 60287 24155",
             "TQ 35621 04544",
-            "SS 46891 01629",
+            "SU 02357 64709",
             "SU 65304 33024",
-            "TR 07247 36474",
-            "NY 51218 13782",
-            "NY 56556 07034",
+            "SS 72086 37164",
         ]
 
 

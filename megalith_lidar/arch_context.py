@@ -525,11 +525,11 @@ def fetch_historic_os_crop(
         half = crop_px // 2
         crop = canvas.crop((center_x - half, center_y - half, center_x + half, center_y + half))
         draw = ImageDraw.Draw(crop)
-        draw.ellipse((half - 18, half - 18, half + 18, half + 18), outline=(185, 28, 28), width=2)
-        draw.line((half - 26, half, half - 18, half), fill=(185, 28, 28), width=2)
-        draw.line((half + 18, half, half + 26, half), fill=(185, 28, 28), width=2)
-        draw.line((half, half - 26, half, half - 18), fill=(185, 28, 28), width=2)
-        draw.line((half, half + 18, half, half + 26), fill=(185, 28, 28), width=2)
+        # Draw 4 outer crosshair ticks WITHOUT a circle so the reticle cannot be mistaken for a circular earthwork
+        draw.line((half - 28, half, half - 16, half), fill=(185, 28, 28), width=2)
+        draw.line((half + 16, half, half + 28, half), fill=(185, 28, 28), width=2)
+        draw.line((half, half - 28, half, half - 16), fill=(185, 28, 28), width=2)
+        draw.line((half, half + 16, half, half + 28), fill=(185, 28, 28), width=2)
         return crop
     except Exception:
         return None
@@ -746,7 +746,6 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "explicitly labeled \"camp\"",
     "explicitly labelled \"camp\"",
     "roman road on the 1888",
-    "depicts it with earthwork symbols",
     "hachured 'tumulus'",
     "hachured \"tumulus\"",
     "labelled 'tumulus'",
@@ -756,18 +755,8 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "labels the red reticle as a 'tumulus'",
     "labels the red reticle as a \"tumulus\"",
     "(tumulus) with hachures",
-    "labels the red reticle as a 'beacon'",
-    "labels the red reticle as 'beacon'",
-    "hachured earthwork symbols at the reticle",
-    "explicit 1888 os hachuring",
-    "explicit 1888 os cartographic hachuring",
-    "explicit 1888 cartographic designation",
-    "displays a distinct hachured circular earthwork",
-    "displays a hachured, oval earthwork",
-    "over a hachured, oval earthwork",
-    "over a hachured circular earthwork",
-    "over a hachured earthwork",
-    "accompanied by earthwork hachures",
+    "labels the red reticle as a 'stone circle'",
+    "labels the red reticle as \"whinny b[urn] camp\"",
 )
 
 _HISTORIC_OS_NEG_PREFIX_RE = re.compile(
@@ -855,13 +844,24 @@ def _clean_blank_os_sentence(s: str) -> str:
         return s
 
     s = re.sub(
-        r",\s*while\s+the\s+(?:1888|1913|historic(?:al)?|ordnance\s+survey|os|6-inch|six-inch|[\s–-])+map\b.*?(?=[.!?]$)",
+        r",\s*(?:while\s+the\s+(?:1888|1913|historic(?:al)?|ordnance\s+survey|os|6-inch|six-inch|[\s–-])+map\b|matching\s+the\s+1888\s+os\s+map's\s+hachured\s+circular\s+enclosure).*?(?=[.!?]$)",
         "",
         s,
         flags=re.IGNORECASE,
     )
     if not _OS_1888_REF_PAT.search(s):
         return s
+
+    m_exp = re.search(
+        r"^(?:Although\s+([^,]+),\s*)?the\s+explicit\s+1888(?:\s+os)?(?:\s+cartographic)?\s+(?:hachuring|hachured\s+ring|designation)\s+([^.!?]+[.!?])$",
+        s,
+        flags=re.IGNORECASE,
+    )
+    if m_exp:
+        concess, tail = m_exp.group(1), m_exp.group(2).strip()
+        if concess:
+            return f"Although {concess}, the isolated LiDAR earthwork morphology {tail}"
+        return f"The isolated LiDAR earthwork morphology {tail}"
 
     m_conj = re.search(
         r"^(?:While\s+the|Although\s+the|Despite\s+the|The)\s+(?:.*?\b)?(?:1888|ordnance\s+survey|historic\s+os).*?(?:;\s*(?:however,\s*|consequently,\s*|nonetheless,\s*|therefore,\s*)?|,\s*(?:but|and\s+(?:the|its)|though|yet|while|whereas)\s+)([A-Za-z0-9].*[.!?])$",
