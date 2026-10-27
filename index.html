@@ -1839,10 +1839,28 @@
       "accompanied by earthwork hachures"
     ];
 
+    const _OS1888_NEG_PREFIX_RE = /\b(no|not|neither|nor|without|lacks|lacking|absent|absence|devoid)\b/;
+
     function hasHistoricOsAntiquity(p) {
       const low = String((p && p.arch_context_note) || "").toLowerCase();
       if (!low) return false;
-      return _OS1888_ANTIQUITY_PATTERNS.some((pat) => low.includes(pat));
+      for (const pat of _OS1888_ANTIQUITY_PATTERNS) {
+        let start = 0;
+        while (true) {
+          const idx = low.indexOf(pat, start);
+          if (idx < 0) break;
+          let prefix = low.slice(Math.max(0, idx - 45), idx);
+          for (const sep of [".", ";", ","]) {
+            if (prefix.includes(sep)) {
+              const parts = prefix.split(sep);
+              prefix = parts[parts.length - 1];
+            }
+          }
+          if (!_OS1888_NEG_PREFIX_RE.test(prefix)) return true;
+          start = idx + pat.length;
+        }
+      }
+      return false;
     }
 
     function cleanGridId(val) {

@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import math
+import re
 import urllib.request
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -752,10 +753,14 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "labeled 'tumulus'",
     "labelled \"tumulus\"",
     "labeled \"tumulus\"",
+    "labels the red reticle as a 'tumulus'",
+    "labels the red reticle as a \"tumulus\"",
+    "(tumulus) with hachures",
     "labels the red reticle as a 'beacon'",
     "labels the red reticle as 'beacon'",
     "hachured earthwork symbols at the reticle",
     "explicit 1888 os hachuring",
+    "explicit 1888 os cartographic hachuring",
     "explicit 1888 cartographic designation",
     "displays a distinct hachured circular earthwork",
     "displays a hachured, oval earthwork",
@@ -764,6 +769,31 @@ _VLM_HISTORIC_OS_ANTIQUITY_PHRASES = (
     "over a hachured earthwork",
     "accompanied by earthwork hachures",
 )
+
+_HISTORIC_OS_NEG_PREFIX_RE = re.compile(
+    r"\b(no|not|neither|nor|without|lacks|lacking|absent|absence|devoid)\b"
+)
+
+
+def has_historic_os_antiquity_evidence(note: str) -> bool:
+    """Return True only when `note` positively cites an 1888 OS antiquity without a preceding negation."""
+    low = (note or "").lower()
+    if not low:
+        return False
+    for ph in _VLM_HISTORIC_OS_ANTIQUITY_PHRASES:
+        start = 0
+        while True:
+            idx = low.find(ph, start)
+            if idx < 0:
+                break
+            prefix = low[max(0, idx - 45) : idx]
+            for sep in (".", ";", ","):
+                if sep in prefix:
+                    prefix = prefix.split(sep)[-1]
+            if not _HISTORIC_OS_NEG_PREFIX_RE.search(prefix):
+                return True
+            start = idx + len(ph)
+    return False
 
 _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES = (
     "old coal shaft",
@@ -821,7 +851,7 @@ def classify_vlm_note_downrating(
         )
 
     # Protect candidates where the 1888 OS 6-Inch map explicitly depicts an antiquity ('Camp', 'Tumulus', hachured earthwork)
-    if any(p in low for p in _VLM_HISTORIC_OS_ANTIQUITY_PHRASES):
+    if has_historic_os_antiquity_evidence(note):
         return ("PLAUSIBLE_MONUMENT", 1.0, None)
 
     if not is_roman and shape_tag in {"RECTILINEAR_OR_U_BUND", "OBVIOUS_MODERN_CONFOUNDER"}:
@@ -1302,6 +1332,18 @@ def enrich_candidates_with_archaeological_context(
 
     if cache_dirty:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
+        if cache_path.exists():
+            try:
+                disk_cache = json.loads(cache_path.read_text(encoding="utf-8"))
+                for dk, dv in disk_cache.items():
+                    dn = str((dv or {}).get("note") or "").lower()
+                    cn = str((cache.get(dk) or {}).get("note") or "").lower()
+                    disk_has_1888 = any(w in dn for w in ("1888", "ordnance survey", "6-inch", "six-inch", "historic os"))
+                    mem_has_1888 = any(w in cn for w in ("1888", "ordnance survey", "6-inch", "six-inch", "historic os"))
+                    if dk not in cache or (disk_has_1888 and not mem_has_1888):
+                        cache[dk] = dv
+            except Exception:
+                pass
         cache_path.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
     apply_community_annotations_to_candidates(candidates)

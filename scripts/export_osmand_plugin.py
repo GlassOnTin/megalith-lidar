@@ -33,12 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from megalith_lidar.arch_context import _VLM_HISTORIC_OS_ANTIQUITY_PHRASES
-
-
-def has_historic_os_antiquity_evidence(note: str) -> bool:
-    low = (note or "").lower()
-    return any(p in low for p in _VLM_HISTORIC_OS_ANTIQUITY_PHRASES)
+from megalith_lidar.arch_context import has_historic_os_antiquity_evidence
 
 SITE_BASE_URL = "https://glassontin.github.io/megalith-lidar/"
 
