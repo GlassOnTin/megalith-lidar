@@ -939,7 +939,10 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert 'value="ancient_trackway"' in addon_xml
 
     from pathlib import Path
-    from megalith_lidar.arch_context import has_historic_os_antiquity_evidence
+    from megalith_lidar.arch_context import (
+        has_historic_os_antiquity_evidence,
+        strip_empty_historic_os_clauses,
+    )
     from scripts.export_osmand_plugin import (
         _curvature_aware_rdp,
         _normalize_roman_road_name,
@@ -955,6 +958,13 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
     assert not has_historic_os_antiquity_evidence(
         "The 1888 OS map places the reticle within estate lands without any hachured 'Tumulus' label."
     )
+    cleaned_st = strip_empty_historic_os_clauses(
+        "The 1m LiDAR reveals a circular earthwork. "
+        "The 1888 OS map shows no hachured 'Tumulus' label or antiquity symbol at the red reticle, "
+        "indicating this is an unmapped feature requiring further investigation to rule out a natural or agricultural confounder."
+    )
+    assert "1888" not in cleaned_st
+    assert "This earthwork is an unmapped feature requiring further investigation" in cleaned_st
 
     assert _normalize_roman_road_name("ROMAN ROAD - Dere Street") == "Dere Street (Roman Road)"
     assert _normalize_roman_road_name("ROMAN ROAD (course)") == "Roman Road"

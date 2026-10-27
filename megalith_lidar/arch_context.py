@@ -795,13 +795,137 @@ def has_historic_os_antiquity_evidence(note: str) -> bool:
             start = idx + len(ph)
     return False
 
+
+_POSITIVE_OS_FEATURE_PAT = re.compile(
+    r"\b("
+    r"old\s+quarry|chalk\s+pit|gravel\s+pit|marl\s+pit|sand\s+pit|clay\s+pit|old\s+coal\s+pit|"
+    r"coal\s+shaft|old\s+shaft|trial\s+shaft|bell-pit|limekiln|kiln|brick\s+works|"
+    r"reservoir|sluice|icehouse|windmill|rifle\s+range|wooded\s+area\s+labelled|"
+    r"labelled\s+(?:as\s+(?:a\s+|an\s+)?)?['\"][^'\"]+['\"]|"
+    r"labeled\s+(?:as\s+(?:a\s+|an\s+)?)?['\"][^'\"]+['\"]|"
+    r"labels\s+the\s+red\s+reticle(?:'s\s+location)?\s+as\s+(?:a\s+|an\s+)?['\"][^'\"]+['\"]|"
+    r"topographic\s+label|triangulation\s+pillar"
+    r")\b",
+    re.IGNORECASE,
+)
+
+_OS_1888_REF_PAT = re.compile(
+    r"\b(1888|ordnance\s+survey|6-inch|six-inch|historic\s+os)\b",
+    re.IGNORECASE,
+)
+
+
+def _clean_blank_os_sentence(s: str) -> str:
+    m_dangling = re.match(
+        r"^(indicating|suggesting|confirming|supporting|leaving|requiring|meaning|ruling\s+out)\s+(?:that\s+)?(.*)$",
+        s.strip(),
+        flags=re.IGNORECASE,
+    )
+    if m_dangling:
+        verb = m_dangling.group(1).lower()
+        rest = m_dangling.group(2).strip()
+        if verb.startswith("ruling"):
+            return "The isolated earthwork morphology rules out " + rest
+        if rest.lower().startswith(("this is ", "the feature is ", "the lidar anomaly is ", "it is ")):
+            return re.sub(r"^(?:this|the\s+feature|the\s+lidar\s+anomaly|it)\s+is\s+", "This earthwork is ", rest, flags=re.IGNORECASE)
+        if rest.lower().startswith("the feature as "):
+            return re.sub(r"^the\s+feature\s+as\s+", "This earthwork remains ", rest, flags=re.IGNORECASE)
+        if verb in ("supporting", "confirming"):
+            return "The LiDAR morphology supports " + rest
+        if verb == "requiring":
+            return "This unrecorded earthwork requires " + rest
+        return rest[0].upper() + rest[1:]
+
+    if not _OS_1888_REF_PAT.search(s):
+        return s
+    if has_historic_os_antiquity_evidence(s) or _POSITIVE_OS_FEATURE_PAT.search(s):
+        return s
+
+    s = re.sub(
+        r",\s*while\s+the\s+(?:1888|1913|historic(?:al)?|ordnance\s+survey|os|6-inch|six-inch|[\s–-])+map\b.*?(?=[.!?]$)",
+        "",
+        s,
+        flags=re.IGNORECASE,
+    )
+    if not _OS_1888_REF_PAT.search(s):
+        return s
+
+    m_conj = re.search(
+        r"^(?:While\s+the|Although\s+the|Despite\s+the|The)\s+(?:.*?\b)?(?:1888|ordnance\s+survey|historic\s+os).*?(?:;\s*(?:however,\s*|consequently,\s*|nonetheless,\s*|therefore,\s*)?|,\s*(?:but|and\s+(?:the|its)|though|yet|while|whereas)\s+)([A-Za-z0-9].*[.!?])$",
+        s,
+        flags=re.IGNORECASE,
+    )
+    if m_conj:
+        rest = m_conj.group(1).strip()
+        if rest[0].isdigit():
+            return "The " + rest
+        if rest.lower().startswith(("the ", "its ", "this ", "given ", "a ", "an ", "combined ", "morphological ", "proximity ", "isolated ")):
+            return rest[0].upper() + rest[1:]
+        return "The " + rest[0].lower() + rest[1:]
+
+    m_abs = re.search(
+        r"^(?:(?:Given\s+the|The)\s+(?:complete\s+|explicit\s+)?(?:absence|lack)\s+of|Lacking\s+(?:any\s+|explicit\s+)?)\s*.*?\b(?:1888|ordnance\s+survey|historic\s+os).*?(?:,\s*combined\s+with\s+([^,]+),|,)\s*(.*)$",
+        s,
+        flags=re.IGNORECASE,
+    )
+    if m_abs:
+        comb, tail = m_abs.group(1), m_abs.group(2).strip()
+        if comb:
+            c_str = comb.strip()
+            return c_str[0].upper() + c_str[1:] + " " + tail
+        return tail[0].upper() + tail[1:]
+
+    m_part = re.search(
+        r"^The\s+(?:.*?\b)?(?:1888|ordnance\s+survey|historic\s+os).*?,\s*(indicating|suggesting|confirming|supporting|leaving|requiring|meaning|ruling\s+out)\s+(?:that\s+)?(.*)$",
+        s,
+        flags=re.IGNORECASE,
+    )
+    if m_part:
+        verb = m_part.group(1).lower()
+        rest = m_part.group(2).strip()
+        if verb.startswith("ruling"):
+            return "The isolated earthwork morphology rules out " + rest
+        if rest.lower().startswith(("this is ", "the feature is ", "the lidar anomaly is ", "it is ")):
+            rest = re.sub(r"^(?:this|the\s+feature|the\s+lidar\s+anomaly|it)\s+is\s+", "This earthwork is ", rest, flags=re.IGNORECASE)
+            return rest
+        if rest.lower().startswith("the feature as "):
+            rest = re.sub(r"^the\s+feature\s+as\s+", "This earthwork remains ", rest, flags=re.IGNORECASE)
+            return rest
+        if verb in ("supporting", "confirming"):
+            return "The LiDAR morphology supports " + rest
+        if verb == "requiring":
+            return "This unrecorded earthwork requires " + rest
+        return rest[0].upper() + rest[1:]
+
+    return s
+
+
+def strip_empty_historic_os_clauses(note: str) -> str:
+    """
+    Remove negative/blank 1888 OS map clauses ('The 1888 OS map shows no Tumulus label...')
+    so the 1888 OS map is only mentioned when it visibly depicts an antiquity or historic feature.
+    """
+    if not note:
+        return note
+    if has_historic_os_antiquity_evidence(note):
+        return note
+    sents = re.split(r"(?<=[.!?])\s+(?=[A-Z])", note.strip())
+    cleaned = [_clean_blank_os_sentence(s) for s in sents]
+    return " ".join(cleaned)
+
 _VLM_ALL_DOMAIN_HISTORIC_OS_REJECT_PHRASES = (
     "old coal shaft",
+    "old coal pit",
     "old trial shaft",
     "bell-pit spoil ring",
     "sluice valve",
     "water-management utility",
     "historic water source",
+    "labels the red reticle as an 'icehouse'",
+    "labels the red reticle as 'icehouse'",
+    "labels the red reticle as a \"spring\"",
+    "labels the red reticle as a 'spring'",
+    "labels the red reticle as a triangulation pillar",
     "effectively dismissing",
     "is a false positive",
     "strongly indicates a false positive",
@@ -1092,8 +1216,9 @@ def query_local_vlm_academic_context(
         "Then write a concise 3-sentence (maximum 95 words total) academic landscape-archaeology, 1m LiDAR, and 1888 Ordnance Survey map assessment of this site. "
         "Sentence 1: Landscape/geological setting and spatial relationship to the nearest named NHLE Scheduled Monuments (cite their exact distances and NHLE IDs). "
         f"Sentence 2: Critical morphological reading of the image panels ({panel_desc}) and measurements. "
-        "Sentence 3: Specific 1888 Historic OS map & false-positive evaluation — read the Right 1888 OS map panel strictly and literally. "
-        "Do NOT claim the 1888 OS map shows a 'Tumulus', 'Camp', or 'hachured earthwork' unless those exact printed words or an explicit antiquarian star/ring symbol are visibly printed at the red reticle (do not confuse contour lines, trig-point triangles, rough-pasture tufts, tree copses, icehouses, or field boundaries with antiquities; if the 1888 OS map is blank open ground at the reticle, state plainly that the 1888 OS map is blank at the reticle). "
+        "Sentence 3: Geomorphic, land-use & 1888 Historic OS map evaluation — read the Right 1888 OS map panel strictly and literally. "
+        "ONLY mention the 1888 OS map if it visibly depicts a feature at/near the red reticle (either an explicit antiquity such as 'Tumulus', 'Camp', or an antiquarian star/hachured ring symbol, or a historic confounder such as an 'Old Quarry', 'Chalk/Gravel/Marl Pit', 'Pond', 'Reservoir', 'Icehouse', or 'Old Coal Shaft'; do not confuse contour lines, trig-point triangles, rough-pasture tufts, or field boundaries with antiquities). "
+        "If the 1888 OS map is blank open ground at the reticle, do NOT mention the 1888 OS map at all — instead evaluate geomorphic/agricultural false-positive risks and state your verdict. "
         "Use plain, rigorous British archaeological prose with no bullet points, no markdown headers, and no invented facts."
     )
 
@@ -1144,7 +1269,7 @@ def query_local_vlm_academic_context(
                 shape_tag = "ROUNDED_MOUND_OR_RING"
                 raw_text = raw_text.replace("[SHAPE: ROUNDED_MOUND_OR_RING]", "").strip()
             if len(raw_text) > 60 and raw_text.endswith((".", "!", "?")):
-                return raw_text, shape_tag
+                return strip_empty_historic_os_clauses(raw_text), shape_tag
     except Exception:
         return None
     return None
@@ -1289,8 +1414,8 @@ def enrich_candidates_with_archaeological_context(
             )
         )
         cached_entry = cache.get(ckey)
-        cached_note = str((cached_entry or {}).get("note") or "").strip()
-        has_1888_os_in_cache = any(
+        cached_note = strip_empty_historic_os_clauses(str((cached_entry or {}).get("note") or "").strip())
+        has_1888_os_in_cache = bool((cached_entry or {}).get("os1888_checked")) or any(
             w in cached_note.lower()
             for w in ("1888", "ordnance survey", "6-inch", "six-inch", "historic os")
         )
@@ -1320,7 +1445,7 @@ def enrich_candidates_with_archaeological_context(
                 cand["arch_context_source"] = src
                 cand["vlm_shape_verdict"] = shape_tag
                 _apply_vlm_verdict(cand, vlm_note, shape_tag)
-                cache[ckey] = {"note": vlm_note, "source": src, "shape_tag": shape_tag}
+                cache[ckey] = {"note": vlm_note, "source": src, "shape_tag": shape_tag, "os1888_checked": True}
                 cache_dirty = True
                 continue
             elif cached_entry and cached_note.endswith((".", "!", "?")):
