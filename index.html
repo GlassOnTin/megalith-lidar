@@ -342,7 +342,7 @@
 
     #map {
       width: 100%;
-      height: 430px;
+      height: 460px;
       border-radius: 4px;
       border: 1px solid var(--border);
     }
@@ -438,39 +438,55 @@
     .badge-osm  { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan-border); }
     .badge-conf { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange-border); }
 
-    .diag-img {
-      width: 100%;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      margin-top: 10px;
-      background: #090b0e;
-      transform: none !important;
-    }
-    .mobile-panel-switcher {
-      display: none;
-    }
-    .mobile-only-lidar-dock {
-      display: none;
-    }
-    .desktop-only-lidar-dock {
-      display: block;
-    }
-    .panel-legend {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-top: 6px;
-      font-size: 11.5px;
-    }
-    .panel-legend div {
+    .map-site-hud {
       background: var(--panel-alt);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 5px 7px;
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
     }
-    .panel-legend strong {
-      display: block;
+    .map-diag-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      margin-top: 5px;
+    }
+    .map-diag-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    }
+    .map-diag-pill:hover {
+      border-color: var(--accent-border);
       color: var(--text);
+    }
+    .map-diag-pill input[type="radio"] {
+      display: none;
+    }
+    .map-diag-pill.active-radio {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--heading);
+    }
+    .map-diag-legend {
+      margin-top: 4px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.32;
     }
 
     .note-truncate {
@@ -645,15 +661,6 @@
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
       }
-      .mobile-only-lidar-dock {
-        display: block;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px solid var(--border);
-      }
-      .desktop-only-lidar-dock {
-        display: none;
-      }
       .table-scroll table {
         min-width: 560px;
         font-size: 12.5px;
@@ -708,76 +715,19 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
-      .mobile-panel-switcher {
+      .map-diag-pills {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 4px;
-        margin-top: 6px;
       }
-      .mobile-panel-radio {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 0;
-        background: var(--panel-alt);
-        border: 1px solid var(--border);
-        border-radius: 4px;
+      .map-diag-pill {
         padding: 5px 3px;
         font-size: 11.5px;
-        font-weight: 600;
-        color: var(--muted);
-        cursor: pointer;
-        user-select: none;
-        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .mobile-panel-radio input[type="radio"] {
-        display: none;
-      }
-      .mobile-panel-radio.active-radio {
-        background: var(--accent-soft);
-        border-color: var(--accent);
-        color: var(--heading);
-      }
-      .diag-viewport {
-        width: 100%;
-        max-width: 100%;
-        aspect-ratio: 1 / 1;
-        overflow: hidden;
-        border-radius: 4px;
-        border: 1px solid var(--border);
-        margin: 6px auto 0 auto;
-        background: #090b0e;
-        position: relative;
-      }
-      .diag-viewport .diag-img {
-        width: 405.47%;
-        max-width: none;
-        height: 100%;
-        margin-top: 0;
-        border: none;
-        border-radius: 0;
-        display: block;
-        transform: translateX(var(--mobile-panel-offset, -25.048%)) !important;
-        transition: transform 0.16s ease;
-      }
-      .panel-legend {
-        grid-template-columns: 1fr;
-        font-size: 12.5px;
-      }
-      .panel-legend div {
-        padding: 5px 8px;
-      }
-      .panel-legend div[data-panel-desc] {
-        display: none;
-      }
-      .panel-legend div[data-panel-desc].active-panel-desc {
-        display: block;
-      }
       #map {
-        height: 320px;
+        height: 360px;
       }
     }
     .stat-grid {
@@ -1080,9 +1030,6 @@
           </table>
         </div>
 
-        <!-- Mobile portrait LiDAR dock placed directly below the candidate table -->
-        <div id="tableBottomLidarDock" class="mobile-only-lidar-dock"></div>
-
         <!-- Statistical benchmark view (hidden unless tab 4 is clicked) -->
         <div id="statsContainer" class="hidden">
           <p class="muted" style="margin-top:0;font-size:12.5px;">
@@ -1129,25 +1076,18 @@
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: SELECTED SITE INSPECTOR + INTERACTIVE MAP -->
+    <!-- RIGHT COLUMN: INTERACTIVE MAP & SITE LIDAR OVERLAY + SELECTED SITE INSPECTOR -->
     <div>
-      <div class="card" id="inspectorCard">
-        <div class="card-header">
-          <h2><span class="step-pill">Step 2</span> Selected Site LiDAR &amp; Context Inspector</h2>
-          <div class="sub muted">Click any row on the left or marker below</div>
-        </div>
-        <div id="inspectorBody" class="muted">
-          Loading top unidentified candidate...
-        </div>
-      </div>
-
       <div class="card">
         <div class="card-header">
           <div>
-            <h2>National Survey Coverage Map</h2>
+            <h2><span class="step-pill">Step 2</span> Interactive Map &amp; 256 m Site LiDAR Overlay</h2>
             <div class="sub muted">Sampled 2 km × 2 km squares: <span id="mapCoverageSummary">6,106 squares = 24,424 km²</span></div>
           </div>
-          <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;">Reset England View</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-link" id="btnZoomCandidatePatch" type="button" style="cursor:pointer;" title="Zoom map to the selected candidate's 256 m × 256 m LiDAR patch (z=17)">Zoom Site (256 m)</button>
+            <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;" title="Zoom out to the full England survey coverage overview (z=6)">Reset England View</button>
+          </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;" class="muted">
@@ -1232,7 +1172,18 @@
             </details>
           </div>
         </div>
+        <div id="mapSiteHud" class="map-site-hud"></div>
         <div id="map"></div>
+      </div>
+
+      <div class="card" id="inspectorCard">
+        <div class="card-header">
+          <h2><span class="step-pill">Step 3</span> Selected Site Context, Viewers &amp; Field Survey Log</h2>
+          <div class="sub muted">Academic assessment, external LiDAR / OS links &amp; ground-truthing log</div>
+        </div>
+        <div id="inspectorBody" class="muted">
+          Loading top unidentified candidate...
+        </div>
       </div>
     </div>
   </div>
@@ -1313,16 +1264,31 @@
     map.getPane("densityPane").style.zIndex = 350;
     map.createPane("squaresPane");
     map.getPane("squaresPane").style.zIndex = 380;
+    map.createPane("diagOverlayPane");
+    map.getPane("diagOverlayPane").style.zIndex = 395;
     map.createPane("roadsPane");
     map.getPane("roadsPane").style.zIndex = 420;
     map.createPane("candidatesPane");
     map.getPane("candidatesPane").style.zIndex = 650;
+
+    const densityContourLayer = L.layerGroup().addTo(map);
+    const squaresLayer = L.layerGroup().addTo(map);
+    const candidateDiagOverlayLayer = L.layerGroup().addTo(map);
+    const countyBoundaryLayer = L.layerGroup().addTo(map);
+    const ancientRoadsLayer = L.layerGroup().addTo(map);
+    const markersLayer = L.layerGroup().addTo(map);
+    const selectedHaloLayer = L.layerGroup().addTo(map);
 
     function updateZoomDependentPaneOpacity() {
       const z = map.getZoom() || 6;
       const dp = map.getPane("densityPane");
       if (dp) {
         dp.style.opacity = z >= 13 ? "0.12" : (z >= 11 ? "0.45" : "1.0");
+      }
+      const cp = map.getPane("candidatesPane");
+      if (cp) {
+        const hasOverlay = candidateDiagOverlayLayer.getLayers().length > 0;
+        cp.style.opacity = (z >= 15 && hasOverlay) ? "0.22" : "1.0";
       }
       squaresLayer.eachLayer((lyr) => {
         if (lyr.setStyle && !(lyr instanceof L.CircleMarker)) {
@@ -1331,13 +1297,6 @@
       });
     }
     map.on("zoomend", updateZoomDependentPaneOpacity);
-
-    const densityContourLayer = L.layerGroup().addTo(map);
-    const squaresLayer = L.layerGroup().addTo(map);
-    const countyBoundaryLayer = L.layerGroup().addTo(map);
-    const ancientRoadsLayer = L.layerGroup().addTo(map);
-    const markersLayer = L.layerGroup().addTo(map);
-    const selectedHaloLayer = L.layerGroup().addTo(map);
 
     let ancientRoadsGeoJSON = null;
     async function ensureAncientRoadsLoaded() {
@@ -2418,8 +2377,100 @@
       });
     }
 
+    let selectedCandidateObj = null;
+    let diagOverlayOpacityVal = 0.94;
+    let cachedDiagImgUrl = "";
+    let cachedDiagImg = null;
+    let cachedCropmarkCanvas = null;
+    let cachedCropmarkReadout = "Computing...";
+
+    function localBngToLatLon(e, n, refE, refN, refLat, refLon) {
+      const de = Number(e) - Number(refE);
+      const dn = Number(n) - Number(refN);
+      const latRad = (Number(refLat) * Math.PI) / 180.0;
+      const gamma = ((Number(refLon) - (-2.0)) * Math.PI / 180.0) * Math.sin(latRad);
+      const f0 = 0.9996012717;
+      const a = 6377563.396;
+      const e2 = 0.00667054;
+      const sinLat = Math.sin(latRad);
+      const rho = (a * f0 * (1.0 - e2)) / Math.pow(1.0 - e2 * sinLat * sinLat, 1.5);
+      const nu = (a * f0) / Math.sqrt(1.0 - e2 * sinLat * sinLat);
+      const dEast = de * Math.cos(gamma) + dn * Math.sin(gamma);
+      const dNorth = -de * Math.sin(gamma) + dn * Math.cos(gamma);
+      return [
+        Number(refLat) + (dNorth / rho) * (180.0 / Math.PI),
+        Number(refLon) + (dEast / (nu * Math.cos(latRad))) * (180.0 / Math.PI)
+      ];
+    }
+
+    function computeCandidateBngOverlayBounds(p) {
+      const wb = (Array.isArray(p.window_bbox) && p.window_bbox.length === 4)
+        ? p.window_bbox
+        : [Math.round(p.easting - 128), Math.round(p.northing - 128), Math.round(p.easting + 128), Math.round(p.northing + 128)];
+      const [eMin, nMin, eMax, nMax] = wb;
+      const corners = [
+        localBngToLatLon(eMin, nMin, p.easting, p.northing, p.lat, p.lon),
+        localBngToLatLon(eMax, nMin, p.easting, p.northing, p.lat, p.lon),
+        localBngToLatLon(eMax, nMax, p.easting, p.northing, p.lat, p.lon),
+        localBngToLatLon(eMin, nMax, p.easting, p.northing, p.lat, p.lon)
+      ];
+      const minLat = Math.min(...corners.map((c) => c[0]));
+      const maxLat = Math.max(...corners.map((c) => c[0]));
+      const minLon = Math.min(...corners.map((c) => c[1]));
+      const maxLon = Math.max(...corners.map((c) => c[1]));
+      const latRad = (Number(p.lat) * Math.PI) / 180.0;
+      const gamma = ((Number(p.lon) - (-2.0)) * Math.PI / 180.0) * Math.sin(latRad);
+      return { bounds: [[minLat, minLon], [maxLat, maxLon]], gamma, wb };
+    }
+
+    function buildRotatedOverlayDataUrl(sourceImgOrCanvas, sx, sy, sw, sh, gamma) {
+      const cG = Math.abs(Math.cos(gamma));
+      const sG = Math.abs(Math.sin(gamma));
+      const outW = Math.ceil(sw * cG + sh * sG);
+      const outH = Math.ceil(sh * cG + sw * sG);
+      const canv = document.createElement("canvas");
+      canv.width = outW;
+      canv.height = outH;
+      const ctx = canv.getContext("2d");
+      ctx.translate(outW / 2.0, outH / 2.0);
+      ctx.rotate(gamma);
+      ctx.drawImage(sourceImgOrCanvas, sx, sy, sw, sh, -sw / 2.0, -sh / 2.0, sw, sh);
+      return canv.toDataURL("image/png");
+    }
+
+    function refreshCandidateMapDiagnosticOverlay(p) {
+      candidateDiagOverlayLayer.clearLayers();
+      if (!p || p.lat == null || p.lon == null || activeMobilePanel === -1) {
+        updateZoomDependentPaneOpacity();
+        return;
+      }
+      const hasPng = Boolean(p.diagnostic_png);
+      const effectivePanel = (!hasPng && activeMobilePanel >= 0 && activeMobilePanel < 4) ? 4 : activeMobilePanel;
+      const { bounds, gamma } = computeCandidateBngOverlayBounds(p);
+      try {
+        if (effectivePanel >= 0 && effectivePanel < 4 && cachedDiagImg) {
+          const dataUrl = buildRotatedOverlayDataUrl(cachedDiagImg, effectivePanel * 260, 0, 256, 256, gamma);
+          L.imageOverlay(dataUrl, bounds, {
+            pane: "diagOverlayPane",
+            opacity: diagOverlayOpacityVal,
+            interactive: false
+          }).addTo(candidateDiagOverlayLayer);
+        } else if (effectivePanel === 4 && cachedCropmarkCanvas) {
+          const dataUrl = buildRotatedOverlayDataUrl(cachedCropmarkCanvas, 0, 0, 256, 256, gamma);
+          L.imageOverlay(dataUrl, bounds, {
+            pane: "diagOverlayPane",
+            opacity: diagOverlayOpacityVal,
+            interactive: false
+          }).addTo(candidateDiagOverlayLayer);
+        }
+      } catch (_err) {}
+      updateZoomDependentPaneOpacity();
+    }
+
     function renderAerialAndCropmarkCanvases(p) {
       const reqId = ++currentAerialReqId;
+      cachedCropmarkCanvas = null;
+      cachedCropmarkReadout = "Computing...";
       const wb = (Array.isArray(p.window_bbox) && p.window_bbox.length === 4)
         ? p.window_bbox
         : [Math.round(p.easting - 128), Math.round(p.northing - 128), Math.round(p.easting + 128), Math.round(p.northing + 128)];
@@ -2512,102 +2563,34 @@
           }
         }
 
-        const drawOverlay = (canvasEl, baseImageSource, isImageData) => {
-          if (!canvasEl) return;
-          const ctx = canvasEl.getContext("2d");
-          if (isImageData) {
-            ctx.putImageData(baseImageSource, 0, 0);
-          } else {
-            ctx.drawImage(baseImageSource, 0, 0, w, h);
-          }
-          ctx.beginPath();
-          ctx.arc(cx, cy, rPx, 0, 2 * Math.PI);
-          ctx.strokeStyle = ringColor;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        };
-
-        drawOverlay(document.getElementById("desktopAerialCanvas"), img, false);
-        drawOverlay(document.getElementById("mobileAerialCanvas"), img, false);
-        drawOverlay(document.getElementById("desktopCropmarkCanvas"), cropIm, true);
-        drawOverlay(document.getElementById("mobileCropmarkCanvas"), cropIm, true);
+        const cropCanv = document.createElement("canvas");
+        cropCanv.width = w;
+        cropCanv.height = h;
+        const cctx = cropCanv.getContext("2d");
+        cctx.putImageData(cropIm, 0, 0);
+        cctx.beginPath();
+        cctx.arc(cx, cy, rPx, 0, 2 * Math.PI);
+        cctx.strokeStyle = ringColor;
+        cctx.lineWidth = 2;
+        cctx.stroke();
+        cachedCropmarkCanvas = cropCanv;
 
         const ringDiff = (ringCnt ? ringExgSum / ringCnt : 0) - (coreCnt ? coreExgSum / coreCnt : 0);
         const coreLum = coreCnt ? coreLumSum / coreCnt : 0;
-        const readoutStr = `Ring ΔExG: ${ringDiff >= 0 ? "+" : ""}${(ringDiff * 100).toFixed(1)}% · Core ΔL: ${coreLum >= 0 ? "+" : ""}${(coreLum * 100).toFixed(1)}%`;
-        const dReadout = document.getElementById("desktopCropmarkReadout");
-        if (dReadout) dReadout.textContent = readoutStr;
-        const mReadout = document.getElementById("mobileCropmarkReadout");
-        if (mReadout) mReadout.textContent = `Cropmark Bandpass (16 m) — ${readoutStr}`;
+        cachedCropmarkReadout = `Ring ΔExG: ${ringDiff >= 0 ? "+" : ""}${(ringDiff * 100).toFixed(1)}% · Core ΔL: ${coreLum >= 0 ? "+" : ""}${(coreLum * 100).toFixed(1)}%`;
+        const mReadout = document.getElementById("mapCropmarkReadout");
+        if (mReadout) mReadout.textContent = cachedCropmarkReadout;
+
+        const effectivePanel = (!p.diagnostic_png && activeMobilePanel >= 0 && activeMobilePanel < 4) ? 4 : activeMobilePanel;
+        if (effectivePanel === 4 && selectedCandidateObj === p) {
+          refreshCandidateMapDiagnosticOverlay(p);
+        }
       };
       img.src = url;
-
-      // Render Panel 7: 1888-1913 Historic Ordnance Survey 6-Inch Map centered on (p.lat, p.lon)
-      if (p.lat != null && p.lon != null) {
-        const zoom = 16;
-        const latRad = (Number(p.lat) * Math.PI) / 180.0;
-        const nTiles = Math.pow(2.0, zoom);
-        const xtileF = ((Number(p.lon) + 180.0) / 360.0) * nTiles;
-        const ytileF = ((1.0 - Math.log(Math.tan(latRad) + 1.0 / Math.cos(latRad)) / Math.PI) / 2.0) * nTiles;
-        const cxTile = Math.floor(xtileF);
-        const cyTile = Math.floor(ytileF);
-        const pxInTile = Math.round((xtileF - cxTile) * 256);
-        const pyInTile = Math.round((ytileF - cyTile) * 256);
-        const dxStart = pxInTile < 128 ? -1 : 0;
-        const dyStart = pyInTile < 128 ? -1 : 0;
-
-        const osOff = document.createElement("canvas");
-        osOff.width = 512;
-        osOff.height = 512;
-        const osCtx = osOff.getContext("2d");
-        osCtx.fillStyle = "#f2ece1";
-        osCtx.fillRect(0, 0, 512, 512);
-        let loadedCount = 0;
-
-        const finishHistoricOs = () => {
-          if (reqId !== currentAerialReqId) return;
-          const centerX = (-dxStart) * 256 + pxInTile;
-          const centerY = (-dyStart) * 256 + pyInTile;
-          [document.getElementById("desktopHistoricOsCanvas"), document.getElementById("mobileHistoricOsCanvas")].forEach((canv) => {
-            if (!canv) return;
-            const c = canv.getContext("2d");
-            c.drawImage(osOff, centerX - 128, centerY - 128, 256, 256, 0, 0, 256, 256);
-            c.strokeStyle = "#b91c1c";
-            c.lineWidth = 2;
-            c.beginPath();
-            c.arc(128, 128, 18, 0, 2 * Math.PI);
-            c.stroke();
-            c.beginPath();
-            c.moveTo(102, 128); c.lineTo(110, 128);
-            c.moveTo(146, 128); c.lineTo(154, 128);
-            c.moveTo(128, 102); c.lineTo(128, 110);
-            c.moveTo(128, 146); c.lineTo(128, 154);
-            c.stroke();
-          });
-        };
-
-        for (let ix = 0; ix < 2; ix++) {
-          for (let iy = 0; iy < 2; iy++) {
-            const tx = cxTile + dxStart + ix;
-            const ty = cyTile + dyStart + iy;
-            const tImg = new Image();
-            tImg.crossOrigin = "anonymous";
-            tImg.onload = () => {
-              osCtx.drawImage(tImg, ix * 256, iy * 256, 256, 256);
-              loadedCount++;
-              if (loadedCount === 4) finishHistoricOs();
-            };
-            tImg.onerror = () => {
-              loadedCount++;
-              if (loadedCount === 4) finishHistoricOs();
-            };
-            tImg.src = `https://api.maptiler.com/tiles/uk-osgb1888/${zoom}/${tx}/${ty}?key=7Y0Q1ck46BnB8cXXXg8X`;
-          }
-        }
-      }
     }
 
     function selectCandidate(p, zoomMap = true, scrollRow = false, updateUrl = true) {
+      selectedCandidateObj = p;
       selectedFeatureKey = featureKey(p);
       if (updateUrl && p && p.os_grid_ref && typeof history !== "undefined" && history.replaceState) {
         try {
@@ -2646,11 +2629,12 @@
       if (!hideHalo && p.lat != null && p.lon != null) {
         L.circleMarker([p.lat, p.lon], {
           pane: "candidatesPane",
-          radius: 13,
+          radius: 18,
           color: "#1b5e6f",
-          weight: 3,
+          weight: 2.5,
+          dashArray: "5,4",
           fillColor: "#1b5e6f",
-          fillOpacity: 0.18,
+          fillOpacity: 0.0,
           interactive: false
         }).addTo(selectedHaloLayer);
       }
@@ -2674,95 +2658,113 @@
       const hgUrl = `https://www.heritagegateway.org.uk/gateway/advanced_search.aspx`;
       const shareUrl = `${window.location.origin}${window.location.pathname}#site=${cleanGridId(p.os_grid_ref)}`;
       const copyPayload = `${p.os_grid_ref} | BNG E ${Math.round(p.easting)}, N ${Math.round(p.northing)} | WGS84 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)} | ${shareUrl}`;
-      const mobileDock = document.getElementById("tableBottomLidarDock");
       const hasPng = Boolean(p.diagnostic_png);
-      const effectivePanel = (!hasPng && activeMobilePanel < 4) ? 4 : activeMobilePanel;
-      const panelOffsetsPct = [0, -25.048, -50.096, -75.144];
-      const curOff = panelOffsetsPct[effectivePanel] || 0;
-      const radioLabels = [
-        "1. Slope",
-        "2. 16 m Relief",
-        "3. Canopy",
-        "4. Model Prob",
-        "5. Aerial RGB",
-        "6. Cropmark",
-        "7. 1888 OS"
+      const effectivePanel = (!hasPng && activeMobilePanel >= 0 && activeMobilePanel < 4) ? 4 : activeMobilePanel;
+
+      const pillDefs = [
+        { idx: 0, lbl: "1. Slope", needPng: true, desc: "<strong>Bare-Earth Slope (256 m patch):</strong> Flat ground is bright; steep banks and ditches are dark (zero directional sun bias)." },
+        { idx: 1, lbl: "2. 16 m Relief", needPng: true, desc: "<strong>16 m Local Relief (256 m patch):</strong> Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m)." },
+        { idx: 2, lbl: "3. Canopy", needPng: true, desc: "<strong>Surface Canopy nDSM (256 m patch):</strong> Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings)." },
+        { idx: 3, lbl: "4. Model Prob", needPng: true, desc: "<strong>Model Probability (256 m patch):</strong> Pink/red highlight shows where the neural network detects monument geometry." },
+        { idx: 4, lbl: "5. 16 m Cropmark", needPng: false, desc: "<strong>16 m Aerial Cropmark ΔExG / ΔL (256 m patch):</strong> Green = moisture-retaining ring-ditch; Red/Magenta = parched bank or soilmark." },
+        { idx: -1, lbl: "Off (Base Map)", needPng: false, desc: "<strong>256 m Patch Hidden:</strong> Inspecting the full nationwide Tile Layer (e.g. 1 m LiDAR RVT, 1888 OS 6-Inch, Aerial) unobstructed." }
       ];
-      const radiosHtml = radioLabels.map((lbl, idx) => {
-        const disabled = (!hasPng && idx < 4) ? "disabled" : "";
+
+      const pillsHtml = pillDefs.map((pd) => {
+        const disabled = (pd.needPng && !hasPng) ? "disabled" : "";
+        const isAct = pd.idx === effectivePanel;
         return `
-          <label class="mobile-panel-radio ${idx === effectivePanel ? "active-radio" : ""}" data-panel-idx="${idx}" style="${disabled ? 'opacity:0.45;' : ''}">
-            <input type="radio" name="mobileLidarPanel" value="${idx}" ${idx === effectivePanel ? "checked" : ""} ${disabled} />
-            <span>${lbl}</span>
+          <label class="map-diag-pill ${isAct ? "active-radio" : ""}" data-panel-idx="${pd.idx}" style="${disabled ? 'opacity:0.42;cursor:not-allowed;' : ''}">
+            <input type="radio" name="mapLidarPanel" value="${pd.idx}" ${isAct ? "checked" : ""} ${disabled} />
+            <span>${pd.lbl}</span>
           </label>
         `;
       }).join("");
 
-      const legendItemsHtml = `
-        <div data-panel-desc="0" class="${effectivePanel === 0 ? "active-panel-desc" : ""}">
-          <strong>Panel 1 (Left): Bare-Earth Slope</strong>
-          Flat ground is bright; steep banks and ditches are dark (zero directional sun bias).
-        </div>
-        <div data-panel-desc="1" class="${effectivePanel === 1 ? "active-panel-desc" : ""}">
-          <strong>Panel 2: 16 m Local Relief</strong>
-          Yellow = raised mound/bank (+1.5 m); Blue = sunken ditch or pit (−1.5 m).
-        </div>
-        <div data-panel-desc="2" class="${effectivePanel === 2 ? "active-panel-desc" : ""}">
-          <strong>Panel 3: Surface Canopy (nDSM)</strong>
-          Trees, hedges, and walls above bare earth (bright amber = vegetation/buildings).
-        </div>
-        <div data-panel-desc="3" class="${effectivePanel === 3 ? "active-panel-desc" : ""}">
-          <strong>Panel 4 (Right): Model Probability</strong>
-          Pink/red highlight shows where the neural network detects monument geometry.
-        </div>
-        <div data-panel-desc="4" class="${effectivePanel === 4 ? "active-panel-desc" : ""}">
-          <strong>Panel 5: Aerial Orthophoto (256 m × 256 m BNG)</strong>
-          Pixel-aligned 1:1 EPSG:27700 vertical aerial photograph with candidate footprint circle.
-        </div>
-        <div data-panel-desc="5" class="${effectivePanel === 5 ? "active-panel-desc" : ""}">
-          <strong>Panel 6: 16 m Scale-Space Cropmark &amp; Soilmark (ΔExG / ΔL)</strong>
-          Green = +ΔExG moisture-retaining ring-ditch cropmark; Red/Magenta = +ΔL chalk/gravel soilmark or parched bank.
-        </div>
-        <div data-panel-desc="6" class="${effectivePanel === 6 ? "active-panel-desc" : ""}">
-          <strong>Panel 7: 1888–1913 Historic OS 6-Inch Map</strong>
-          19th-century Ordnance Survey mapping (NLS): shows Gothic antiquity labels ('Camp', 'Tumulus') or Victorian quarries, pits &amp; plantations.
-        </div>
-      `;
-
-      if (mobileDock) {
-        const mobOsBadge = hasHistoricOsAntiquity(p) ? '<span class="badge badge-nhle" style="margin-right:4px;">1888 OS ★</span>' : "";
-        const mobSurveyBadge = p.user_survey_status ? `<span style="margin-right:4px;">${surveyStatusBadge(p.user_survey_status)}</span>` : "";
-        mobileDock.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13px;">
-            <div><strong>${p.os_grid_ref}</strong>${p.county ? ` <span class="muted" style="font-size:11.5px;">(${p.county})</span>` : ""} · <span class="muted">${formatClass(p.predicted_class)}</span></div>
-            <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m²)</div>
+      const activeDescObj = pillDefs.find((pd) => pd.idx === effectivePanel) || pillDefs[1];
+      const mapHudEl = document.getElementById("mapSiteHud");
+      if (mapHudEl) {
+        const hudOsBadge = hasHistoricOsAntiquity(p) ? '<span class="badge badge-nhle" style="margin-right:4px;">1888 OS ★</span>' : "";
+        const hudSurveyBadge = p.user_survey_status ? `<span style="margin-right:4px;">${surveyStatusBadge(p.user_survey_status)}</span>` : "";
+        mapHudEl.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+            <div>
+              <strong style="font-size:13.5px;">${p.os_grid_ref}</strong>${p.county ? ` <span class="muted">(${p.county})</span>` : ""} ·
+              <span class="muted">${formatClass(p.predicted_class)}</span> ·
+              Score <strong>${p.confidence.toFixed(3)}</strong> ·
+              Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m²)
+            </div>
+            <div style="display:inline-flex;align-items:center;gap:8px;font-size:11.5px;">
+              <span id="mapCropmarkReadout" class="muted">${cachedCropmarkReadout}</span>
+              <label style="display:inline-flex;align-items:center;gap:4px;" title="Adjust opacity of the geo-draped 256 m × 256 m diagnostic patch over the base map">
+                <span class="muted">Opacity:</span>
+                <input type="range" id="diagOverlayOpacity" min="0.25" max="1.0" step="0.05" value="${diagOverlayOpacityVal}" style="width:64px;accent-color:var(--accent);cursor:pointer;" />
+              </label>
+            </div>
           </div>
-          <div style="font-size:12px;line-height:1.35;padding:4px 7px;background:var(--panel-alt);border-left:3px solid var(--accent);border-radius:3px;margin-bottom:4px;color:var(--text);">
-            ${mobOsBadge}${mobSurveyBadge}${contextNote(p)}
+          <div style="font-size:12px;line-height:1.34;padding:3px 7px;background:var(--panel);border-left:3px solid var(--accent);border-radius:3px;margin-top:4px;color:var(--text);">
+            ${hudOsBadge}${hudSurveyBadge}${contextNote(p)}
           </div>
-          <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
-            ${radiosHtml}
+          <div class="map-diag-pills" id="mapDiagPillBar">
+            ${pillsHtml}
           </div>
-          <div class="diag-viewport">
-            ${hasPng ? `<img class="diag-img" id="diagImgEl" style="--mobile-panel-offset:${curOff}%;display:${effectivePanel < 4 ? 'block' : 'none'};" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />` : ""}
-            <canvas id="mobileAerialCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 4 ? 'block' : 'none'};"></canvas>
-            <canvas id="mobileCropmarkCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 5 ? 'block' : 'none'};"></canvas>
-            <canvas id="mobileHistoricOsCanvas" width="256" height="256" style="width:100%;height:100%;display:${effectivePanel === 6 ? 'block' : 'none'};"></canvas>
-          </div>
-          <div class="panel-legend" id="panelLegendBox">
-            ${legendItemsHtml}
-          </div>
-          <div id="mobileCropmarkReadout" class="muted" style="margin-top:5px;font-size:12px;"></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${nlsLidarSideBySideUrl}" target="_blank" rel="noopener" title="Open NLS Side-by-Side 1888 OS 6-Inch vs 1 m LiDAR RVT Viewer">LiDAR + 1888 OS ↗</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${ukLidar3dUrl}" target="_blank" rel="noopener" title="Open UK 1 m LiDAR &amp; 3D Terrain Map at ${p.os_grid_ref}">3D LiDAR Map ↗</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${geoUri}">Open in GPS / OsmAnd ↗</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${osmandMapUrl}" target="_blank" rel="noopener">OsmAnd Web ↗</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener">${topMp ? `Megalithic.co.uk: ${topMp.name} (#${topMp.sid}, ${topMp.distance_m} m) ↗` : "Search Megalithic.co.uk ↗"}</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener">Megalithic.co.uk Map ↗</a>
-            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${nlsUrl}" target="_blank" rel="noopener">1888 OS Map (NLS) ↗</a>
+          <div class="map-diag-legend" id="mapDiagLegendLine">
+            ${activeDescObj.desc}
           </div>
         `;
+        const pillBar = document.getElementById("mapDiagPillBar");
+        if (pillBar) {
+          pillBar.querySelectorAll('input[name="mapLidarPanel"]').forEach((inp) => {
+            inp.addEventListener("change", (ev) => {
+              const idx = parseInt(ev.target.value, 10);
+              activeMobilePanel = Number.isNaN(idx) ? 1 : idx;
+              pillBar.querySelectorAll(".map-diag-pill").forEach((lbl) => {
+                lbl.classList.toggle("active-radio", parseInt(lbl.dataset.panelIdx, 10) === activeMobilePanel);
+              });
+              const dObj = pillDefs.find((pd) => pd.idx === activeMobilePanel);
+              const legEl = document.getElementById("mapDiagLegendLine");
+              if (legEl && dObj) legEl.innerHTML = dObj.desc;
+              refreshCandidateMapDiagnosticOverlay(p);
+              if (activeMobilePanel >= 0 && map.getZoom() < 16 && p.lat != null && p.lon != null) {
+                map.setView([p.lat, p.lon], 17);
+              }
+            });
+          });
+        }
+        const opSlider = document.getElementById("diagOverlayOpacity");
+        if (opSlider) {
+          opSlider.addEventListener("input", (ev) => {
+            diagOverlayOpacityVal = parseFloat(ev.target.value) || 0.94;
+            candidateDiagOverlayLayer.eachLayer((lyr) => {
+              if (lyr.setOpacity) lyr.setOpacity(diagOverlayOpacityVal);
+            });
+          });
+        }
+      }
+
+      if (hasPng) {
+        const pngUrl = `${DATA_BASE}docs/diagnostics/${p.diagnostic_png}`;
+        if (cachedDiagImgUrl === pngUrl && cachedDiagImg) {
+          refreshCandidateMapDiagnosticOverlay(p);
+        } else {
+          cachedDiagImgUrl = pngUrl;
+          cachedDiagImg = null;
+          refreshCandidateMapDiagnosticOverlay(p);
+          const dImg = new Image();
+          dImg.crossOrigin = "anonymous";
+          dImg.onload = () => {
+            if (cachedDiagImgUrl !== pngUrl) return;
+            cachedDiagImg = dImg;
+            if (selectedCandidateObj === p) {
+              refreshCandidateMapDiagnosticOverlay(p);
+            }
+          };
+          dImg.src = pngUrl;
+        }
+      } else {
+        cachedDiagImgUrl = "";
+        cachedDiagImg = null;
+        refreshCandidateMapDiagnosticOverlay(p);
       }
 
       const scoreDeltaBadge = p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015
@@ -2784,10 +2786,10 @@
           <div style="display:flex;gap:5px;flex-wrap:wrap;">
             <button class="btn-link" id="btnShareSiteLink" type="button" style="cursor:pointer;padding:3px 7px;font-size:11.5px;" data-share="${shareUrl}" title="Copy direct permalink (${shareUrl}) to this site">Share Link</button>
             <button class="btn-link" id="btnCopyCoords" type="button" style="cursor:pointer;padding:3px 7px;font-size:11.5px;" data-copy="${copyPayload}">Copy Coords</button>
-            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${osmandMapUrl}" target="_blank" rel="noopener" title="Open pin in OsmAnd Map (or tap '${geoUri}' on Android)">OsmAnd ↗</a>
-            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${geoUri}" title="Launch native Android / iOS GPS app (OsmAnd, Organic Maps) at ${p.os_grid_ref}">GPS App ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${nlsLidarSideBySideUrl}" target="_blank" rel="noopener" title="Open National Library of Scotland Side-by-Side Viewer: 1888 OS 6-Inch Map (left) vs 1 m EA LiDAR DTM RVT Hillshade (right)">LiDAR + 1888 OS ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${ukLidar3dUrl}" target="_blank" rel="noopener" title="Open UK Open Data 1 m LiDAR &amp; interactive 3D terrain mesh viewer at ${p.os_grid_ref}">3D LiDAR ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${osmandMapUrl}" target="_blank" rel="noopener" title="Open pin in OsmAnd Map (or tap '${geoUri}' on Android)">OsmAnd ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${geoUri}" title="Launch native Android / iOS GPS app (OsmAnd, Organic Maps) at ${p.os_grid_ref}">GPS App ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${nlsUrl}" target="_blank" rel="noopener" title="Open 1888–1913 Historic Ordnance Survey 6-Inch Map on National Library of Scotland">1888 OS ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk ↗"}</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
@@ -2798,68 +2800,6 @@
           </div>
         </div>
         ${p.case_study_note ? `<div style="margin-top:8px;padding:8px 10px;background:var(--green-soft);border:1px solid var(--green-border);border-radius:4px;font-size:12.5px;">${p.case_study_note}</div>` : ""}
-        <div class="desktop-only-lidar-dock">
-          ${hasPng ? `
-            <img class="diag-img" src="${DATA_BASE}docs/diagnostics/${p.diagnostic_png}" alt="4-panel 1m LiDAR diagnostic" />
-          ` : `
-            <div style="margin-top:8px;padding:7px 10px;background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;font-size:12px;" class="muted">
-              No 4-panel LiDAR PNG cached for this lower-ranked window; showing live EPSG:27700 Aerial Orthophoto, 16 m Scale-Space Cropmark &amp; 1888 OS 6-Inch Map panels below.
-            </div>
-          `}
-          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-top:8px;">
-            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 5: Aerial RGB</strong>
-                <span class="muted" style="font-size:10.5px;">256 m BNG</span>
-              </div>
-              <canvas id="desktopAerialCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
-            </div>
-            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 6: 16 m Cropmark</strong>
-                <span id="desktopCropmarkReadout" class="muted" style="font-size:10px;">Computing...</span>
-              </div>
-              <canvas id="desktopCropmarkCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#090b0e;display:block;"></canvas>
-            </div>
-            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                <strong>Panel 7: 1888 OS 6-Inch</strong>
-                <a href="${nlsUrl}" target="_blank" rel="noopener" style="font-size:10.5px;font-weight:600;">Full NLS Map ↗</a>
-              </div>
-              <canvas id="desktopHistoricOsCanvas" width="256" height="256" style="width:100%;aspect-ratio:1/1;border-radius:3px;background:#f2ece1;display:block;"></canvas>
-            </div>
-            <div style="background:var(--panel-alt);border:1px solid var(--border);border-radius:4px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;">
-              <div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11.5px;">
-                  <strong>Megalithic.co.uk &amp; OS</strong>
-                  <span class="badge ${topMp ? (topMp.distance_m <= 250 ? 'badge-nhle' : 'badge-osm') : 'badge-unid'}" style="font-size:10px;padding:1px 5px;">${topMp ? (topMp.distance_m <= 250 ? `${p.megalithic_portal_matches.filter((m) => Number(m.distance_m) <= 250).length} within 250m` : `${p.megalithic_portal_matches.length} within 1km`) : "Unlisted <1km"}</span>
-                </div>
-                <div style="font-size:11.5px;line-height:1.35;margin-bottom:6px;">
-                  ${(p.megalithic_portal_matches && p.megalithic_portal_matches.length > 0)
-                    ? p.megalithic_portal_matches.slice(0, 3).map((mp) => `
-                        <div style="padding:3px 0;border-bottom:1px dashed var(--border);">
-                          <a href="${mp.url}" target="_blank" rel="noopener" style="font-weight:600;">${mp.name}</a>
-                          <div class="muted" style="font-size:10.5px;">${mp.site_type} · <strong>${mp.distance_m} m</strong>${mp.accuracy ? ` · acc ${mp.accuracy}/5` : ""}</div>
-                        </div>
-                      `).join("")
-                    : `<div class="muted" style="padding:4px 0;">No recorded <em>Megalithic.co.uk</em> entry within 1 km of <strong>${p.os_grid_ref}</strong>.</div>`
-                  }
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:4px;">
-                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${mpUrl}" target="_blank" rel="noopener">${topMp ? `Open #${topMp.sid} on Megalithic.co.uk ↗` : `Search ${p.os_grid_ref} on Megalithic.co.uk ↗`}</a>
-                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${mpMapUrl}" target="_blank" rel="noopener">Megalithic.co.uk Interactive Map ↗</a>
-                <a class="btn-link" style="text-align:center;padding:4px 6px;font-size:11px;" href="${nlsUrl}" target="_blank" rel="noopener">1888 OS 6-Inch Viewer (NLS) ↗</a>
-              </div>
-            </div>
-          </div>
-          <details class="inline-drawer" style="margin-top:8px;">
-            <summary style="font-size:12px;"><span class="muted">Panel Guide: 1. Bare-Earth Slope · 2. 16 m Local Relief · 3. Canopy · 4. Model Prob · 5. Aerial RGB · 6. Cropmark ΔExG · 7. 1888 OS Map</span></summary>
-            <div class="panel-legend" style="grid-template-columns:repeat(3, 1fr);margin-top:4px;">
-              ${legendItemsHtml}
-            </div>
-          </details>
-        </div>
       `;
 
       if (p.arch_context_note) {
@@ -2957,36 +2897,6 @@
       `;
 
       card.innerHTML = html;
-      const switcher = document.getElementById("mobilePanelSwitcher");
-      if (switcher) {
-        switcher.querySelectorAll('input[name="mobileLidarPanel"]').forEach((inp) => {
-          inp.addEventListener("change", (ev) => {
-            const idx = parseInt(ev.target.value, 10) || 0;
-            activeMobilePanel = idx;
-            const imgEl = document.getElementById("diagImgEl");
-            const mobAer = document.getElementById("mobileAerialCanvas");
-            const mobCrop = document.getElementById("mobileCropmarkCanvas");
-            const mobHistOs = document.getElementById("mobileHistoricOsCanvas");
-            if (imgEl) {
-              if (idx < 4) {
-                imgEl.style.display = "block";
-                imgEl.style.setProperty("--mobile-panel-offset", `${panelOffsetsPct[idx]}%`);
-              } else {
-                imgEl.style.display = "none";
-              }
-            }
-            if (mobAer) mobAer.style.display = idx === 4 ? "block" : "none";
-            if (mobCrop) mobCrop.style.display = idx === 5 ? "block" : "none";
-            if (mobHistOs) mobHistOs.style.display = idx === 6 ? "block" : "none";
-            switcher.querySelectorAll(".mobile-panel-radio").forEach((lbl) => {
-              lbl.classList.toggle("active-radio", parseInt(lbl.dataset.panelIdx, 10) === idx);
-            });
-            document.querySelectorAll("#panelLegendBox div[data-panel-desc]").forEach((d) => {
-              d.classList.toggle("active-panel-desc", parseInt(d.dataset.panelDesc, 10) === idx);
-            });
-          });
-        });
-      }
       renderAerialAndCropmarkCanvases(p);
       const copyBtn = document.getElementById("btnCopyCoords");
       if (copyBtn && navigator.clipboard) {
@@ -3060,8 +2970,8 @@
       if (btnInspPr) {
         btnInspPr.addEventListener("click", () => copyAndOpenGithubPr(btnInspPr));
       }
-      if (zoomMap) {
-        map.setView([p.lat, p.lon], Math.max(map.getZoom(), 11));
+      if (zoomMap && p.lat != null && p.lon != null) {
+        map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17));
       }
     }
 
@@ -3117,7 +3027,7 @@
       renderActiveView(false, false);
       selectCandidate(p, false, true, true);
       if (p.lat != null && p.lon != null) {
-        map.setView([p.lat, p.lon], 15);
+        map.setView([p.lat, p.lon], 17);
       }
       return true;
     }
@@ -3244,8 +3154,6 @@
       const isStats = currentTab === "stats";
       document.getElementById("listControls").classList.toggle("hidden", isStats);
       document.getElementById("candidateListContainer").classList.toggle("hidden", isStats);
-      const bottomDock = document.getElementById("tableBottomLidarDock");
-      if (bottomDock) bottomDock.classList.toggle("hidden", isStats);
       document.getElementById("statsContainer").classList.toggle("hidden", !isStats);
 
       if (isStats) return;
@@ -3523,7 +3431,7 @@
 
       if (autoSelectFirst && filtered.length > 0) {
         const withPng = filtered.find((f) => f.properties.diagnostic_png) || filtered[0];
-        selectCandidate(withPng.properties, false);
+        selectCandidate(withPng.properties, !fitToCounty, false, false);
       }
     }
 
@@ -3807,6 +3715,14 @@
       document.getElementById("btnResetNationalView").addEventListener("click", () => {
         map.setView([52.85, -1.85], 6);
       });
+      const btnZoomPatch = document.getElementById("btnZoomCandidatePatch");
+      if (btnZoomPatch) {
+        btnZoomPatch.addEventListener("click", () => {
+          if (selectedCandidateObj && selectedCandidateObj.lat != null && selectedCandidateObj.lon != null) {
+            map.setView([selectedCandidateObj.lat, selectedCandidateObj.lon], 17);
+          }
+        });
+      }
       const btnThorn = document.getElementById("btnThornboroughCase");
       if (btnThorn) {
         btnThorn.addEventListener("click", () => {
