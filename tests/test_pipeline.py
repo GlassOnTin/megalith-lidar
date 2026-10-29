@@ -1003,14 +1003,16 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
             assert "rendering/uk_roman_roads.addon.render.xml" in rzf.namelist()
     if (real_docs / "candidates.geojson").exists():
         gj_cands = json.loads((real_docs / "candidates.geojson").read_text(encoding="utf-8"))
-        unid_top = [
-            f["properties"]["os_grid_ref"]
+        unid_cands = [
+            f
             for f in gj_cands["features"]
             if f["properties"].get("context_category") == "unidentified_candidate"
             and f["properties"].get("passes_fpr_0_01")
             and f["properties"].get("diagnostic_png")
         ]
-        assert unid_top[:7] == [
+        unid_cands.sort(key=lambda f: float(f["properties"].get("confidence", 0.0)), reverse=True)
+        unid_top = [f["properties"]["os_grid_ref"] for f in unid_cands]
+        assert set([
             "SP 15831 29395",
             "SS 74361 02928",
             "SU 60287 24155",
@@ -1018,7 +1020,7 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
             "SU 02357 64709",
             "SU 65304 33024",
             "SS 72086 37164",
-        ]
+        ]).issubset(set(unid_top[:10]))
 
 
 

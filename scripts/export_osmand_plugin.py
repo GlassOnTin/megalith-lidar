@@ -227,6 +227,8 @@ def build_candidates_gpx_xml(candidates: List[Tuple[str, Dict[str, Any]]], updat
 
         deep_link = f"{SITE_BASE_URL}#site={gref_id}"
         nls_url = f"https://maps.nls.uk/geo/explore/#zoom=17&lat={lat:.5f}&lon={lon:.5f}&layers=6&b=1&o=100"
+        nls_lidar_sbs_url = f"https://maps.nls.uk/geo/explore/side-by-side/#zoom=17&lat={lat:.5f}&lon={lon:.5f}&layers=6&right=LIDAR_DTM_1m"
+        uk_lidar_3d_url = f"https://houseprices.io/lab/lidar/map?ref={gref_id}"
         diag_png = str(p.get("diagnostic_png") or "").strip()
         diag_url = f"{SITE_BASE_URL}docs/diagnostics/{diag_png}" if diag_png else ""
 
@@ -257,6 +259,8 @@ def build_candidates_gpx_xml(candidates: List[Tuple[str, Dict[str, Any]]], updat
         desc_parts.append(f"7-Panel LiDAR & Cropmark Inspector: {deep_link}")
         if diag_url:
             desc_parts.append(f"4-Panel 1 m LiDAR Diagnostic PNG: {diag_url}")
+        desc_parts.append(f"1 m LiDAR + 1888 OS Side-by-Side (NLS): {nls_lidar_sbs_url}")
+        desc_parts.append(f"UK 1 m LiDAR & 3D Terrain Viewer: {uk_lidar_3d_url}")
         desc_parts.append(f"1888 OS 6-Inch Map (NLS): {nls_url}")
 
         desc_text = "\n".join(desc_parts)
@@ -872,6 +876,21 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                 "pluginId": "uk.megalith.lidar",
                 "items": [
                     {
+                        "name": "🇬🇧 ⛰ England 1m LiDAR RVT Multi-Hillshade (NLS)",
+                        "minZoom": 6,
+                        "maxZoom": 18,
+                        "url": "https://mapseries-tilesets.s3.amazonaws.com/lidar/england/{0}/{1}/{2}.png",
+                        "ext": ".png",
+                        "tileSize": 256,
+                        "bitDensity": 16,
+                        "avgSize": 32000,
+                        "ellipsoid": False,
+                        "inverted_y": False,
+                        "randoms": "",
+                        "rule": "",
+                        "sql": False,
+                    },
+                    {
                         "name": "🇬🇧 ⛰ England LiDAR Terrain 1m (EA)",
                         "minZoom": 11,
                         "maxZoom": 19,
@@ -910,6 +929,36 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                         "tileSize": 256,
                         "bitDensity": 16,
                         "avgSize": 32000,
+                        "ellipsoid": False,
+                        "inverted_y": False,
+                        "randoms": "",
+                        "rule": "",
+                        "sql": False,
+                    },
+                    {
+                        "name": "UK 1937–61 OS 1:25,000 Map",
+                        "minZoom": 6,
+                        "maxZoom": 16,
+                        "url": "https://api.maptiler.com/tiles/uk-osgb25k1937/{0}/{1}/{2}.jpg?key=7Y0Q1ck46BnB8cXXXg8X",
+                        "ext": ".jpg",
+                        "tileSize": 256,
+                        "bitDensity": 16,
+                        "avgSize": 28000,
+                        "ellipsoid": False,
+                        "inverted_y": False,
+                        "randoms": "",
+                        "rule": "",
+                        "sql": False,
+                    },
+                    {
+                        "name": "UK OS Outdoor & Public Footpaths",
+                        "minZoom": 7,
+                        "maxZoom": 17,
+                        "url": "https://api.os.uk/maps/raster/v1/zxy/Outdoor_3857/{0}/{1}/{2}.png?key=Rt69sv62Dv1JNAvlJAcM0upXIaIcpua8",
+                        "ext": ".png",
+                        "tileSize": 256,
+                        "bitDensity": 16,
+                        "avgSize": 24000,
                         "ellipsoid": False,
                         "inverted_y": False,
                         "randoms": "",

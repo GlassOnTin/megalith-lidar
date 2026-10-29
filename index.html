@@ -473,20 +473,42 @@
       color: var(--text);
     }
 
+    .note-truncate {
+      min-width: 180px;
+      max-width: 380px;
+      white-space: normal;
+      line-height: 1.32;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     /* Mobile & portrait friendly layout */
     @media (max-width: 900px), (orientation: portrait) {
       body {
-        font-size: 15px;
+        font-size: 14px;
         -webkit-text-size-adjust: 100%;
       }
       header {
-        padding: 10px 12px;
+        padding: 7px 10px;
+        gap: 5px;
       }
       header h1 {
-        font-size: 17px;
+        font-size: 15px;
+        line-height: 1.25;
+      }
+      header > div:first-child > .sub {
+        display: none;
       }
       header .sub {
-        font-size: 13.5px;
+        font-size: 11.5px;
+        line-height: 1.3;
+        gap: 5px !important;
+      }
+      header .btn-link {
+        font-size: 11.5px;
+        padding: 3px 7px;
       }
       .guide-bar {
         display: none;
@@ -495,8 +517,8 @@
         grid-template-columns: minmax(0, 1fr);
         width: 100%;
         max-width: 100vw;
-        gap: 10px;
-        padding: 8px 8px 16px 8px;
+        gap: 8px;
+        padding: 6px 6px 14px 6px;
       }
       .layout > div {
         min-width: 0;
@@ -507,12 +529,18 @@
         width: 100%;
         max-width: 100%;
         min-width: 0;
-        padding: 10px;
-        margin-bottom: 10px;
+        padding: 8px;
+        margin-bottom: 8px;
         overflow-x: hidden;
       }
+      .card-header {
+        margin-bottom: 6px;
+      }
       .card-header h2 {
-        font-size: 16px;
+        font-size: 14.5px;
+      }
+      .card-header .sub {
+        font-size: 11.5px;
       }
       .tabs {
         display: flex;
@@ -523,31 +551,31 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
-        gap: 8px;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
+        gap: 6px;
+        margin-bottom: 6px;
+        padding-bottom: 5px;
       }
       .tab-btn {
-        padding: 8px 12px;
-        font-size: 13.5px;
+        padding: 5px 10px;
+        font-size: 12.5px;
         white-space: nowrap;
         flex-shrink: 0;
       }
       .tab-count {
-        font-size: 12px;
+        font-size: 11px;
       }
       .tab-explainer {
-        font-size: 13px;
-        line-height: 1.4;
-        padding: 6px 9px;
+        font-size: 11.5px;
+        line-height: 1.32;
+        padding: 4px 8px;
         margin-bottom: 6px;
-        max-height: 46px;
+        max-height: 36px;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
       .controls {
-        font-size: 13px;
-        gap: 6px;
+        font-size: 12px;
+        gap: 5px;
         margin-bottom: 6px;
         width: 100%;
         max-width: 100%;
@@ -558,31 +586,60 @@
         max-width: 100%;
         min-width: 0;
       }
+      #listControls > div:first-child {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px 8px !important;
+        align-items: end !important;
+      }
       .controls label {
         display: flex;
         flex-wrap: wrap;
         width: 100%;
         max-width: 100%;
         min-width: 0;
+        font-size: 11.5px;
+        gap: 2px;
+      }
+      #listControls > div:first-child > label[title] {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 5px;
+        padding-bottom: 5px;
+        font-size: 12px;
+      }
+      #listControls > div:first-child > div {
+        grid-column: 1 / -1;
+        display: flex !important;
+        width: 100%;
+        gap: 5px;
+      }
+      #searchSiteInput {
+        flex: 1;
+        min-width: 0 !important;
+        font-size: 12.5px !important;
+        padding: 5px 8px !important;
       }
       select {
-        font-size: 13.5px;
+        font-size: 12.5px;
         width: 100%;
         max-width: 100%;
         min-width: 0;
         text-overflow: ellipsis;
-        padding: 5px 8px;
+        padding: 4px 6px;
       }
       .btn-link {
-        font-size: 13px;
-        padding: 5px 9px;
+        font-size: 12px;
+        padding: 4px 8px;
       }
       .table-scroll,
       #candidateListContainer {
         width: 100%;
         max-width: 100%;
         min-width: 0;
-        max-height: 25vh;
+        max-height: 32vh;
+        min-height: 215px;
         overflow-x: auto;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -598,35 +655,53 @@
         display: none;
       }
       .table-scroll table {
-        min-width: 720px;
-        font-size: 14px;
+        min-width: 560px;
+        font-size: 12.5px;
       }
       th, td {
-        padding: 8px 10px;
-        font-size: 14px;
+        padding: 5px 7px;
+        font-size: 12.5px;
         white-space: nowrap;
+        vertical-align: middle;
       }
       th:first-child,
       td:first-child {
         position: sticky;
         left: 0;
         z-index: 2;
+        padding: 4px 6px;
+        font-size: 12px;
         background: var(--panel);
-        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.35);
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25);
       }
       th:first-child {
         background: var(--panel-alt);
         z-index: 3;
       }
+      #candidateListContainer td:nth-child(2) {
+        max-width: 112px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .table-scroll td .note-truncate {
+        display: block;
+        min-width: 0;
+        max-width: 240px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.25;
+      }
       tr.cand-row.selected-row td:first-child {
         background: var(--selected-row-sticky);
       }
       .row-copy-btn {
-        font-size: 12px;
-        padding: 3px 7px;
+        font-size: 10.5px;
+        padding: 1px 5px;
       }
       #inspectorBody {
-        font-size: 14px;
+        font-size: 13.5px;
       }
       .inspector-arch-note {
         max-height: 210px;
@@ -635,30 +710,31 @@
       }
       .mobile-panel-switcher {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-        margin-top: 10px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        margin-top: 6px;
       }
       .mobile-panel-radio {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        gap: 6px;
+        justify-content: center;
+        text-align: center;
+        gap: 0;
         background: var(--panel-alt);
         border: 1px solid var(--border);
-        border-radius: 5px;
-        padding: 8px 10px;
-        font-size: 13.5px;
+        border-radius: 4px;
+        padding: 5px 3px;
+        font-size: 11.5px;
         font-weight: 600;
         color: var(--muted);
         cursor: pointer;
         user-select: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .mobile-panel-radio input[type="radio"] {
-        margin: 0;
-        width: 16px;
-        height: 16px;
-        accent-color: var(--accent);
+        display: none;
       }
       .mobile-panel-radio.active-radio {
         background: var(--accent-soft);
@@ -672,7 +748,7 @@
         overflow: hidden;
         border-radius: 4px;
         border: 1px solid var(--border);
-        margin: 8px auto 0 auto;
+        margin: 6px auto 0 auto;
         background: #090b0e;
         position: relative;
       }
@@ -689,10 +765,10 @@
       }
       .panel-legend {
         grid-template-columns: 1fr;
-        font-size: 13.5px;
+        font-size: 12.5px;
       }
       .panel-legend div {
-        padding: 7px 10px;
+        padding: 5px 8px;
       }
       .panel-legend div[data-panel-desc] {
         display: none;
@@ -784,11 +860,6 @@
       margin-bottom: 8px;
       padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
-    }
-    .note-truncate {
-      max-width: none;
-      white-space: normal;
-      line-height: 1.35;
     }
     footer {
       padding: 12px 20px;
@@ -1105,6 +1176,20 @@
             </span>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <label style="font-size:12px;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:3px 8px;" title="Choose the interactive map tile layer (including 1 m RVT Multi-Hillshade LiDAR, EA Bare-Earth &amp; Surface LiDAR, 1888 OS 6-Inch, 1937–61 OS 1:25k, OS Outdoor Footpaths, Aerial, and Roman Empire DARE)">
+              <strong>Tile Layer:</strong>
+              <select id="basemapSelect" style="padding:2px 6px;font-size:11.5px;width:auto;">
+                <option value="osm" selected>OpenStreetMap (Modern)</option>
+                <option value="lidar_rvt">1 m LiDAR RVT Multi-Hillshade (NLS / EA)</option>
+                <option value="lidar_dtm">1 m LiDAR Bare-Earth Hillshade (EA DTM)</option>
+                <option value="lidar_dsm">1 m LiDAR Surface / Canopy (EA DSM)</option>
+                <option value="os1888">1888–1913 OS 6-Inch Map (NLS)</option>
+                <option value="os1937">1937–1961 OS 1:25,000 Map (NLS)</option>
+                <option value="os_outdoor">OS Outdoor &amp; Public Footpaths</option>
+                <option value="aerial">Aerial Satellite (Esri)</option>
+                <option value="dare">Roman Empire Atlas (DARE)</option>
+              </select>
+            </label>
             <label style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:4px 9px;" title="Overlay Roman roads (Margary routes, Watling St, Ermine St, Fosse Way, Dere St, Stanegate) &amp; prehistoric ridgeways (The Ridgeway, Icknield Way)">
               <input type="checkbox" id="chkAncientRoadsLayer" />
               <strong>Roman &amp; Ancient Roads</strong>
@@ -1141,6 +1226,10 @@
                   <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
                   <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
                 </select>
+                <label title="Overlay semi-transparent British Geological Survey (BGS) 1:50,000 Bedrock Geology (chalk, limestone, greensand, granite)">
+                  <input type="checkbox" id="chkBgsGeologyOverlay" />
+                  BGS 1:50k Bedrock Geology Overlay
+                </label>
                 <label>
                   <input type="checkbox" id="chkAerialBasemap" />
                   Aerial Basemap
@@ -1195,12 +1284,42 @@
       maxNativeZoom: 11,
       attribution: "Digital Atlas of the Roman Empire (DARE) &copy; Lund / Gothenburg University"
     });
+    const lidarRvtBaseLayer = L.tileLayer("https://mapseries-tilesets.s3.amazonaws.com/lidar/england/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      maxNativeZoom: 18,
+      attribution: "1 m LiDAR RVT Multi-Hillshade &copy; Environment Agency (OGL v3.0) / National Library of Scotland"
+    });
     const lidarHillshadeLayer = L.tileLayer.wms("https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms", {
       layers: "Lidar_Composite_Hillshade_DTM_1m",
       format: "image/png",
       transparent: false,
       maxZoom: 19,
       attribution: "Environment Agency 1 m LiDAR DTM Hillshade (OGL v3.0)"
+    });
+    const lidarDsmHillshadeLayer = L.tileLayer.wms("https://environment.data.gov.uk/spatialdata/lidar-composite-digital-surface-model-last-return-dsm-1m/wms", {
+      layers: "Lidar_Composite_Hillshade_LZ_DSM_1m",
+      format: "image/png",
+      transparent: false,
+      maxZoom: 19,
+      attribution: "Environment Agency 1 m LiDAR DSM Surface Hillshade (OGL v3.0)"
+    });
+    const historicOs1937BaseLayer = L.tileLayer("https://api.maptiler.com/tiles/uk-osgb25k1937/{z}/{x}/{y}.jpg?key=7Y0Q1ck46BnB8cXXXg8X", {
+      maxZoom: 19,
+      maxNativeZoom: 16,
+      attribution: "OS 1:25,000 First Series (1937–1961) &copy; National Library of Scotland"
+    });
+    const osOutdoorBaseLayer = L.tileLayer("https://api.os.uk/maps/raster/v1/zxy/Outdoor_3857/{z}/{x}/{y}.png?key=Rt69sv62Dv1JNAvlJAcM0upXIaIcpua8", {
+      maxZoom: 19,
+      maxNativeZoom: 17,
+      attribution: "Ordnance Survey Outdoor &amp; Public Rights of Way &copy; Crown copyright"
+    });
+    const bgsGeologyOverlayLayer = L.tileLayer.wms("https://map.bgs.ac.uk/arcgis/services/BGS_Detailed_Geology/MapServer/WMSServer", {
+      layers: "BGS.50k.Bedrock",
+      format: "image/png",
+      transparent: true,
+      opacity: 0.48,
+      maxZoom: 19,
+      attribution: "BGS 1:50k Bedrock Geology &copy; UKRI / British Geological Survey"
     });
 
     map.createPane("densityPane");
@@ -1211,6 +1330,20 @@
     map.getPane("roadsPane").style.zIndex = 420;
     map.createPane("candidatesPane");
     map.getPane("candidatesPane").style.zIndex = 650;
+
+    function updateZoomDependentPaneOpacity() {
+      const z = map.getZoom() || 6;
+      const dp = map.getPane("densityPane");
+      if (dp) {
+        dp.style.opacity = z >= 13 ? "0.12" : (z >= 11 ? "0.45" : "1.0");
+      }
+      squaresLayer.eachLayer((lyr) => {
+        if (lyr.setStyle && !(lyr instanceof L.CircleMarker)) {
+          lyr.setStyle({ fillOpacity: z >= 13 ? 0.0 : 0.18 });
+        }
+      });
+    }
+    map.on("zoomend", updateZoomDependentPaneOpacity);
 
     const densityContourLayer = L.layerGroup().addTo(map);
     const squaresLayer = L.layerGroup().addTo(map);
@@ -2547,6 +2680,8 @@
         : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
       const mpMapUrl = `https://www.megalithic.co.uk/leaflet_megalith_map.php#15/${Number(p.lat).toFixed(5)}/${Number(p.lon).toFixed(5)}`;
       const nlsUrl = `https://maps.nls.uk/geo/explore/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&b=1&o=100`;
+      const nlsLidarSideBySideUrl = `https://maps.nls.uk/geo/explore/side-by-side/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&right=LIDAR_DTM_1m`;
+      const ukLidar3dUrl = `https://houseprices.io/lab/lidar/map?ref=${cleanGridId(p.os_grid_ref)}`;
       const osmandMapUrl = `https://osmand.net/map?pin=${Number(p.lat).toFixed(5)},${Number(p.lon).toFixed(5)}#17/${Number(p.lat).toFixed(5)}/${Number(p.lon).toFixed(5)}`;
       const geoUri = `geo:${Number(p.lat).toFixed(6)},${Number(p.lon).toFixed(6)}?z=17&q=${Number(p.lat).toFixed(6)},${Number(p.lon).toFixed(6)}(${encodeURIComponent(p.os_grid_ref || "LiDAR Candidate")})`;
       const hgUrl = `https://www.heritagegateway.org.uk/gateway/advanced_search.aspx`;
@@ -2563,8 +2698,8 @@
         "3. Canopy",
         "4. Model Prob",
         "5. Aerial RGB",
-        "6. Cropmark ΔExG",
-        "7. 1888 OS Map"
+        "6. Cropmark",
+        "7. 1888 OS"
       ];
       const radiosHtml = radioLabels.map((lbl, idx) => {
         const disabled = (!hasPng && idx < 4) ? "disabled" : "";
@@ -2608,10 +2743,15 @@
       `;
 
       if (mobileDock) {
+        const mobOsBadge = hasHistoricOsAntiquity(p) ? '<span class="badge badge-nhle" style="margin-right:4px;">1888 OS ★</span>' : "";
+        const mobSurveyBadge = p.user_survey_status ? `<span style="margin-right:4px;">${surveyStatusBadge(p.user_survey_status)}</span>` : "";
         mobileDock.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13.5px;">
-            <div><strong>${p.os_grid_ref}</strong> · <span class="muted">${formatClass(p.predicted_class)}</span></div>
-            <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;font-size:13px;">
+            <div><strong>${p.os_grid_ref}</strong>${p.county ? ` <span class="muted" style="font-size:11.5px;">(${p.county})</span>` : ""} · <span class="muted">${formatClass(p.predicted_class)}</span></div>
+            <div>Score <strong>${p.confidence.toFixed(3)}</strong> · Relief <strong>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</strong> (${p.area_m2} m²)</div>
+          </div>
+          <div style="font-size:12px;line-height:1.35;padding:4px 7px;background:var(--panel-alt);border-left:3px solid var(--accent);border-radius:3px;margin-bottom:4px;color:var(--text);">
+            ${mobOsBadge}${mobSurveyBadge}${contextNote(p)}
           </div>
           <div class="mobile-panel-switcher" id="mobilePanelSwitcher">
             ${radiosHtml}
@@ -2627,6 +2767,8 @@
           </div>
           <div id="mobileCropmarkReadout" class="muted" style="margin-top:5px;font-size:12px;"></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${nlsLidarSideBySideUrl}" target="_blank" rel="noopener" title="Open NLS Side-by-Side 1888 OS 6-Inch vs 1 m LiDAR RVT Viewer">LiDAR + 1888 OS ↗</a>
+            <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${ukLidar3dUrl}" target="_blank" rel="noopener" title="Open UK 1 m LiDAR &amp; 3D Terrain Map at ${p.os_grid_ref}">3D LiDAR Map ↗</a>
             <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${geoUri}">Open in GPS / OsmAnd ↗</a>
             <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${osmandMapUrl}" target="_blank" rel="noopener">OsmAnd Web ↗</a>
             <a class="btn-link" style="padding:3px 8px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener">${topMp ? `Megalithic.co.uk: ${topMp.name} (#${topMp.sid}, ${topMp.distance_m} m) ↗` : "Search Megalithic.co.uk ↗"}</a>
@@ -2657,6 +2799,8 @@
             <button class="btn-link" id="btnCopyCoords" type="button" style="cursor:pointer;padding:3px 7px;font-size:11.5px;" data-copy="${copyPayload}">Copy Coords</button>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${osmandMapUrl}" target="_blank" rel="noopener" title="Open pin in OsmAnd Map (or tap '${geoUri}' on Android)">OsmAnd ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${geoUri}" title="Launch native Android / iOS GPS app (OsmAnd, Organic Maps) at ${p.os_grid_ref}">GPS App ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${nlsLidarSideBySideUrl}" target="_blank" rel="noopener" title="Open National Library of Scotland Side-by-Side Viewer: 1888 OS 6-Inch Map (left) vs 1 m EA LiDAR DTM RVT Hillshade (right)">LiDAR + 1888 OS ↗</a>
+            <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${ukLidar3dUrl}" target="_blank" rel="noopener" title="Open UK Open Data 1 m LiDAR &amp; interactive 3D terrain mesh viewer at ${p.os_grid_ref}">3D LiDAR ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${nlsUrl}" target="_blank" rel="noopener" title="Open 1888–1913 Historic Ordnance Survey 6-Inch Map on National Library of Scotland">1888 OS ↗</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpUrl}" target="_blank" rel="noopener" title="${topMp ? `Open '${topMp.name}' (${topMp.site_type}, ${topMp.distance_m} m) on The Megalithic Portal` : 'Search this OS Grid Reference on The Megalithic Portal'}">${topMp ? `Megalithic.co.uk (#${topMp.sid}) ↗` : "Megalithic.co.uk ↗"}</a>
             <a class="btn-link" style="padding:3px 7px;font-size:11.5px;" href="${mpMapUrl}" target="_blank" rel="noopener" title="Open The Megalithic Portal interactive map at these coordinates">MP Map ↗</a>
@@ -3352,6 +3496,7 @@
           ? rowTopMp.url
           : `https://www.megalithic.co.uk/search.php?query=${encodeURIComponent((p.os_grid_ref || "").replace(/\s+/g, ""))}&country=1`;
         const rowNlsUrl = `https://maps.nls.uk/geo/explore/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&b=1&o=100`;
+        const rowLidarUrl = `https://maps.nls.uk/geo/explore/side-by-side/#zoom=17&lat=${Number(p.lat).toFixed(5)}&lon=${Number(p.lon).toFixed(5)}&layers=6&right=LIDAR_DTM_1m`;
         const tr = document.createElement("tr");
         tr.className = "cand-row" + (key === selectedFeatureKey ? " selected-row" : "");
         tr.dataset.key = key;
@@ -3368,7 +3513,7 @@
           <td><span style="display:inline-block;color:${st.fillColor};opacity:${Math.max(0.65, st.fillOpacity)};margin-right:6px;vertical-align:middle;font-size:13px;line-height:1;" title="${st.catLabel}">${st.glyph}</span><strong>${p.confidence.toFixed(3)}</strong>${p.raw_unet_confidence && (p.confidence - p.raw_unet_confidence) > 0.0015 ? ` <span class="muted" style="font-size:11px;color:var(--green);" title="${(p.user_survey_status === 'priority_field_target' || p.user_survey_status === 'field_verified_monument' || p.user_survey_status === 'historic_survey_confirmed') ? `Priority survey target bonus (raw UNet score=${p.raw_unet_confidence.toFixed(3)})` : (hasHistoricOsAntiquity(p) ? `1888 OS 6-Inch Map confirmed antiquity bonus (raw UNet score=${p.raw_unet_confidence.toFixed(3)})` : `Concentric ring bonus (${p.ring_type || 'ring'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})`)}">(↑${p.raw_unet_confidence.toFixed(2)})</span>` : (p.raw_unet_confidence && (p.raw_unet_confidence - p.confidence) > 0.005 ? ` <span class="muted" style="font-size:11px;" title="${p.vlm_downrate_reason || ''}">(↓${p.raw_unet_confidence.toFixed(2)})</span>` : "")}</td>
           <td>${p.est_local_relief_m > 0 ? "+" : ""}${p.est_local_relief_m} m</td>
           <td>${p.area_m2} m²</td>
-          <td style="white-space:nowrap;">${p.diagnostic_png ? '<span class="badge badge-nhle" title="4-Panel 1 m LiDAR diagnostic view available">Lidar</span>' : '<span class="muted" style="font-size:11px;">Aerial</span>'}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${hasHistoricOsAntiquity(p) ? 'badge-nhle' : 'badge-unid'}" style="text-decoration:none;${hasHistoricOsAntiquity(p) ? '' : 'opacity:0.85;'}" title="${hasHistoricOsAntiquity(p) ? '1888–1913 OS 6-Inch Map explicitly depicts a Tumulus / Camp / Hachured Antiquity here — click to open on NLS' : `Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}`}">${hasHistoricOsAntiquity(p) ? '1888 OS ★' : '1888 OS'}</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
+          <td style="white-space:nowrap;">${p.diagnostic_png ? `<a href="${rowLidarUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-nhle" style="text-decoration:none;" title="4-Panel 1 m LiDAR diagnostic available — click to open public 1 m LiDAR + 1888 OS Side-by-Side Viewer at ${p.os_grid_ref}">Lidar ↗</a>` : `<a href="${rowLidarUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.78;" title="Open public 1 m LiDAR + 1888 OS Side-by-Side Viewer at ${p.os_grid_ref}">Lidar ↗</a>`}${p.has_concentric_ring ? ` <span class="badge badge-nhle" title="Concentric 1 m LiDAR ring (${p.ring_type || 'ring_ditch_barrow'}, ring score=${(p.ring_barrow_score || 0).toFixed(2)})">Ring</span>` : ""}${p.has_distinct_cropmark ? ' <span class="badge badge-osm" title="Distinct 16 m scale-space aerial cropmark / soilmark anomaly (|ΔExG| ≥ 0.015 or |ΔL| ≥ 0.020)">Crop</span>' : ""}${rowTopMp ? ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${rowTopMp.distance_m <= 60 ? 'badge-nhle' : 'badge-osm'}" style="text-decoration:none;" title="Open Megalithic.co.uk #${rowTopMp.sid}: ${rowTopMp.name} (${rowTopMp.site_type}, ${rowTopMp.distance_m} m)">MP ↗</a>` : ` <a href="${rowMpUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge badge-unid" style="text-decoration:none;opacity:0.75;" title="Search ${p.os_grid_ref} on Megalithic.co.uk">MP</a>`} <a href="${rowNlsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="badge ${hasHistoricOsAntiquity(p) ? 'badge-nhle' : 'badge-unid'}" style="text-decoration:none;${hasHistoricOsAntiquity(p) ? '' : 'opacity:0.85;'}" title="${hasHistoricOsAntiquity(p) ? '1888–1913 OS 6-Inch Map explicitly depicts a Tumulus / Camp / Hachured Antiquity here — click to open on NLS' : `Open 1888–1913 Historic OS 6-Inch Map (NLS) at ${p.os_grid_ref}`}">${hasHistoricOsAntiquity(p) ? '1888 OS ★' : '1888 OS'}</a>${p.user_survey_status ? " " + surveyStatusBadge(p.user_survey_status) : ""}</td>
           <td class="muted"><div class="note-truncate" title="${contextNote(p).replace(/"/g, '&quot;')}">${contextNote(p)}</div></td>
         `;
         const rowBtn = tr.querySelector(".row-copy-btn");
@@ -3829,75 +3974,89 @@
       if (btnSubmitPr) {
         btnSubmitPr.addEventListener("click", () => copyAndOpenGithubPr(btnSubmitPr));
       }
+      const basemapSel = document.getElementById("basemapSelect");
+      const chkBgsGeol = document.getElementById("chkBgsGeologyOverlay");
       const chkAerial = document.getElementById("chkAerialBasemap");
       const chkHistOs = document.getElementById("chkHistoricOsBasemap");
       const chkRomanEmp = document.getElementById("chkRomanEmpireBasemap");
       const chkLidarHs = document.getElementById("chkLidarHillshadeBasemap");
-      function updateBasemapLayers() {
-        const useLidar = chkLidarHs && chkLidarHs.checked;
-        const useRoman = !useLidar && chkRomanEmp && chkRomanEmp.checked;
-        const useHist = !useLidar && !useRoman && chkHistOs && chkHistOs.checked;
-        const useAer = !useLidar && !useRoman && !useHist && chkAerial && chkAerial.checked;
-        if (map.hasLayer(osmBaseLayer)) map.removeLayer(osmBaseLayer);
-        if (map.hasLayer(aerialBaseLayer)) map.removeLayer(aerialBaseLayer);
-        if (map.hasLayer(historicOsBaseLayer)) map.removeLayer(historicOsBaseLayer);
-        if (map.hasLayer(dareRomanBaseLayer)) map.removeLayer(dareRomanBaseLayer);
-        if (map.hasLayer(lidarHillshadeLayer)) map.removeLayer(lidarHillshadeLayer);
-        if (useLidar) {
-          lidarHillshadeLayer.addTo(map);
-        } else if (useRoman) {
-          dareRomanBaseLayer.addTo(map);
-        } else if (useHist) {
-          historicOsBaseLayer.addTo(map);
-        } else if (useAer) {
-          aerialBaseLayer.addTo(map);
-        } else {
-          osmBaseLayer.addTo(map);
+      const allBaseTileLayers = [
+        osmBaseLayer,
+        lidarRvtBaseLayer,
+        lidarHillshadeLayer,
+        lidarDsmHillshadeLayer,
+        historicOsBaseLayer,
+        historicOs1937BaseLayer,
+        osOutdoorBaseLayer,
+        aerialBaseLayer,
+        dareRomanBaseLayer
+      ];
+      function applySelectedBasemap(mode) {
+        if (basemapSel) basemapSel.value = mode;
+        if (chkAerial) chkAerial.checked = mode === "aerial";
+        if (chkHistOs) chkHistOs.checked = mode === "os1888";
+        if (chkRomanEmp) chkRomanEmp.checked = mode === "dare";
+        if (chkLidarHs) chkLidarHs.checked = mode === "lidar_dtm" || mode === "lidar_rvt";
+        allBaseTileLayers.forEach((lyr) => {
+          if (map.hasLayer(lyr)) map.removeLayer(lyr);
+        });
+        const mapByMode = {
+          osm: osmBaseLayer,
+          lidar_rvt: lidarRvtBaseLayer,
+          lidar_dtm: lidarHillshadeLayer,
+          lidar_dsm: lidarDsmHillshadeLayer,
+          os1888: historicOsBaseLayer,
+          os1937: historicOs1937BaseLayer,
+          os_outdoor: osOutdoorBaseLayer,
+          aerial: aerialBaseLayer,
+          dare: dareRomanBaseLayer
+        };
+        const chosen = mapByMode[mode] || osmBaseLayer;
+        chosen.addTo(map);
+        if (mode === "dare") {
+          const chkRoads = document.getElementById("chkAncientRoadsLayer");
+          if (chkRoads && !chkRoads.checked) {
+            chkRoads.checked = true;
+            renderAncientRoadsOverlay();
+          }
         }
+        if (chkBgsGeol && chkBgsGeol.checked) {
+          if (!map.hasLayer(bgsGeologyOverlayLayer)) bgsGeologyOverlayLayer.addTo(map);
+          bgsGeologyOverlayLayer.bringToFront();
+        } else if (map.hasLayer(bgsGeologyOverlayLayer)) {
+          map.removeLayer(bgsGeologyOverlayLayer);
+        }
+      }
+      if (basemapSel) {
+        basemapSel.addEventListener("change", (ev) => {
+          ev.target.blur();
+          applySelectedBasemap(basemapSel.value || "osm");
+        });
+      }
+      if (chkBgsGeol) {
+        chkBgsGeol.addEventListener("change", (ev) => {
+          ev.target.blur();
+          applySelectedBasemap(basemapSel ? basemapSel.value : "osm");
+        });
       }
       if (chkAerial) {
         chkAerial.addEventListener("change", () => {
-          if (chkAerial.checked) {
-            if (chkHistOs) chkHistOs.checked = false;
-            if (chkRomanEmp) chkRomanEmp.checked = false;
-            if (chkLidarHs) chkLidarHs.checked = false;
-          }
-          updateBasemapLayers();
+          applySelectedBasemap(chkAerial.checked ? "aerial" : "osm");
         });
       }
       if (chkHistOs) {
         chkHistOs.addEventListener("change", () => {
-          if (chkHistOs.checked) {
-            if (chkAerial) chkAerial.checked = false;
-            if (chkRomanEmp) chkRomanEmp.checked = false;
-            if (chkLidarHs) chkLidarHs.checked = false;
-          }
-          updateBasemapLayers();
+          applySelectedBasemap(chkHistOs.checked ? "os1888" : "osm");
         });
       }
       if (chkRomanEmp) {
         chkRomanEmp.addEventListener("change", () => {
-          if (chkRomanEmp.checked) {
-            if (chkAerial) chkAerial.checked = false;
-            if (chkHistOs) chkHistOs.checked = false;
-            if (chkLidarHs) chkLidarHs.checked = false;
-            const chkRoads = document.getElementById("chkAncientRoadsLayer");
-            if (chkRoads && !chkRoads.checked) {
-              chkRoads.checked = true;
-              renderAncientRoadsOverlay();
-            }
-          }
-          updateBasemapLayers();
+          applySelectedBasemap(chkRomanEmp.checked ? "dare" : "osm");
         });
       }
       if (chkLidarHs) {
         chkLidarHs.addEventListener("change", () => {
-          if (chkLidarHs.checked) {
-            if (chkAerial) chkAerial.checked = false;
-            if (chkHistOs) chkHistOs.checked = false;
-            if (chkRomanEmp) chkRomanEmp.checked = false;
-          }
-          updateBasemapLayers();
+          applySelectedBasemap(chkLidarHs.checked ? "lidar_rvt" : "osm");
         });
       }
 

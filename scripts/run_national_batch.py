@@ -826,6 +826,10 @@ def export_public_docs(
             )
         )
     ]
+    priority_non_conf.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
     fpr05_tail = [
         f
         for f in all_features
