@@ -1176,7 +1176,7 @@
             </span>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <label style="font-size:12px;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:3px 8px;" title="Choose the interactive map tile layer (including 1 m RVT Multi-Hillshade LiDAR, EA Bare-Earth &amp; Surface LiDAR, 1888 OS 6-Inch, 1937–61 OS 1:25k, OS Outdoor Footpaths, Aerial, and Roman Empire DARE)">
+            <label style="font-size:12px;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:3px 8px;" title="Choose the interactive map tile layer (including 1 m RVT Multi-Hillshade LiDAR, EA Bare-Earth &amp; Surface LiDAR, 1888 OS 6-Inch, 1937–61 OS 1:25k, OS Outdoor Footpaths, Aerial, BGS Bedrock Geology, and Roman Empire DARE)">
               <strong>Tile Layer:</strong>
               <select id="basemapSelect" style="padding:2px 6px;font-size:11.5px;width:auto;">
                 <option value="osm" selected>OpenStreetMap (Modern)</option>
@@ -1188,6 +1188,8 @@
                 <option value="os_outdoor">OS Outdoor &amp; Public Footpaths</option>
                 <option value="aerial">Aerial Satellite (Esri)</option>
                 <option value="dare">Roman Empire Atlas (DARE)</option>
+                <option value="bgs_geology">BGS 1:50k Bedrock Geology (over OSM)</option>
+                <option value="lidar_rvt_bgs">1 m LiDAR RVT + BGS Bedrock Geology</option>
               </select>
             </label>
             <label style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;padding:4px 9px;" title="Overlay Roman roads (Margary routes, Watling St, Ermine St, Fosse Way, Dere St, Stanegate) &amp; prehistoric ridgeways (The Ridgeway, Icknield Way)">
@@ -1199,7 +1201,7 @@
               <strong>Contours Only</strong>
             </label>
             <details class="inline-drawer" style="padding:4px 9px;">
-              <summary style="font-size:12px;color:var(--accent);">Map Layers &amp; Contours</summary>
+              <summary style="font-size:12px;color:var(--accent);">Pins, Squares &amp; Contours</summary>
               <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px;">
                 <label title="Show or hide candidate markers on the map">
                   <input type="checkbox" id="chkShowCandidateMarkers" checked />
@@ -1226,26 +1228,6 @@
                   <option value="normalized_tab">Contours: Active Tab / Scanned km²</option>
                   <option value="raw_kde">Contours: Raw Concentration (KDE)</option>
                 </select>
-                <label title="Overlay semi-transparent British Geological Survey (BGS) 1:50,000 Bedrock Geology (chalk, limestone, greensand, granite)">
-                  <input type="checkbox" id="chkBgsGeologyOverlay" />
-                  BGS 1:50k Bedrock Geology Overlay
-                </label>
-                <label>
-                  <input type="checkbox" id="chkAerialBasemap" />
-                  Aerial Basemap
-                </label>
-                <label title="Overlay 1888–1913 Ordnance Survey Six-Inch to the Mile historic map (zoom ≤ 17)">
-                  <input type="checkbox" id="chkHistoricOsBasemap" />
-                  1888 OS 6-Inch Map
-                </label>
-                <label title="Switch basemap from modern OpenStreetMap to the Digital Atlas of the Roman Empire (DARE) + Roman &amp; Ancient Roads network">
-                  <input type="checkbox" id="chkRomanEmpireBasemap" />
-                  Roman Empire Basemap (DARE)
-                </label>
-                <label title="Switch basemap to live Environment Agency 1 m LiDAR Composite DTM Hillshade (WMS)">
-                  <input type="checkbox" id="chkLidarHillshadeBasemap" />
-                  1 m LiDAR Hillshade (EA)
-                </label>
               </div>
             </details>
           </div>
@@ -3980,11 +3962,6 @@
         btnSubmitPr.addEventListener("click", () => copyAndOpenGithubPr(btnSubmitPr));
       }
       const basemapSel = document.getElementById("basemapSelect");
-      const chkBgsGeol = document.getElementById("chkBgsGeologyOverlay");
-      const chkAerial = document.getElementById("chkAerialBasemap");
-      const chkHistOs = document.getElementById("chkHistoricOsBasemap");
-      const chkRomanEmp = document.getElementById("chkRomanEmpireBasemap");
-      const chkLidarHs = document.getElementById("chkLidarHillshadeBasemap");
       const allBaseTileLayers = [
         osmBaseLayer,
         lidarRvtBaseLayer,
@@ -3998,10 +3975,6 @@
       ];
       function applySelectedBasemap(mode) {
         if (basemapSel) basemapSel.value = mode;
-        if (chkAerial) chkAerial.checked = mode === "aerial";
-        if (chkHistOs) chkHistOs.checked = mode === "os1888";
-        if (chkRomanEmp) chkRomanEmp.checked = mode === "dare";
-        if (chkLidarHs) chkLidarHs.checked = mode === "lidar_dtm" || mode === "lidar_rvt";
         allBaseTileLayers.forEach((lyr) => {
           if (map.hasLayer(lyr)) map.removeLayer(lyr);
         });
@@ -4014,7 +3987,9 @@
           os1937: historicOs1937BaseLayer,
           os_outdoor: osOutdoorBaseLayer,
           aerial: aerialBaseLayer,
-          dare: dareRomanBaseLayer
+          dare: dareRomanBaseLayer,
+          bgs_geology: osmBaseLayer,
+          lidar_rvt_bgs: lidarRvtBaseLayer
         };
         const chosen = mapByMode[mode] || osmBaseLayer;
         chosen.addTo(map);
@@ -4025,7 +4000,7 @@
             renderAncientRoadsOverlay();
           }
         }
-        if (chkBgsGeol && chkBgsGeol.checked) {
+        if (mode === "bgs_geology" || mode === "lidar_rvt_bgs") {
           if (!map.hasLayer(bgsGeologyOverlayLayer)) bgsGeologyOverlayLayer.addTo(map);
           bgsGeologyOverlayLayer.bringToFront();
         } else if (map.hasLayer(bgsGeologyOverlayLayer)) {
@@ -4036,32 +4011,6 @@
         basemapSel.addEventListener("change", (ev) => {
           ev.target.blur();
           applySelectedBasemap(basemapSel.value || "osm");
-        });
-      }
-      if (chkBgsGeol) {
-        chkBgsGeol.addEventListener("change", (ev) => {
-          ev.target.blur();
-          applySelectedBasemap(basemapSel ? basemapSel.value : "osm");
-        });
-      }
-      if (chkAerial) {
-        chkAerial.addEventListener("change", () => {
-          applySelectedBasemap(chkAerial.checked ? "aerial" : "osm");
-        });
-      }
-      if (chkHistOs) {
-        chkHistOs.addEventListener("change", () => {
-          applySelectedBasemap(chkHistOs.checked ? "os1888" : "osm");
-        });
-      }
-      if (chkRomanEmp) {
-        chkRomanEmp.addEventListener("change", () => {
-          applySelectedBasemap(chkRomanEmp.checked ? "dare" : "osm");
-        });
-      }
-      if (chkLidarHs) {
-        chkLidarHs.addEventListener("change", () => {
-          applySelectedBasemap(chkLidarHs.checked ? "lidar_rvt" : "osm");
         });
       }
 
