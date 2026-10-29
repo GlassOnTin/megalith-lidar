@@ -878,7 +878,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                     {
                         "name": "🇬🇧 ⛰ England 1m LiDAR RVT Multi-Hillshade (NLS)",
                         "minZoom": 6,
-                        "maxZoom": 18,
+                        "maxZoom": 17,
                         "url": "https://mapseries-tilesets.s3.amazonaws.com/lidar/england/{0}/{1}/{2}.png",
                         "ext": ".png",
                         "tileSize": 256,
@@ -953,7 +953,7 @@ def export_osmand_files(docs_dir: Path) -> Dict[str, Any]:
                     {
                         "name": "UK OS Outdoor & Public Footpaths",
                         "minZoom": 7,
-                        "maxZoom": 17,
+                        "maxZoom": 16,
                         "url": "https://api.os.uk/maps/raster/v1/zxy/Outdoor_3857/{0}/{1}/{2}.png?key=Rt69sv62Dv1JNAvlJAcM0upXIaIcpua8",
                         "ext": ".png",
                         "tileSize": 256,

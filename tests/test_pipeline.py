@@ -930,6 +930,14 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
         assert "🇬🇧 ⛰ England LiDAR Terrain 1m (EA)" in map_source_names
         assert "UK 1888 OS 6-Inch Map" in map_source_names
         assert "Roman Empire Atlas (DARE)" in map_source_names
+        ms_by_name = {
+            ms["name"]: ms
+            for item in manifest["items"]
+            if item.get("type") == "MAP_SOURCES"
+            for ms in item.get("items", [])
+        }
+        assert ms_by_name["🇬🇧 ⛰ England 1m LiDAR RVT Multi-Hillshade (NLS)"]["maxZoom"] == 17
+        assert ms_by_name["UK OS Outdoor & Public Footpaths"]["maxZoom"] == 16
         roads_gpx_txt = zf.read("tracks/UK_Megalith_LiDAR/UK_Roman_and_Ancient_Roads.gpx").decode("utf-8")
         assert "<osmand:show_start_finish>false</osmand:show_start_finish>" in roads_gpx_txt
         addon_xml = zf.read("rendering/uk_roman_roads.addon.render.xml").decode("utf-8")

@@ -1265,52 +1265,56 @@
     crossorigin=""
   ></script>
   <script>
-    const map = L.map("map", { keyboard: false }).setView([52.8, -1.7], 6);
+    const map = L.map("map", { keyboard: false, maxZoom: 21 }).setView([52.8, -1.7], 6);
     const osmBaseLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
+      maxZoom: 21,
+      maxNativeZoom: 19,
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
     const aerialBaseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      maxZoom: 19,
+      maxZoom: 21,
+      maxNativeZoom: 18,
       attribution: "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     });
     const historicOsBaseLayer = L.tileLayer("https://api.maptiler.com/tiles/uk-osgb1888/{z}/{x}/{y}?key=7Y0Q1ck46BnB8cXXXg8X", {
-      maxZoom: 19,
+      maxZoom: 21,
       maxNativeZoom: 17,
       attribution: "Historic OS Six-Inch (1888–1913) &copy; National Library of Scotland"
     });
     const dareRomanBaseLayer = L.tileLayer("https://dh.gu.se/tiles/imperium/{z}/{x}/{y}.png", {
-      maxZoom: 19,
+      maxZoom: 21,
       maxNativeZoom: 11,
       attribution: "Digital Atlas of the Roman Empire (DARE) &copy; Lund / Gothenburg University"
     });
     const lidarRvtBaseLayer = L.tileLayer("https://mapseries-tilesets.s3.amazonaws.com/lidar/england/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      maxNativeZoom: 18,
+      maxZoom: 21,
+      maxNativeZoom: 17,
       attribution: "1 m LiDAR RVT Multi-Hillshade &copy; Environment Agency (OGL v3.0) / National Library of Scotland"
     });
     const lidarHillshadeLayer = L.tileLayer.wms("https://environment.data.gov.uk/spatialdata/lidar-composite-digital-terrain-model-dtm-1m/wms", {
       layers: "Lidar_Composite_Hillshade_DTM_1m",
       format: "image/png",
       transparent: false,
-      maxZoom: 19,
+      maxZoom: 21,
+      maxNativeZoom: 18,
       attribution: "Environment Agency 1 m LiDAR DTM Hillshade (OGL v3.0)"
     });
     const lidarDsmHillshadeLayer = L.tileLayer.wms("https://environment.data.gov.uk/spatialdata/lidar-composite-digital-surface-model-last-return-dsm-1m/wms", {
       layers: "Lidar_Composite_Hillshade_LZ_DSM_1m",
       format: "image/png",
       transparent: false,
-      maxZoom: 19,
+      maxZoom: 21,
+      maxNativeZoom: 18,
       attribution: "Environment Agency 1 m LiDAR DSM Surface Hillshade (OGL v3.0)"
     });
     const historicOs1937BaseLayer = L.tileLayer("https://api.maptiler.com/tiles/uk-osgb25k1937/{z}/{x}/{y}.jpg?key=7Y0Q1ck46BnB8cXXXg8X", {
-      maxZoom: 19,
+      maxZoom: 21,
       maxNativeZoom: 16,
       attribution: "OS 1:25,000 First Series (1937–1961) &copy; National Library of Scotland"
     });
     const osOutdoorBaseLayer = L.tileLayer("https://api.os.uk/maps/raster/v1/zxy/Outdoor_3857/{z}/{x}/{y}.png?key=Rt69sv62Dv1JNAvlJAcM0upXIaIcpua8", {
-      maxZoom: 19,
-      maxNativeZoom: 17,
+      maxZoom: 21,
+      maxNativeZoom: 16,
       attribution: "Ordnance Survey Outdoor &amp; Public Rights of Way &copy; Crown copyright"
     });
     const bgsGeologyOverlayLayer = L.tileLayer.wms("https://map.bgs.ac.uk/arcgis/services/BGS_Detailed_Geology/MapServer/WMSServer", {
@@ -1318,7 +1322,8 @@
       format: "image/png",
       transparent: true,
       opacity: 0.48,
-      maxZoom: 19,
+      maxZoom: 21,
+      maxNativeZoom: 18,
       attribution: "BGS 1:50k Bedrock Geology &copy; UKRI / British Geological Survey"
     });
 
