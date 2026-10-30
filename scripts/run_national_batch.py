@@ -810,7 +810,7 @@ def export_public_docs(
     }
 
     (docs_dir / "survey_summary.json").write_text(
-        json.dumps(public_summary, indent=2),
+        json.dumps(public_summary, separators=(",", ":")),
         encoding="utf-8",
     )
     priority_non_conf = [

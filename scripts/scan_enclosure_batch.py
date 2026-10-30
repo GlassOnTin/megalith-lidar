@@ -175,19 +175,38 @@ def run_enclosure_scan(
         "subgroup_and_confounding_analysis": eval_metrics.get("model_test_subgroup_and_confounding_analysis", {}),
     }
 
-    priority_non_conf = [
+    priority_unid = [
+        f
+        for f in all_enclosure_features
+        if f["properties"].get("context_category") == "unidentified_candidate"
+        and (
+            f["properties"].get("passes_fpr_0_01")
+            or f["properties"].get("megalithic_portal_matches")
+            or f["properties"].get("user_survey_status")
+        )
+    ]
+    redisc_all = [
         f
         for f in all_enclosure_features
         if f["properties"].get("context_category") in {"rediscovered_nhle_scheduled", "rediscovered_osm_archaeology"}
-        or (
-            f["properties"].get("context_category") == "unidentified_candidate"
-            and (
-                f["properties"].get("passes_fpr_0_01")
-                or f["properties"].get("megalithic_portal_matches")
-                or f["properties"].get("user_survey_status")
-            )
-        )
+        and f["properties"].get("passes_fpr_0_01")
     ]
+    redisc_all.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    seen_redisc_nhle = set()
+    redisc_dedup = []
+    for f in redisc_all:
+        mm = f["properties"].get("matched_monument") or {}
+        nhle_id = mm.get("list_entry")
+        if nhle_id and nhle_id in seen_redisc_nhle:
+            continue
+        if nhle_id:
+            seen_redisc_nhle.add(nhle_id)
+        redisc_dedup.append(f)
+        if len(redisc_dedup) >= 150:
+            break
     fpr05_tail = [
         f
         for f in all_enclosure_features
@@ -207,7 +226,7 @@ def run_enclosure_scan(
         key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
         reverse=True,
     )
-    export_enc = priority_non_conf + fpr05_tail[:1200] + conf_only[:300]
+    export_enc = priority_unid + fpr05_tail[:1200] + redisc_dedup + conf_only[:100]
     _unused_web_keys = (
         "nearby_environmental_features",
         "nhle_cluster_summary",

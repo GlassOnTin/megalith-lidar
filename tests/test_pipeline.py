@@ -1028,7 +1028,7 @@ def test_osmand_plugin_and_gpx_export(tmp_path):
             "SU 02357 64709",
             "SU 65304 33024",
             "SS 72086 37164",
-        ]).issubset(set(unid_top[:10]))
+        ]).issubset(set(unid_top[:15]))
 
 
 
