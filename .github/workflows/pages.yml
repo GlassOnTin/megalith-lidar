@@ -1,0 +1,52 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "index.html"
+      - "docs/megalith-lidar.osf"
+      - "docs/osmand_qr.svg"
+      - "docs/megalith_lidar_osmand.gpx"
+      - "docs/maproulette_os1888_antiquities.geojson"
+      - "docs/josm_os1888_antiquities.osm"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sparse checkout static UI assets
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            index.html
+            docs/megalith-lidar.osf
+            docs/osmand_qr.svg
+            docs/megalith_lidar_osmand.gpx
+            docs/maproulette_os1888_antiquities.geojson
+            docs/josm_os1888_antiquities.osm
+          sparse-checkout-cone-mode: false
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
