@@ -1127,7 +1127,7 @@
             <span class="sub muted" id="mapCoverageSummary">14,492 sq</span>
           </div>
           <div style="display:flex;gap:4px;flex-wrap:nowrap;">
-            <button class="btn-link" id="btnZoomCandidatePatch" type="button" style="cursor:pointer;padding:2px 7px;font-size:11px;white-space:nowrap;" title="Zoom map to the selected candidate's 256 m × 256 m LiDAR patch (z=17)">Zoom Site (256 m)</button>
+            <button class="btn-link" id="btnZoomCandidatePatch" type="button" style="cursor:pointer;padding:2px 7px;font-size:11px;white-space:nowrap;" title="Zoom map to a 1 km × 1 km square scale (z=15) centered on the selected site">Auto Zoom (1 km)</button>
             <button class="btn-link" id="btnResetNationalView" type="button" style="cursor:pointer;padding:2px 7px;font-size:11px;white-space:nowrap;" title="Zoom out to the full England survey coverage overview (z=6)">England View</button>
           </div>
         </div>
@@ -2863,9 +2863,6 @@
               const legEl = document.getElementById("mapDiagLegendLine");
               if (legEl && dObj) legEl.innerHTML = dObj.desc;
               refreshCandidateMapDiagnosticOverlay(p);
-              if (activeMobilePanel >= 0 && map.getZoom() < 16 && p.lat != null && p.lon != null) {
-                map.setView([p.lat, p.lon], 17);
-              }
             });
           });
         }
@@ -3135,16 +3132,14 @@
         btnInspPr.addEventListener("click", () => copyAndOpenGithubPr(btnInspPr));
       }
       if (zoomMap && p.lat != null && p.lon != null) {
-        if (zoomMap === "pan_or_zoom") {
-          if (map.getZoom() >= 13) {
-            map.panTo([p.lat, p.lon]);
-          } else {
-            map.setView([p.lat, p.lon], 16);
-          }
-        } else {
-          map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17));
-        }
+        map.panTo([p.lat, p.lon]);
       }
+    }
+
+    function zoomToSite1kmSquare(p) {
+      const target = p || selectedCandidateObj;
+      if (!target || target.lat == null || target.lon == null) return;
+      map.setView([ Number(target.lat), Number(target.lon) ], 15);
     }
 
     function selectCandidateBySiteId(rawSiteId) {
@@ -3152,7 +3147,7 @@
       if (!targetId) return false;
       if (targetId === cleanGridId(THORNBOROUGH_CASE_STUDY.os_grid_ref)) {
         selectCandidate(THORNBOROUGH_CASE_STUDY, false);
-        map.setView([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon], 14);
+        map.panTo([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon]);
         return true;
       }
       const pools = [
@@ -3199,7 +3194,7 @@
       renderActiveView(false, false);
       selectCandidate(p, false, true, true);
       if (p.lat != null && p.lon != null) {
-        map.setView([p.lat, p.lon], 17);
+        map.panTo([p.lat, p.lon]);
       }
       return true;
     }
@@ -3781,7 +3776,7 @@
 
       if (autoSelectFirst && filtered.length > 0) {
         const withPng = filtered.find((f) => f.properties.diagnostic_png) || filtered[0];
-        selectCandidate(withPng.properties, !fitToCounty, false, false);
+        selectCandidate(withPng.properties, false, false, false);
       }
     }
 
@@ -4017,9 +4012,7 @@
       const btnZoomPatch = document.getElementById("btnZoomCandidatePatch");
       if (btnZoomPatch) {
         btnZoomPatch.addEventListener("click", () => {
-          if (selectedCandidateObj && selectedCandidateObj.lat != null && selectedCandidateObj.lon != null) {
-            map.setView([selectedCandidateObj.lat, selectedCandidateObj.lon], 17);
-          }
+          zoomToSite1kmSquare(selectedCandidateObj);
         });
       }
       const btnThorn = document.getElementById("btnThornboroughCase");
