@@ -1226,7 +1226,7 @@
       maxZoom: 21,
       maxNativeZoom: 18,
       attribution: "Environment Agency 1 m LiDAR DTM Hillshade (OGL v3.0)"
-    });
+    }).addTo(map);
     const lidarDsmHillshadeLayer = L.tileLayer.wms("https://environment.data.gov.uk/spatialdata/lidar-composite-digital-surface-model-last-return-dsm-1m/wms", {
       layers: "Lidar_Composite_Hillshade_LZ_DSM_1m",
       format: "image/png",
@@ -1375,7 +1375,7 @@
     let currentVisibleFeatures = [];
     let sortCol = "confidence";
     let sortDir = "desc";
-    let activeMobilePanel = 1; // Default to Panel 2 (16m Local Relief) on mobile portrait
+    let activeMobilePanel = 0; // Default to Panel 1 (1. Slope)
     const SURVEY_STORAGE_KEY = "megalith_lidar_survey_annotations_v1";
     const SURVEY_OBSERVER_KEY = "megalith_lidar_last_observer_v1";
     const THEME_STORAGE_KEY = "megalith_lidar_theme_v1";
@@ -2607,7 +2607,7 @@
 
     const TABLE_PAGE_SIZE = 150;
     let tableRenderLimit = TABLE_PAGE_SIZE;
-    let activeBasemapMode = "lidar_rvt";
+    let activeBasemapMode = "lidar_dtm";
 
     const OVERLAY_TO_BASEMAP = {
       0: "lidar_dtm",
@@ -2644,7 +2644,7 @@
     }
 
     function applySelectedBasemap(mode, syncOverlayToTile = false) {
-      activeBasemapMode = mode || "lidar_rvt";
+      activeBasemapMode = mode || "lidar_dtm";
       const overlayTileLayers = [
         lidarRvtBaseLayer,
         lidarHillshadeLayer,
@@ -2831,8 +2831,8 @@
             <label style="font-size:10.5px;display:inline-flex;align-items:center;gap:3px;margin-left:auto;white-space:nowrap;" title="Nationwide Base Map Tile (follows 256 m Overlay selection automatically, or switches Overlay to Off when no matching 256 m patch exists)">
               <span class="muted">Tile:</span>
               <select id="basemapSelect" style="padding:1px 4px;font-size:10.5px;max-width:126px;text-overflow:ellipsis;">
-                <option value="lidar_rvt" ${activeBasemapMode === "lidar_rvt" ? "selected" : ""}>1 m LiDAR RVT (NLS / EA)</option>
                 <option value="lidar_dtm" ${activeBasemapMode === "lidar_dtm" ? "selected" : ""}>1 m LiDAR Bare-Earth (EA DTM)</option>
+                <option value="lidar_rvt" ${activeBasemapMode === "lidar_rvt" ? "selected" : ""}>1 m LiDAR RVT (NLS / EA)</option>
                 <option value="lidar_dsm" ${activeBasemapMode === "lidar_dsm" ? "selected" : ""}>1 m LiDAR Canopy (EA DSM)</option>
                 <option value="aerial" ${activeBasemapMode === "aerial" ? "selected" : ""}>Aerial Satellite (Esri)</option>
                 <option value="os1888" ${activeBasemapMode === "os1888" ? "selected" : ""}>1888–1913 OS 6-Inch (NLS)</option>
@@ -2852,7 +2852,7 @@
           pillBar.querySelectorAll('input[name="mapLidarPanel"]').forEach((inp) => {
             inp.addEventListener("change", (ev) => {
               const idx = parseInt(ev.target.value, 10);
-              activeMobilePanel = Number.isNaN(idx) ? 1 : idx;
+              activeMobilePanel = Number.isNaN(idx) ? 0 : idx;
               const matchedTile = OVERLAY_TO_BASEMAP[activeMobilePanel];
               if (matchedTile) {
                 applySelectedBasemap(matchedTile, false);
@@ -2876,7 +2876,7 @@
         if (basemapSel) {
           basemapSel.addEventListener("change", (ev) => {
             ev.target.blur();
-            applySelectedBasemap(basemapSel.value || "lidar_rvt", true);
+            applySelectedBasemap(basemapSel.value || "lidar_dtm", true);
           });
         }
         const opSlider = document.getElementById("diagOverlayOpacity");
@@ -3385,7 +3385,8 @@
       const thBtn = document.getElementById("btnHintThornborough");
       if (thBtn) {
         thBtn.addEventListener("click", () => {
-          applySelectedBasemap("lidar_rvt", false);
+          activeMobilePanel = 0;
+          applySelectedBasemap("lidar_dtm", false);
           selectCandidate(THORNBOROUGH_CASE_STUDY, false);
           map.setView([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon], 15);
         });
@@ -3496,8 +3497,8 @@
               applySelectedBasemap("lidar_dtm", false);
               selectCandidate(p, true, false);
             } else {
-              activeMobilePanel = p.diagnostic_png ? 1 : -1;
-              applySelectedBasemap("lidar_rvt", false);
+              activeMobilePanel = p.diagnostic_png ? 0 : -1;
+              applySelectedBasemap("lidar_dtm", false);
               selectCandidate(p, true, false);
             }
           });
@@ -4020,7 +4021,8 @@
       const btnThorn = document.getElementById("btnThornboroughCase");
       if (btnThorn) {
         btnThorn.addEventListener("click", () => {
-          applySelectedBasemap("lidar_rvt", false);
+          activeMobilePanel = 0;
+          applySelectedBasemap("lidar_dtm", false);
           selectCandidate(THORNBOROUGH_CASE_STUDY, false);
           map.setView([THORNBOROUGH_CASE_STUDY.lat, THORNBOROUGH_CASE_STUDY.lon], 15);
           const mapCard = document.getElementById("mapSectionCard");
