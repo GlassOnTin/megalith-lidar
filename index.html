@@ -3132,6 +3132,7 @@
         btnInspPr.addEventListener("click", () => copyAndOpenGithubPr(btnInspPr));
       }
       if (zoomMap && p.lat != null && p.lon != null) {
+        map.stop();
         map.panTo([p.lat, p.lon]);
       }
     }
@@ -3139,7 +3140,8 @@
     function zoomToSite1kmSquare(p) {
       const target = p || selectedCandidateObj;
       if (!target || target.lat == null || target.lon == null) return;
-      map.setView([ Number(target.lat), Number(target.lon) ], 15);
+      map.stop();
+      map.setView([Number(target.lat), Number(target.lon)], 15);
     }
 
     function selectCandidateBySiteId(rawSiteId) {
