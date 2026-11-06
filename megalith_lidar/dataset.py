@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
+from scipy.ndimage import binary_dilation
 from torch.utils.data import Dataset
 
 from megalith_lidar.catalog import (
@@ -250,8 +251,9 @@ def compute_train_channel_stats(dataset: "MegalithLidarDataset") -> Tuple[np.nda
     Compute per-channel empirical mean and standard deviation strictly over the training split
     to standardize raw physical units without data leakage.
     """
-    ch_sum = np.zeros(NUM_TERRAIN_CHANNELS, dtype=np.float64)
-    ch_sq_sum = np.zeros(NUM_TERRAIN_CHANNELS, dtype=np.float64)
+    n_ch = dataset.num_channels
+    ch_sum = np.zeros(n_ch, dtype=np.float64)
+    ch_sq_sum = np.zeros(n_ch, dtype=np.float64)
     total_px = 0
 
     for spec in dataset.manifest:
@@ -265,17 +267,18 @@ def compute_train_channel_stats(dataset: "MegalithLidarDataset") -> Tuple[np.nda
     mean = ch_sum / max(total_px, 1)
     var = np.maximum(ch_sq_sum / max(total_px, 1) - mean * mean, 1e-8)
     std = np.sqrt(var)
-    # Channel 0, 1, 2, 4 are zero-mean differential/bandpass quantities by symmetry; pin mean=0
-    # so exact D4 sign/zero-point symmetry is preserved
-    for idx in (0, 1, 2, 4):
-        mean[idx] = 0.0
+    # Channels 0, 1, 2, 4 (and 6, 7 bandpass cropmarks) are zero-mean differential/bandpass quantities;
+    # pin mean=0 so exact D4 sign/zero-point symmetry is preserved
+    for idx in (0, 1, 2, 4, 6, 7):
+        if idx < n_ch:
+            mean[idx] = 0.0
     return mean.astype(np.float32), std.astype(np.float32)
 
 
 class MegalithLidarDataset(Dataset):
     """
-    PyTorch Dataset yielding standardized 6-channel isotropic scale-space tensors
-    and exact surveyed NHLE polygon masks.
+    PyTorch Dataset yielding standardized 6-channel (or 8-channel LiDAR + Scale-Space Cropmark)
+    isotropic scale-space tensors and exact surveyed NHLE polygon masks.
     """
 
     def __init__(
@@ -287,39 +290,81 @@ class MegalithLidarDataset(Dataset):
         feature_cache_dir: Optional[Path] = None,
         channel_mean: Optional[np.ndarray] = None,
         channel_std: Optional[np.ndarray] = None,
+        target_domain: str = "prehistoric",
+        include_cropmarks: bool = False,
+        aerial_cache_dir: Optional[Path] = None,
     ) -> None:
         self.manifest = manifest
         self.catalog = catalog
         self.tile_cache_dir = Path(tile_cache_dir)
         self.augment = augment
+        self.target_domain = target_domain
+        self.include_cropmarks = include_cropmarks
+        self.num_channels = NUM_TERRAIN_CHANNELS + (2 if include_cropmarks else 0)
+        self.aerial_cache_dir = Path(aerial_cache_dir) if aerial_cache_dir else (self.tile_cache_dir.parent / "aerial_tiles")
         self.feature_cache_dir = Path(feature_cache_dir) if feature_cache_dir else None
         if self.feature_cache_dir is not None:
             self.feature_cache_dir.mkdir(parents=True, exist_ok=True)
         self.channel_mean = (
-            np.asarray(channel_mean, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+            np.asarray(channel_mean, dtype=np.float32).reshape(-1, 1, 1)
             if channel_mean is not None
-            else np.zeros((NUM_TERRAIN_CHANNELS, 1, 1), dtype=np.float32)
+            else np.zeros((self.num_channels, 1, 1), dtype=np.float32)
         )
         self.channel_std = (
-            np.asarray(channel_std, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+            np.asarray(channel_std, dtype=np.float32).reshape(-1, 1, 1)
             if channel_std is not None
-            else np.ones((NUM_TERRAIN_CHANNELS, 1, 1), dtype=np.float32)
+            else np.ones((self.num_channels, 1, 1), dtype=np.float32)
         )
 
     def set_normalization(self, mean: np.ndarray, std: np.ndarray) -> None:
-        self.channel_mean = np.asarray(mean, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
-        self.channel_std = np.asarray(std, dtype=np.float32).reshape(NUM_TERRAIN_CHANNELS, 1, 1)
+        self.channel_mean = np.asarray(mean, dtype=np.float32).reshape(-1, 1, 1)
+        self.channel_std = np.asarray(std, dtype=np.float32).reshape(-1, 1, 1)
 
     def __len__(self) -> int:
         return len(self.manifest)
 
+    def _append_cropmarks_if_needed(self, feats: np.ndarray, spec: Dict) -> np.ndarray:
+        if not self.include_cropmarks:
+            return feats[:NUM_TERRAIN_CHANNELS]
+        if feats.shape[0] >= NUM_TERRAIN_CHANNELS + 2:
+            return feats[: NUM_TERRAIN_CHANNELS + 2]
+        from megalith_lidar.aerial_cropmarks import compute_cropmark_features, fetch_or_load_aerial_tile
+
+        rgb = fetch_or_load_aerial_tile(
+            spec["e_min"],
+            spec["e_max"],
+            spec["n_min"],
+            spec["n_max"],
+            cache_dir=self.aerial_cache_dir,
+            size=feats.shape[1],
+        )
+        if rgb is not None:
+            ndsm = np.expm1(feats[5])
+            crop_feats = compute_cropmark_features(rgb, dtm=np.zeros_like(ndsm), dsm=ndsm)
+        else:
+            crop_feats = np.zeros((2, feats.shape[1], feats.shape[2]), dtype=np.float32)
+        return np.concatenate([feats[:NUM_TERRAIN_CHANNELS], crop_feats], axis=0).astype(np.float32)
+
     def _load_features_and_mask(self, spec: Dict) -> Tuple[np.ndarray, np.ndarray]:
+        if self.target_domain == "roman":
+            prefix = "roman_v1"
+        elif self.target_domain == "enclosure":
+            prefix = "enclosure_v1"
+        else:
+            prefix = "v3"
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v2_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             if f_path.exists():
                 try:
                     with np.load(f_path) as d:
-                        return d["features"].astype(np.float32), d["mask"].astype(np.uint8)
+                        raw_f = d["features"].astype(np.float32)
+                        raw_m = d["mask"].astype(np.uint8)
+                    if self.include_cropmarks and raw_f.shape[0] < NUM_TERRAIN_CHANNELS + 2:
+                        raw_f = self._append_cropmarks_if_needed(raw_f, spec)
+                        np.savez_compressed(f_path, features=raw_f.astype(np.float16), mask=raw_m)
+                    elif not self.include_cropmarks and raw_f.shape[0] > NUM_TERRAIN_CHANNELS:
+                        raw_f = raw_f[:NUM_TERRAIN_CHANNELS]
+                    return raw_f, raw_m
                 except Exception:
                     pass
 
@@ -334,18 +379,86 @@ class MegalithLidarDataset(Dataset):
         dtm, dsm = pair
         features = compute_terrain_features(dtm, dsm)
         if spec["is_positive"]:
-            mask = self.catalog.rasterize_tile(
-                spec["e_min"],
-                spec["e_max"],
-                spec["n_min"],
-                spec["n_max"],
-                size=dtm.shape[0],
-            )
+            if self.target_domain in ("roman", "enclosure"):
+                if self.target_domain == "roman":
+                    mask = self.catalog.rasterize_roman_tile(
+                        spec["e_min"],
+                        spec["e_max"],
+                        spec["n_min"],
+                        spec["n_max"],
+                        size=dtm.shape[0],
+                    )
+                else:
+                    mask = self.catalog.rasterize_enclosure_tile(
+                        spec["e_min"],
+                        spec["e_max"],
+                        spec["n_min"],
+                        spec["n_max"],
+                        size=dtm.shape[0],
+                    )
+                # For Roman villas/forts/roads and Iron Age hillforts/enclosures/hut circles/dykes:
+                # Many survive under woodland canopy (nDSM >= 2.5m) where bare-earth 1m DTM
+                # resolves the embankment/rampart/hut ring through the trees. Keep active bare-earth
+                # relief pixels (|z - G_16(z)| >= 0.16m or top 32% of polygon relief) as positive,
+                # mark a narrow 3m transition ring around the rampart as IGNORE (255), and supervise
+                # flat interior pasture (>3m from ramparts) as explicit background (0) so the decoder
+                # does not learn to flood-fill 20,000-45,000 m^2 interiors.
+                pos_px = mask > 0
+                if int(np.sum(pos_px)) > 500:
+                    rel16 = np.abs(features[0] + features[1])
+                    slope = features[3]
+                    rel_th = max(0.16, min(0.28, float(np.percentile(rel16[pos_px], 68))))
+                    earthwork = pos_px & ((rel16 >= rel_th) | (slope >= 0.065))
+                    earthwork = binary_dilation(earthwork, iterations=2) & pos_px
+                    if int(np.sum(earthwork)) < 48:
+                        ys, xs = np.where(pos_px)
+                        cy, cx = float(np.mean(ys)), float(np.mean(xs))
+                        yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                        core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 12.0**2) & pos_px
+                        earthwork = earthwork | core
+                    transition_ring = binary_dilation(earthwork, iterations=3) & pos_px & (~earthwork)
+                    refined = np.zeros_like(mask, dtype=np.uint8)
+                    refined[transition_ring] = 255
+                    refined[earthwork] = mask[earthwork]
+                    mask = refined
+            else:
+                mask = self.catalog.rasterize_tile(
+                    spec["e_min"],
+                    spec["e_max"],
+                    spec["n_min"],
+                    spec["n_max"],
+                    size=dtm.shape[0],
+                )
+                # Refine oversized NHLE legal-buffer polygons (> 600 m^2):
+                # Keep active local-relief earthwork pixels as the positive monument class,
+                # mark a 3m transition halo around the earthwork as IGNORE_INDEX (255), and mark
+                # flat legal-buffer pasture and tree canopy as explicit background (0).
+                pos_px = mask > 0
+                if int(np.sum(pos_px)) > 600:
+                    rel16 = np.abs(features[0] + features[1])
+                    ndsm = np.expm1(features[5])
+                    rel_th = max(0.20, float(np.percentile(rel16[pos_px], 75)))
+                    earthwork = pos_px & (rel16 >= rel_th) & (ndsm < 2.5)
+                    earthwork = binary_dilation(earthwork, iterations=2) & pos_px & (ndsm < 2.5)
+                    if int(np.sum(earthwork)) < 36:
+                        ys, xs = np.where(pos_px)
+                        cy, cx = float(np.mean(ys)), float(np.mean(xs))
+                        yy, xx = np.ogrid[: dtm.shape[0], : dtm.shape[1]]
+                        core = ((yy - cy) ** 2 + (xx - cx) ** 2 <= 10.0**2) & pos_px & (ndsm < 2.5)
+                        earthwork = earthwork | core
+                    transition_ring = binary_dilation(earthwork, iterations=3) & pos_px & (~earthwork) & (ndsm < 2.5)
+                    refined = np.zeros_like(mask, dtype=np.uint8)
+                    refined[transition_ring] = 255
+                    refined[earthwork] = mask[earthwork]
+                    mask = refined
         else:
             mask = np.zeros(dtm.shape, dtype=np.uint8)
 
+        if self.include_cropmarks:
+            features = self._append_cropmarks_if_needed(features, spec)
+
         if self.feature_cache_dir is not None:
-            f_path = self.feature_cache_dir / f"v2_{spec['sample_id']}.npz"
+            f_path = self.feature_cache_dir / f"{prefix}_{spec['sample_id']}.npz"
             np.savez_compressed(f_path, features=features.astype(np.float16), mask=mask)
         return features, mask
 
@@ -358,7 +471,7 @@ class MegalithLidarDataset(Dataset):
 
         # Measure physical local relief SNR (95th percentile of |band_fine + band_med| inside polygon)
         # before augmentation for stratified evaluation
-        pos_px = mask > 0
+        pos_px = (mask > 0) & (mask < 255)
         if np.any(pos_px):
             raw_local_relief = np.abs(
                 features[0, pos_px] * self.channel_std[0, 0, 0] + features[1, pos_px] * self.channel_std[1, 0, 0]
@@ -368,6 +481,12 @@ class MegalithLidarDataset(Dataset):
             relief_p95_m = 0.0
 
         if self.augment:
+            # 0. Modality dropout (50% probability of zeroing aerial cropmark channels during training)
+            #    so the network remains accurate on bare-earth LiDAR in woodland/pasture or when aerial is offline
+            if self.include_cropmarks and features.shape[0] >= NUM_TERRAIN_CHANNELS + 2:
+                if np.random.rand() < 0.5:
+                    features = features.copy()
+                    features[NUM_TERRAIN_CHANNELS : NUM_TERRAIN_CHANNELS + 2] = 0.0
             # 1. Exact Dihedral D4 symmetry (rotations + flips)
             k_rot = int(np.random.randint(0, 4))
             if k_rot > 0:
@@ -380,11 +499,20 @@ class MegalithLidarDataset(Dataset):
                 features = np.flip(features, axis=1).copy()
                 mask = np.flip(mask, axis=0).copy()
 
-            # 2. Random spatial shift (eliminates center-pixel spatial prior)
-            shift_y = int(np.random.randint(-48, 49))
-            shift_x = int(np.random.randint(-48, 49))
-            features = np.roll(features, shift=(shift_y, shift_x), axis=(1, 2))
-            mask = np.roll(mask, shift=(shift_y, shift_x), axis=(0, 1))
+            # 2. Seam-free reflection-padded spatial shift (eliminates center-pixel spatial prior
+            #    without introducing wrap-around step-scarp discontinuities from np.roll)
+            shift_y = int(np.random.randint(-40, 41))
+            shift_x = int(np.random.randint(-40, 41))
+            if shift_y != 0 or shift_x != 0:
+                pad = 40
+                _, h_f, w_f = features.shape
+                feat_pad = np.pad(features, ((0, 0), (pad, pad), (pad, pad)), mode="reflect")
+                mask_fill = 255 if spec["is_positive"] else 0
+                mask_pad = np.pad(mask, ((pad, pad), (pad, pad)), mode="constant", constant_values=mask_fill)
+                y0 = pad - shift_y
+                x0 = pad - shift_x
+                features = feat_pad[:, y0 : y0 + h_f, x0 : x0 + w_f].copy()
+                mask = mask_pad[y0 : y0 + h_f, x0 : x0 + w_f].copy()
 
         has_pos = float(spec["is_positive"])
         primary_cls = int(spec["primary_class"]) if has_pos > 0.5 else 0

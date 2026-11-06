@@ -1,0 +1,56 @@
+<renderingStyle name="uk_roman_roads" addon="yes" depends="" defaultColor="#ebe7e4" version="1">
+
+	<renderingProperty attr="appMode" name="Rendering mode" description="Map optimization for respective User Profile"
+		type="string" possibleValues="browse map,car,bicycle,pedestrian"/>
+	<renderingProperty attr="baseAppMode" name="Default Rendering mode" description="Map optimization for respective User Profile based on base (parent) profile"
+		type="string" possibleValues="default,car,bicycle,pedestrian,public_transport,boat,ski"/>
+	<renderingProperty attr="hideUkRomanRoads" name="Hide UK Roman &amp; Ancient Roads"
+		description="Hide UK Roman roads and prehistoric ridgeways vector layer"
+		type="boolean" possibleValues="" category="hide"/>
+
+	<renderingConstant name="null" value="#00000000"/>
+	<renderingProperty attr="engine_v1" type="boolean"/>
+
+	<order>
+		<switch area="false" objectType="2" order="122">
+			<case tag="historic" value="roman_road"/>
+			<case tag="historic" value="ancient_trackway"/>
+			<apply_if hideUkRomanRoads="true" order="-1"/>
+		</switch>
+	</order>
+
+	<text>
+		<switch minzoom="9" textOnPath="true" textBold="true" textWrapWidth="30" textOrder="35" textMinDistance="70">
+			<case maxzoom="12" tag="historic" value="roman_road" additional="roman_road_named=yes" nameTag="" textColor="#581c87" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#e9d5ff" textHaloColor="#cc1f0933"/>
+			</case>
+			<case minzoom="13" tag="historic" value="roman_road" nameTag="" textColor="#581c87" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#e9d5ff" textHaloColor="#cc1f0933"/>
+			</case>
+			<case tag="historic" value="ancient_trackway" nameTag="" textColor="#78350f" textHaloColor="#ddffffff" textHaloRadius="2">
+				<apply_if nightMode="true" textColor="#fde68a" textHaloColor="#cc2d1606"/>
+			</case>
+			<apply_if maxzoom="10" textSize="10" textMinDistance="110"/>
+			<apply_if minzoom="11" maxzoom="12" textSize="11" textMinDistance="85"/>
+			<apply_if minzoom="13" maxzoom="14" textSize="12"/>
+			<apply_if minzoom="15" textSize="13"/>
+		</switch>
+	</text>
+
+	<line>
+		<switch minzoom="8" cap="ROUND">
+			<case tag="historic" value="roman_road" color="#7e22ce" color__1="#ccffffff">
+				<apply_if nightMode="true" color="#c084fc" color__1="#aa1e1b4b"/>
+				<apply_if minzoom="12" pathEffect="10_4"/>
+			</case>
+			<case tag="historic" value="ancient_trackway" color="#b45309" color__1="#ccffffff" pathEffect="6_4">
+				<apply_if nightMode="true" color="#fbbf24" color__1="#aa271705"/>
+			</case>
+			<apply_if maxzoom="9" strokeWidth="1.4" strokeWidth__1="2.4"/>
+			<apply_if minzoom="10" maxzoom="11" strokeWidth="1.8" strokeWidth__1="3.0"/>
+			<apply_if minzoom="12" maxzoom="13" strokeWidth="2.4" strokeWidth__1="3.8"/>
+			<apply_if minzoom="14" maxzoom="15" strokeWidth="3.0" strokeWidth__1="4.6"/>
+			<apply_if minzoom="16" strokeWidth="3.6" strokeWidth__1="5.4"/>
+		</switch>
+	</line>
+</renderingStyle>

@@ -9,13 +9,17 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from megalith_lidar.arch_context import (
+    NHLESpatialContextExtractor,
+    enrich_candidates_with_archaeological_context,
+)
 from megalith_lidar.catalog import (
     CLASS_BARROW_CAIRN,
     CLASS_CIRCLE_HENGE_STONE,
@@ -192,11 +196,374 @@ def build_deterministic_national_queue(
     return interleaved
 
 
+HELDOUT_SEED_REGIONS = [
+    ("Ure Valley / Masham (North of Thornborough)", 422000, 488000, 420000, 480000),
+    ("Cotswolds (Bourton / Windrush)", 414000, 224000, 400000, 220000),
+    ("Wessex / Wylye & Avon Valleys", 414000, 132000, 400000, 120000),
+    ("Bodmin Moor / Rough Tor Fringe", 214000, 88000, 200000, 80000),
+    ("South Downs (Chichester / Bignor)", 490000, 112000, 480000, 100000),
+]
+
+
+def prioritize_contiguous_seed_regions_in_queue(
+    queue_state: Dict,
+    catalog: MonumentCatalog,
+    square_size_m: int = 2000,
+) -> bool:
+    """
+    Ensure that contiguous 12 km x 12 km (6x6 squares) patches around each of the 5 held-out
+    test seed regions are present in the queue and ordered in concentric outward spirals at
+    the front of the pending queue (round-robin across the 5 seed landscapes).
+    """
+    if queue_state.get("contiguous_seed_regions_prioritized"):
+        return False
+
+    prehistoric_classes = {
+        CLASS_MEGALITHIC_TOMB_LONG_BARROW,
+        CLASS_CIRCLE_HENGE_STONE,
+        CLASS_BARROW_CAIRN,
+    }
+    prehistoric_squares_2k: Dict[Tuple[int, int], int] = {}
+    for rec in catalog.records:
+        if rec.cls in prehistoric_classes:
+            sx = int(rec.easting // square_size_m) * square_size_m
+            sy = int(rec.northing // square_size_m) * square_size_m
+            prehistoric_squares_2k[(sx, sy)] = prehistoric_squares_2k.get((sx, sy), 0) + 1
+
+    existing_by_coord: Dict[Tuple[int, int], Dict] = {}
+    for item in queue_state["queue"]:
+        existing_by_coord[(int(item["e_min"]), int(item["n_min"]))] = item
+
+    seed_spirals: List[List[Dict]] = []
+    prioritized_coords: Set[Tuple[int, int]] = set()
+
+    for _region_name, seed_e, seed_n, block_e, block_n in HELDOUT_SEED_REGIONS:
+        spiral_coords: List[Tuple[float, int, int]] = []
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                sx = seed_e + dx * square_size_m
+                sy = seed_n + dy * square_size_m
+                if not (block_e <= sx < block_e + 20000 and block_n <= sy < block_n + 20000):
+                    continue
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                if assign_spatial_split(ce, cn) != "test":
+                    continue
+                dist2 = float(dx * dx + dy * dy)
+                spiral_coords.append((dist2, sx, sy))
+        spiral_coords.sort(key=lambda t: (t[0], t[1], t[2]))
+
+        region_pending: List[Dict] = []
+        for _d2, sx, sy in spiral_coords:
+            if (sx, sy) in prioritized_coords:
+                continue
+            item = existing_by_coord.get((sx, sy))
+            if item is not None:
+                if item.get("status") == "pending":
+                    region_pending.append(item)
+                    prioritized_coords.add((sx, sy))
+            else:
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                lat, lon = bng_to_latlon(ce, cn)
+                count = prehistoric_squares_2k.get((sx, sy), 0)
+                new_item = {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": "test",
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": count,
+                    "status": "pending",
+                }
+                existing_by_coord[(sx, sy)] = new_item
+                region_pending.append(new_item)
+                prioritized_coords.add((sx, sy))
+        seed_spirals.append(region_pending)
+
+    # Interleave round-robin across the 5 seed regions so all 5 grow outward together,
+    # starting with two extra rings in the Ure Valley block immediately north of Thornborough.
+    front_pending: List[Dict] = []
+    ure_spiral = seed_spirals[0] if seed_spirals else []
+    for item in ure_spiral[:8]:
+        front_pending.append(item)
+    seed_spirals[0] = ure_spiral[8:]
+
+    max_len = max((len(s) for s in seed_spirals), default=0)
+    for i in range(max_len):
+        for s in seed_spirals:
+            if i < len(s):
+                front_pending.append(s[i])
+
+    done_or_skipped = [q for q in queue_state["queue"] if q.get("status") != "pending"]
+    remaining_pending = [
+        q
+        for q in queue_state["queue"]
+        if q.get("status") == "pending" and (int(q["e_min"]), int(q["n_min"])) not in prioritized_coords
+    ]
+    queue_state["queue"] = done_or_skipped + front_pending + remaining_pending
+    queue_state["contiguous_seed_regions_prioritized"] = True
+    return True
+
+
+def expand_national_queue_if_needed(
+    queue_state: Dict,
+    catalog: MonumentCatalog,
+    square_size_m: int = 2000,
+    min_pending: int = 8000,
+    seed: int = 20261023,
+) -> bool:
+    """
+    When pending squares drop below `min_pending`, append:
+      1. Full 20 km x 20 km (10x10 squares) contiguous outward spirals for the 5 seed regions,
+      2. All remaining held-out test-split and val-split 2 km x 2 km squares in England
+         (monument squares, 1/2-ring halos, and remaining uniform_national_null squares),
+      3. National expansion across all remaining England 20 km land blocks (interleaving
+         monument/halo landscape squares 1:1 with uniform national null squares) so
+         long-running national batch runs never starve.
+    """
+    pending_now = sum(1 for q in queue_state["queue"] if q.get("status") == "pending")
+    if pending_now >= min_pending:
+        return False
+
+    rng = np.random.default_rng(seed + len(queue_state["queue"]))
+    existing_coords: Set[Tuple[int, int]] = {
+        (int(q["e_min"]), int(q["n_min"])) for q in queue_state["queue"]
+    }
+
+    prehistoric_classes = {
+        CLASS_MEGALITHIC_TOMB_LONG_BARROW,
+        CLASS_CIRCLE_HENGE_STONE,
+        CLASS_BARROW_CAIRN,
+    }
+    monument_squares_2k: Dict[Tuple[int, int], int] = {}
+    prehistoric_squares_2k: Dict[Tuple[int, int], int] = {}
+    land_blocks_20k: Set[Tuple[int, int]] = set()
+
+    for rec in catalog.records:
+        bx = int(rec.easting // 20000)
+        by = int(rec.northing // 20000)
+        land_blocks_20k.add((bx, by))
+        sx = int(rec.easting // square_size_m) * square_size_m
+        sy = int(rec.northing // square_size_m) * square_size_m
+        if rec.cls in prehistoric_classes:
+            prehistoric_squares_2k[(sx, sy)] = prehistoric_squares_2k.get((sx, sy), 0) + 1
+        monument_squares_2k[(sx, sy)] = monument_squares_2k.get((sx, sy), 0) + 1
+
+    # 1. Full 10x10 (20 km x 20 km) outward spirals in the 5 held-out seed blocks
+    seed_spirals: List[List[Dict]] = []
+    for _region_name, seed_e, seed_n, block_e, block_n in HELDOUT_SEED_REGIONS:
+        spiral_coords: List[Tuple[float, int, int]] = []
+        for sx in range(block_e, block_e + 20000, square_size_m):
+            for sy in range(block_n, block_n + 20000, square_size_m):
+                if (sx, sy) in existing_coords:
+                    continue
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                if assign_spatial_split(ce, cn) != "test":
+                    continue
+                dx = (sx - seed_e) / square_size_m
+                dy = (sy - seed_n) / square_size_m
+                spiral_coords.append((float(dx * dx + dy * dy), sx, sy))
+        spiral_coords.sort(key=lambda t: (t[0], t[1], t[2]))
+        reg_items: List[Dict] = []
+        for _d2, sx, sy in spiral_coords:
+            existing_coords.add((sx, sy))
+            ce = sx + square_size_m // 2
+            cn = sy + square_size_m // 2
+            lat, lon = bng_to_latlon(ce, cn)
+            reg_items.append(
+                {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": "test",
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                    "status": "pending",
+                }
+            )
+        seed_spirals.append(reg_items)
+
+    new_seed_round_robin: List[Dict] = []
+    max_s = max((len(s) for s in seed_spirals), default=0)
+    for i in range(max_s):
+        for s in seed_spirals:
+            if i < len(s):
+                new_seed_round_robin.append(s[i])
+
+    # 2. Remaining held-out test/val/national monument landscape squares and 1-ring Halo squares
+    new_landscape: List[Dict] = []
+    for target_splits in ({"test"}, {"val"}, {"train"}):
+        tier_landscape: List[Dict] = []
+        for (sx, sy), _cnt in sorted(monument_squares_2k.items()):
+            if (sx, sy) in existing_coords:
+                continue
+            ce = sx + square_size_m // 2
+            cn = sy + square_size_m // 2
+            sp = assign_spatial_split(ce, cn)
+            if sp not in target_splits:
+                continue
+            existing_coords.add((sx, sy))
+            lat, lon = bng_to_latlon(ce, cn)
+            tier_landscape.append(
+                {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": sp,
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                    "status": "pending",
+                }
+            )
+        rng.shuffle(tier_landscape)
+        new_landscape.extend(tier_landscape)
+
+        # 1-ring Halo (2 km adjacent) around monuments in this split tier
+        tier_halo_coords: List[Tuple[int, int, str]] = []
+        seen_tier_halo: Set[Tuple[int, int]] = set()
+        for (mx, my) in monument_squares_2k.keys():
+            sp_m = assign_spatial_split(mx + square_size_m // 2, my + square_size_m // 2)
+            if sp_m not in target_splits:
+                continue
+            bx, by = mx // 20000, my // 20000
+            for dx in (-square_size_m, 0, square_size_m):
+                for dy in (-square_size_m, 0, square_size_m):
+                    nx, ny = mx + dx, my + dy
+                    if (
+                        (nx // 20000, ny // 20000) == (bx, by)
+                        and (nx, ny) not in existing_coords
+                        and (nx, ny) not in seen_tier_halo
+                    ):
+                        seen_tier_halo.add((nx, ny))
+                        tier_halo_coords.append((nx, ny, sp_m))
+        tier_halo_items: List[Dict] = []
+        for sx, sy, sp_m in sorted(tier_halo_coords):
+            existing_coords.add((sx, sy))
+            ce, cn = sx + square_size_m // 2, sy + square_size_m // 2
+            lat, lon = bng_to_latlon(ce, cn)
+            tier_halo_items.append(
+                {
+                    "square_id": f"test_landscape_E{sx}_N{sy}",
+                    "sampling_stream": "heldout_test_landscape",
+                    "split": sp_m,
+                    "e_min": sx,
+                    "n_min": sy,
+                    "e_max": sx + square_size_m,
+                    "n_max": sy + square_size_m,
+                    "center_lat": round(lat, 5),
+                    "center_lon": round(lon, 5),
+                    "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                    "known_prehistoric_monuments_in_square": prehistoric_squares_2k.get((sx, sy), 0),
+                    "status": "pending",
+                }
+            )
+        rng.shuffle(tier_halo_items)
+        new_landscape.extend(tier_halo_items)
+        if len(new_seed_round_robin) + len(new_landscape) >= max(min_pending - pending_now, 2500):
+            break
+
+    all_new_landscape = new_seed_round_robin + new_landscape
+
+    # 3. Matching number of uniform_national_null squares (first exhausting test+val blocks, then national blocks)
+    target_null_count = max(len(all_new_landscape), max(0, min_pending - pending_now))
+    new_null: List[Dict] = []
+    for target_splits in ({"test", "val"}, {"train"}):
+        if len(new_null) >= target_null_count:
+            break
+        tier_blocks = sorted(
+            [
+                (bx, by)
+                for (bx, by) in land_blocks_20k
+                if assign_spatial_split(bx * 20000 + 10000, by * 20000 + 10000) in target_splits
+            ]
+        )
+        # Enumerate all unqueued 2km squares per block in random round-robin passes across blocks
+        block_candidates: Dict[Tuple[int, int], List[Tuple[int, int]]] = {}
+        for bx, by in tier_blocks:
+            coords = []
+            for sub_x in range(20000 // square_size_m):
+                for sub_y in range(20000 // square_size_m):
+                    sx = bx * 20000 + sub_x * square_size_m
+                    sy = by * 20000 + sub_y * square_size_m
+                    if (sx, sy) not in existing_coords and (sx, sy) not in monument_squares_2k:
+                        coords.append((sx, sy))
+            if coords:
+                rng.shuffle(coords)
+                block_candidates[(bx, by)] = coords
+
+        while block_candidates and len(new_null) < target_null_count:
+            active_blocks = list(block_candidates.keys())
+            rng.shuffle(active_blocks)
+            for bkey in active_blocks:
+                clist = block_candidates[bkey]
+                sx, sy = clist.pop()
+                if not clist:
+                    del block_candidates[bkey]
+                if (sx, sy) in existing_coords:
+                    continue
+                existing_coords.add((sx, sy))
+                ce = sx + square_size_m // 2
+                cn = sy + square_size_m // 2
+                sp_null = assign_spatial_split(ce, cn)
+                lat, lon = bng_to_latlon(ce, cn)
+                new_null.append(
+                    {
+                        "square_id": f"null_test_E{sx}_N{sy}",
+                        "sampling_stream": "uniform_national_null",
+                        "split": sp_null,
+                        "e_min": sx,
+                        "n_min": sy,
+                        "e_max": sx + square_size_m,
+                        "n_max": sy + square_size_m,
+                        "center_lat": round(lat, 5),
+                        "center_lon": round(lon, 5),
+                        "os_grid_ref": bng_to_os_grid_ref(ce, cn),
+                        "known_prehistoric_monuments_in_square": 0,
+                        "status": "pending",
+                    }
+                )
+                if len(new_null) >= target_null_count:
+                    break
+
+    # Interleave 1:1
+    appended: List[Dict] = []
+    max_len = max(len(all_new_landscape), len(new_null))
+    for i in range(max_len):
+        if i < len(all_new_landscape):
+            appended.append(all_new_landscape[i])
+        if i < len(new_null):
+            appended.append(new_null[i])
+
+    if not appended:
+        return False
+    queue_state["queue"].extend(appended)
+    print(f"[queue] Expanded national survey queue with {len(appended)} additional 2km x 2km squares.")
+    return True
+
+
 def export_public_docs(
     queue_state: Dict,
     survey_dir: Path,
     eval_metrics_path: Path,
     docs_dir: Path,
+    catalog: Optional[MonumentCatalog] = None,
 ) -> Dict:
     """
     Aggregate all completed 2 km x 2 km squares and export:
@@ -205,8 +572,7 @@ def export_public_docs(
       - `docs/diagnostics/*.png` (4-panel LiDAR diagnostic images referenced by candidates)
     """
     docs_dir = Path(docs_dir)
-    docs_diag_dir = docs_dir / "diagnostics"
-    docs_diag_dir.mkdir(parents=True, exist_ok=True)
+    docs_dir.mkdir(parents=True, exist_ok=True)
 
     eval_metrics = {}
     if eval_metrics_path.exists():
@@ -218,7 +584,6 @@ def export_public_docs(
 
     all_features: List[Dict] = []
     square_summaries: List[Dict] = []
-    copied_pngs: Set[str] = set()
 
     stream_stats = {
         "uniform_national_null": {
@@ -249,8 +614,16 @@ def export_public_docs(
         if not report_path.exists() or not geojson_path.exists():
             continue
 
-        rep = json.loads(report_path.read_text(encoding="utf-8"))
-        gj = json.loads(geojson_path.read_text(encoding="utf-8"))
+        try:
+            rep = json.loads(report_path.read_text(encoding="utf-8"))
+            gj = json.loads(geojson_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        rep_cand_by_coord = {
+            (round(float(rc.get("easting", 0.0)), 1), round(float(rc.get("northing", 0.0)), 1)): rc
+            for rc in rep.get("candidates", [])
+        }
 
         area_km2 = float(rep.get("area_km2", 4.0))
         st = stream_stats.setdefault(
@@ -275,23 +648,42 @@ def export_public_docs(
         unid_001 = 0
         for feat in gj.get("features", []):
             props = feat.get("properties", {})
+            rc_match = rep_cand_by_coord.get(
+                (round(float(props.get("easting", 0.0)), 1), round(float(props.get("northing", 0.0)), 1))
+            )
+            if rc_match:
+                for rk in (
+                    "ring_inner4_m",
+                    "ring_rim4_m",
+                    "ring_ditch4_m",
+                    "ring_ditch16_m",
+                    "ring_reb4_m",
+                    "ring_neg_sectors",
+                    "ring_rim_sectors",
+                    "has_concentric_ring",
+                    "ring_type",
+                    "ring_barrow_score",
+                    "pond_unet_tile_prob",
+                    "pond_unet_local_peak",
+                    "pond_unet_local_mean",
+                    "pond_unet_predicted_class",
+                    "nearby_environmental_features",
+                    "environmental_confounder_hints",
+                ):
+                    if rk in rc_match and rk not in props:
+                        props[rk] = rc_match[rk]
             props["square_id"] = sq_id
             props["sampling_stream"] = stream
             props["split"] = sq.get("split", "test")
             if props.get("context_category") == "unidentified_candidate" and props.get("passes_fpr_0_01"):
                 unid_001 += 1
 
-            diag_name = props.get("diagnostic_png")
-            if diag_name:
-                src_png = survey_dir / sq_id / "diagnostics" / diag_name
-                if src_png.exists() and diag_name not in copied_pngs:
-                    shutil.copy2(src_png, docs_diag_dir / diag_name)
-                    copied_pngs.add(diag_name)
-
             all_features.append(feat)
 
         st["unidentified_candidates_fpr_0_01"] += unid_001
 
+        lat_sw, lon_sw = bng_to_latlon(sq["e_min"], sq["n_min"])
+        lat_ne, lon_ne = bng_to_latlon(sq["e_max"], sq["n_max"])
         square_summaries.append(
             {
                 "square_id": sq_id,
@@ -299,6 +691,7 @@ def export_public_docs(
                 "split": sq.get("split", "test"),
                 "os_grid_ref": sq.get("os_grid_ref", ""),
                 "bbox_epsg27700": [sq["e_min"], sq["n_min"], sq["e_max"], sq["n_max"]],
+                "bounds_latlon": [[round(lat_sw, 5), round(lon_sw, 5)], [round(lat_ne, 5), round(lon_ne, 5)]],
                 "center_lat": sq["center_lat"],
                 "center_lon": sq["center_lon"],
                 "area_km2": area_km2,
@@ -312,6 +705,58 @@ def export_public_docs(
                 "scanned_at_utc": sq.get("scanned_at_utc", ""),
             }
         )
+
+    if catalog is not None and all_features:
+        from megalith_lidar.scanner import evaluate_concentric_ring_score
+
+        extractor = NHLESpatialContextExtractor(catalog)
+        cand_props = [f["properties"] for f in all_features]
+        for cp in cand_props:
+            if "ring_inner4_m" in cp:
+                evaluate_concentric_ring_score(cp)
+        arch_cache_path = survey_dir.parent / "arch_context_cache.json"
+        enrich_candidates_with_archaeological_context(
+            candidates=cand_props,
+            extractor=extractor,
+            cache_path=arch_cache_path,
+            docs_diag_dir=survey_dir,
+            max_vlm_calls=80,
+        )
+        # Recompute stream_stats and square_summaries counts after VLM rectilinear-bund filtering
+        for st in stream_stats.values():
+            st["rediscovered_nhle_scheduled"] = 0
+            st["rediscovered_osm_archaeology"] = 0
+            st["flagged_modern_or_karst_confounders"] = 0
+            st["unidentified_candidates"] = 0
+            st["unidentified_candidates_fpr_0_01"] = 0
+        sq_map = {s["square_id"]: s for s in square_summaries}
+        for s in square_summaries:
+            s["flagged_modern_or_karst_confounders_count"] = 0
+            s["unidentified_candidates_count"] = 0
+            s["unidentified_candidates_fpr_0_01_count"] = 0
+        for feat in all_features:
+            p = feat["properties"]
+            st = stream_stats.get(p.get("sampling_stream", ""))
+            sq_s = sq_map.get(p.get("square_id", ""))
+            cat = p.get("context_category")
+            if st is not None:
+                if cat == "rediscovered_nhle_scheduled":
+                    st["rediscovered_nhle_scheduled"] += 1
+                elif cat == "rediscovered_osm_archaeology":
+                    st["rediscovered_osm_archaeology"] += 1
+                elif cat == "flagged_modern_or_karst_confounder":
+                    st["flagged_modern_or_karst_confounders"] += 1
+                elif cat == "unidentified_candidate":
+                    st["unidentified_candidates"] += 1
+                    if p.get("passes_fpr_0_01"):
+                        st["unidentified_candidates_fpr_0_01"] += 1
+            if sq_s is not None:
+                if cat == "flagged_modern_or_karst_confounder":
+                    sq_s["flagged_modern_or_karst_confounders_count"] += 1
+                elif cat == "unidentified_candidate":
+                    sq_s["unidentified_candidates_count"] += 1
+                    if p.get("passes_fpr_0_01"):
+                        sq_s["unidentified_candidates_fpr_0_01_count"] += 1
 
     for stream, st in stream_stats.items():
         area = max(st["area_km2"], 1e-6)
@@ -347,11 +792,77 @@ def export_public_docs(
     }
 
     (docs_dir / "survey_summary.json").write_text(
-        json.dumps(public_summary, indent=2),
+        json.dumps(public_summary, separators=(",", ":")),
         encoding="utf-8",
     )
+    priority_non_conf = [
+        f
+        for f in all_features
+        if f["properties"].get("context_category") in {"rediscovered_nhle_scheduled", "rediscovered_osm_archaeology"}
+        or (
+            f["properties"].get("context_category") == "unidentified_candidate"
+            and (
+                f["properties"].get("passes_fpr_0_01")
+                or f["properties"].get("megalithic_portal_matches")
+                or f["properties"].get("user_survey_status")
+            )
+        )
+    ]
+    priority_non_conf.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    fpr05_tail = [
+        f
+        for f in all_features
+        if f["properties"].get("context_category") == "unidentified_candidate"
+        and not (
+            f["properties"].get("passes_fpr_0_01")
+            or f["properties"].get("megalithic_portal_matches")
+            or f["properties"].get("user_survey_status")
+        )
+    ]
+    fpr05_tail.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    conf_only = [f for f in all_features if f["properties"].get("context_category") == "flagged_modern_or_karst_confounder"]
+    conf_only.sort(
+        key=lambda f: (1 if f["properties"].get("diagnostic_png") else 0, float(f["properties"].get("confidence", 0.0))),
+        reverse=True,
+    )
+    export_feats = priority_non_conf + fpr05_tail[:1200] + conf_only[:300]
+    _unused_web_keys = (
+        "nearby_environmental_features",
+        "nhle_cluster_summary",
+        "pond_unet_local_mean",
+        "pond_unet_local_peak",
+        "pond_unet_predicted_class",
+        "pond_unet_tile_prob",
+        "ridge_continuation_elongation",
+        "ridge_continuation_span_m",
+        "adjacent_channel_span_m",
+        "patch_min_relief_m",
+        "centroid_local_relief_m",
+        "max_positive_relief_m",
+        "mean_slope_tangent",
+        "raw_tile_logit",
+        "vlm_verdict_tier",
+        "vlm_shape_verdict",
+    )
+    for f in export_feats:
+        p = f["properties"]
+        for uk in _unused_web_keys:
+            p.pop(uk, None)
+        if isinstance(p.get("environmental_confounder_hints"), list):
+            p["environmental_confounder_hints"] = p["environmental_confounder_hints"][:1]
+        if isinstance(p.get("nearby_nhle_monuments"), list) and len(p["nearby_nhle_monuments"]) > 2:
+            p["nearby_nhle_monuments"] = p["nearby_nhle_monuments"][:2]
+        for k_empty in ("osm_archaeology_matches", "osm_confounder_matches", "megalithic_portal_matches"):
+            if p.get(k_empty) == []:
+                p.pop(k_empty, None)
     (docs_dir / "candidates.geojson").write_text(
-        json.dumps({"type": "FeatureCollection", "features": all_features}, indent=2),
+        json.dumps({"type": "FeatureCollection", "features": export_feats}, separators=(",", ":")),
         encoding="utf-8",
     )
     return public_summary
@@ -373,7 +884,17 @@ def main() -> None:
         default=Path("/home/ian/Code/megalith-lidar/docs"),
     )
     parser.add_argument("--max-squares", type=int, default=4)
+    parser.add_argument("--cycles", type=int, default=1, help="Number of consecutive batch cycles to run")
+    parser.add_argument(
+        "--roman-enclosure-per-cycle",
+        type=int,
+        default=25,
+        help="Number of completed squares to scan with RomanUNet and EnclosureUNet per cycle",
+    )
     parser.add_argument("--device", type=str, default="cuda:1")
+    parser.add_argument("--rescore-completed", action="store_true", help="Re-score all completed squares with current model & OSM context")
+    parser.add_argument("--shard-idx", type=int, default=0, help="Shard index for parallel rescoring")
+    parser.add_argument("--num-shards", type=int, default=1, help="Total number of parallel shards")
     parser.add_argument("--git-push", action="store_true", help="Commit and push updated docs/ to GitHub")
     args = parser.parse_args()
 
@@ -397,10 +918,13 @@ def main() -> None:
             "square_size_m": 2000,
             "queue": queue_items,
         }
+    if prioritize_contiguous_seed_regions_in_queue(queue_state, catalog):
+        queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+    if expand_national_queue_if_needed(queue_state, catalog):
         queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
-    ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
+    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
 
     model = MegalithUNet(
         in_channels=int(ckpt.get("in_channels", 6)),
@@ -420,111 +944,251 @@ def main() -> None:
 
     channel_mean = np.array(ckpt["channel_mean"], dtype=np.float32)
     channel_std = np.array(ckpt["channel_std"], dtype=np.float32)
+    del ckpt
 
-    scanned_now = 0
-    for item in queue_state["queue"]:
-        if item.get("status") != "pending":
-            continue
-        if scanned_now >= args.max_squares:
-            break
+    if args.rescore_completed:
+        completed_items = []
+        for q in queue_state["queue"]:
+            if q.get("status") != "completed":
+                continue
+            rep_p = survey_dir / q["square_id"] / f"{q['square_id']}_report.json"
+            if rep_p.exists():
+                rep_d = json.loads(rep_p.read_text(encoding="utf-8"))
+                if int(rep_d.get("unidentified_candidates_count", 1)) == 0:
+                    continue
+            completed_items.append(q)
+        shard_items = [
+            item for idx, item in enumerate(completed_items) if idx % max(args.num_shards, 1) == args.shard_idx
+        ]
+        for idx, item in enumerate(shard_items, 1):
+            sq_id = item["square_id"]
+            e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
+            t0 = time.time()
+            out_dir = survey_dir / sq_id
+            diag_sub = out_dir / "diagnostics"
+            if diag_sub.exists():
+                for old_p in diag_sub.glob("*.png"):
+                    old_p.unlink(missing_ok=True)
+            summary = scan_region(
+                model=model,
+                catalog=catalog,
+                channel_mean=channel_mean,
+                channel_std=channel_std,
+                calibrator=calibrator,
+                tile_prob_threshold=th_005,
+                pixel_prob_threshold=pixel_th_005,
+                e_min=e_min,
+                e_max=e_max,
+                n_min=n_min,
+                n_max=n_max,
+                device=device,
+                tile_cache_dir=tile_cache_dir,
+                output_dir=out_dir,
+                region_name=sq_id,
+                osm_cache_dir=osm_cache_dir,
+            )
+            gj_path = out_dir / f"{sq_id}_candidates.geojson"
+            if gj_path.exists():
+                gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
+                for feat in gj_data.get("features", []):
+                    p = feat.get("properties", {})
+                    p["passes_fpr_0_01"] = bool(
+                        float(p.get("calibrated_tile_prob", 0.0)) >= th_001
+                        and float(p.get("peak_prob", 0.0)) >= pixel_th_001
+                    )
+                gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+            print(
+                f"[rescore shard {args.shard_idx}/{args.num_shards}] ({idx}/{len(shard_items)}) {sq_id} ({round(time.time() - t0, 1)}s): "
+                f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
+                f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
+                f"Confounder={summary['flagged_modern_or_karst_confounders_count']}, "
+                f"Unid={summary['unidentified_candidates_count']}"
+            )
+        if args.num_shards > 1:
+            return
 
-        sq_id = item["square_id"]
-        e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
-        t0 = time.time()
-        print(
-            f"[batch] Scanning {sq_id} ({item['sampling_stream']}, {item['os_grid_ref']}) "
-            f"bbox=[{e_min}, {n_min}, {e_max}, {n_max}] ..."
-        )
+    from scripts.export_osmand_plugin import export_osmand_files
+    from scripts.scan_enclosure_batch import run_enclosure_scan
+    from scripts.scan_roman_batch import run_roman_scan
 
-        out_dir = survey_dir / sq_id
-        summary = scan_region(
-            model=model,
-            catalog=catalog,
-            channel_mean=channel_mean,
-            channel_std=channel_std,
-            calibrator=calibrator,
-            tile_prob_threshold=th_005,
-            pixel_prob_threshold=pixel_th_005,
-            e_min=e_min,
-            e_max=e_max,
-            n_min=n_min,
-            n_max=n_max,
-            device=device,
-            tile_cache_dir=tile_cache_dir,
-            output_dir=out_dir,
-            region_name=sq_id,
-            osm_cache_dir=osm_cache_dir,
-        )
+    roman_ckpt = args.checkpoint.parent / "roman_unet_best.pt"
+    enclosure_ckpt = args.checkpoint.parent / "enclosure_unet_best.pt"
 
-        if summary["windows_with_valid_1m_lidar"] == 0:
-            item["status"] = "no_lidar_coverage"
-            item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    total_cycles = max(1, int(args.cycles))
+    for cycle_idx in range(1, total_cycles + 1):
+        if expand_national_queue_if_needed(queue_state, catalog):
             queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
-            print(f"[batch] {sq_id}: 0 valid 1m LiDAR windows (skipping without counting toward quota)")
-            continue
 
-        # Tag each candidate in the saved GeoJSON and report with whether it also passes `fpr_0.01`
-        gj_path = out_dir / f"{sq_id}_candidates.geojson"
-        if gj_path.exists():
-            gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
-            for feat in gj_data.get("features", []):
-                p = feat.get("properties", {})
-                p["passes_fpr_0_01"] = bool(
-                    float(p.get("calibrated_tile_prob", 0.0)) >= th_001
-                    and float(p.get("peak_prob", 0.0)) >= pixel_th_001
-                )
-            gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+        pending_count = sum(1 for item in queue_state["queue"] if item.get("status") == "pending")
+        if pending_count == 0 and not args.rescore_completed:
+            print("[batch] All 1,417 test squares in queue_state are completed; skipping no-op re-export.")
+            return
 
-        item["status"] = "completed"
-        item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        item["elapsed_s"] = round(time.time() - t0, 1)
-        item["windows_with_valid_1m_lidar"] = summary["windows_with_valid_1m_lidar"]
-        item["rediscovered_nhle_scheduled_count"] = summary["rediscovered_scheduled_monuments_count"]
-        item["rediscovered_osm_archaeology_count"] = summary["rediscovered_osm_archaeology_count"]
-        item["flagged_modern_or_karst_confounders_count"] = summary["flagged_modern_or_karst_confounders_count"]
-        item["unidentified_candidates_count"] = summary["unidentified_candidates_count"]
+        model.to(device)
+        scanned_now = 0
+        for item in queue_state["queue"]:
+            if args.rescore_completed:
+                break
+            if item.get("status") != "pending":
+                continue
+            if scanned_now >= args.max_squares:
+                break
 
-        queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
-        scanned_now += 1
+            sq_id = item["square_id"]
+            e_min, n_min, e_max, n_max = item["e_min"], item["n_min"], item["e_max"], item["n_max"]
+            t0 = time.time()
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] Scanning {sq_id} ({item['sampling_stream']}, {item['os_grid_ref']}) "
+                f"bbox=[{e_min}, {n_min}, {e_max}, {n_max}] ..."
+            )
+
+            out_dir = survey_dir / sq_id
+            summary = scan_region(
+                model=model,
+                catalog=catalog,
+                channel_mean=channel_mean,
+                channel_std=channel_std,
+                calibrator=calibrator,
+                tile_prob_threshold=th_005,
+                pixel_prob_threshold=pixel_th_005,
+                e_min=e_min,
+                e_max=e_max,
+                n_min=n_min,
+                n_max=n_max,
+                device=device,
+                tile_cache_dir=tile_cache_dir,
+                output_dir=out_dir,
+                region_name=sq_id,
+                osm_cache_dir=osm_cache_dir,
+            )
+
+            if summary["windows_with_valid_1m_lidar"] == 0:
+                item["status"] = "no_lidar_coverage"
+                item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+                print(f"[batch] {sq_id}: 0 valid 1m LiDAR windows (skipping without counting toward quota)")
+                continue
+
+            # Tag each candidate in the saved GeoJSON and report with whether it also passes `fpr_0.01`
+            gj_path = out_dir / f"{sq_id}_candidates.geojson"
+            if gj_path.exists():
+                gj_data = json.loads(gj_path.read_text(encoding="utf-8"))
+                for feat in gj_data.get("features", []):
+                    p = feat.get("properties", {})
+                    p["passes_fpr_0_01"] = bool(
+                        float(p.get("calibrated_tile_prob", 0.0)) >= th_001
+                        and float(p.get("peak_prob", 0.0)) >= pixel_th_001
+                    )
+                gj_path.write_text(json.dumps(gj_data, indent=2), encoding="utf-8")
+
+            item["status"] = "completed"
+            item["scanned_at_utc"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            item["elapsed_s"] = round(time.time() - t0, 1)
+            item["windows_with_valid_1m_lidar"] = summary["windows_with_valid_1m_lidar"]
+            item["rediscovered_nhle_scheduled_count"] = summary["rediscovered_scheduled_monuments_count"]
+            item["rediscovered_osm_archaeology_count"] = summary["rediscovered_osm_archaeology_count"]
+            item["flagged_modern_or_karst_confounders_count"] = summary["flagged_modern_or_karst_confounders_count"]
+            item["unidentified_candidates_count"] = summary["unidentified_candidates_count"]
+
+            queue_path.write_text(json.dumps(queue_state, indent=2), encoding="utf-8")
+            scanned_now += 1
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] Completed {sq_id} in {item['elapsed_s']}s: "
+                f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
+                f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
+                f"OSM_confounder={summary['flagged_modern_or_karst_confounders_count']}, "
+                f"Unidentified={summary['unidentified_candidates_count']}"
+            )
+
+        pub = export_public_docs(
+            queue_state=queue_state,
+            survey_dir=survey_dir,
+            eval_metrics_path=eval_metrics_path,
+            docs_dir=args.docs_dir,
+            catalog=catalog,
+        )
         print(
-            f"[batch] Completed {sq_id} in {item['elapsed_s']}s: "
-            f"NHLE={summary['rediscovered_scheduled_monuments_count']}, "
-            f"OSM_arch={summary['rediscovered_osm_archaeology_count']}, "
-            f"OSM_confounder={summary['flagged_modern_or_karst_confounders_count']}, "
-            f"Unidentified={summary['unidentified_candidates_count']}"
+            f"[cycle {cycle_idx}/{total_cycles}] Prehistoric public docs updated: "
+            f"{pub['queue_progress']['completed_squares']} squares "
+            f"({pub['queue_progress']['total_scanned_area_km2']} km²), "
+            f"{pub['queue_progress']['total_detections']} total detections."
         )
 
-    pub = export_public_docs(
-        queue_state=queue_state,
-        survey_dir=survey_dir,
-        eval_metrics_path=eval_metrics_path,
-        docs_dir=args.docs_dir,
-    )
-    print(
-        f"[batch] Public docs updated: {pub['queue_progress']['completed_squares']} squares "
-        f"({pub['queue_progress']['total_scanned_area_km2']} km²), "
-        f"{pub['queue_progress']['total_detections']} total detections."
-    )
+        if args.roman_enclosure_per_cycle > 0:
+            model.cpu()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            if roman_ckpt.exists():
+                rom_sum = run_roman_scan(
+                    data_dir=args.data_dir,
+                    roman_ckpt_path=roman_ckpt,
+                    docs_dir=args.docs_dir,
+                    device_str=args.device,
+                    max_squares=args.roman_enclosure_per_cycle,
+                )
+                print(
+                    f"[cycle {cycle_idx}/{total_cycles}] Roman docs updated: "
+                    f"{rom_sum['squares_scanned']} squares ({rom_sum['area_km2']} km²), "
+                    f"Unid={rom_sum['unidentified_candidates']} (1% FPR={rom_sum['unidentified_candidates_fpr_0_01']})."
+                )
+            if enclosure_ckpt.exists():
+                enc_sum = run_enclosure_scan(
+                    data_dir=args.data_dir,
+                    enclosure_ckpt_path=enclosure_ckpt,
+                    docs_dir=args.docs_dir,
+                    device_str=args.device,
+                    max_squares=args.roman_enclosure_per_cycle,
+                )
+                print(
+                    f"[cycle {cycle_idx}/{total_cycles}] Enclosure docs updated: "
+                    f"{enc_sum['squares_scanned']} squares ({enc_sum['area_km2']} km²), "
+                    f"Unid={enc_sum['unidentified_candidates']} (1% FPR={enc_sum['unidentified_candidates_fpr_0_01']})."
+                )
 
-    if args.git_push and scanned_now > 0:
-        repo_root = Path(__file__).resolve().parents[1]
-        subprocess.run(["git", "add", "docs/"], cwd=repo_root, check=False)
-        status = subprocess.run(
-            ["git", "status", "--porcelain", "docs/"],
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if status.stdout.strip():
-            comp = pub["queue_progress"]["completed_squares"]
-            area = pub["queue_progress"]["total_scanned_area_km2"]
-            subprocess.run(
-                ["git", "commit", "-m", f"Update national survey batch ({comp} squares, {area} km²)"],
+        try:
+            osmand_res = export_osmand_files(args.docs_dir)
+            print(
+                f"[cycle {cycle_idx}/{total_cycles}] OsmAnd GPX & .osf updated: "
+                f"{osmand_res['total_waypoints']} waypoints ({osmand_res['osf_size_kb']} KB .osf)."
+            )
+        except Exception as exc:
+            print(f"[cycle {cycle_idx}/{total_cycles}] Warning: OsmAnd export failed: {exc}")
+
+        if args.git_push:
+            repo_root = Path(__file__).resolve().parents[1]
+            subprocess.run(["git", "add", "docs/"], cwd=repo_root, check=False)
+            status = subprocess.run(
+                ["git", "status", "--porcelain", "docs/"],
                 cwd=repo_root,
+                capture_output=True,
+                text=True,
                 check=False,
             )
-            subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=False)
+            if status.stdout.strip():
+                comp = pub["queue_progress"]["completed_squares"]
+                area = pub["queue_progress"]["total_scanned_area_km2"]
+                head_msg = subprocess.run(
+                    ["git", "log", "-1", "--format=%s"],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                ).stdout.strip()
+                head_tags = subprocess.run(
+                    ["git", "tag", "--points-at", "HEAD"],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                ).stdout.strip()
+                msg = f"Update national survey batch ({comp} squares, {area} km²)"
+                if head_msg.startswith("Update national survey batch (") and not head_tags:
+                    subprocess.run(["git", "commit", "--amend", "-m", msg], cwd=repo_root, check=False)
+                    subprocess.run(["git", "push", "--force-with-lease", "origin", "main"], cwd=repo_root, check=False)
+                else:
+                    subprocess.run(["git", "commit", "-m", msg], cwd=repo_root, check=False)
+                    subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=repo_root, check=False)
+                    subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=False)
 
 
 if __name__ == "__main__":

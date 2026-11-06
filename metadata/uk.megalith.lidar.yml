@@ -1,0 +1,37 @@
+Categories:
+  - Navigation
+  - Science & Education
+License: AGPL-3.0-only
+AuthorName: Ian Ross Williams
+WebSite: https://glassontin.github.io/megalith-lidar/
+SourceCode: https://github.com/GlassOnTin/megalith-lidar
+IssueTracker: https://github.com/GlassOnTin/megalith-lidar/issues
+Changelog: https://github.com/GlassOnTin/megalith-lidar/releases
+
+AutoName: Megalith LiDAR
+
+RepoType: git
+Repo: https://github.com/GlassOnTin/megalith-lidar.git
+Binaries: 
+  https://github.com/GlassOnTin/megalith-lidar/releases/download/v%v/megalith-lidar-v%v.apk
+
+Builds:
+  - versionName: 3.2.0
+    versionCode: 320
+    commit: 5c318c8d3f651efb6994ea7348dec5b95ef01e10
+    subdir: android/app
+    gradle:
+      - yes
+    rm:
+      - docs/Uk_roman_roads_2.obf
+      - docs/megalith-lidar.osf
+
+AllowedAPKSigningKeys: f34fa20c96d5ca12a4cc5b490fd1c34be642ac5d7f1ea7f10cdfb968b17fca15
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: HTTP
+UpdateCheckName: Ignore
+UpdateCheckData: 
+  https://raw.githubusercontent.com/GlassOnTin/megalith-lidar/refs/heads/main/android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|.|versionName\s*=\s*"([^"]+)"
+CurrentVersion: 3.2.0
+CurrentVersionCode: 320

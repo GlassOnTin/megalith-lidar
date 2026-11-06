@@ -2,8 +2,7 @@
 Description=Run UK LiDAR Megalith Survey batch every 30 minutes
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=30min
+OnCalendar=*:0/30
 RandomizedDelaySec=60s
 Persistent=true
 

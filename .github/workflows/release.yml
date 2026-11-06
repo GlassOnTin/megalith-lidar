@@ -1,0 +1,150 @@
+name: Release Android APK
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v3.2.0)"
+        required: true
+        default: "v3.2.0"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Reproducible APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          sparse-checkout: |
+            /*
+            !docs/Uk_roman_roads_2.obf
+            !docs/megalith-lidar.osf
+          sparse-checkout-cone-mode: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Install Android SDK Platform 35 & Build-Tools 35.0.0
+        run: |
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build unsigned release APK with R8 and SOURCE_DATE_EPOCH
+        working-directory: android
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          ./gradlew assembleRelease -PnoLintVital --no-daemon --stacktrace
+
+      - name: Assert reflectively-loaded classes survived R8
+        run: ./scripts/check-r8-kept-classes.sh
+
+      - name: Align and sign APK (v2 + v3 signatures, alignment preserved)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 || secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          TAG_NAME="${{ github.event.inputs.tag || github.ref_name }}"
+          BUILD_TOOLS="${ANDROID_HOME}/build-tools/35.0.0"
+          UNSIGNED_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED_APK="android/app/build/outputs/apk/release/app-release-aligned.apk"
+          mkdir -p dist
+          SIGNED_APK="dist/megalith-lidar-${TAG_NAME}.apk"
+
+          echo "${KEYSTORE_BASE64}" | base64 -d > /tmp/megalith-lidar-release.jks
+          "${BUILD_TOOLS}/zipalign" -f 4 "${UNSIGNED_APK}" "${ALIGNED_APK}"
+          "${BUILD_TOOLS}/apksigner" sign \
+            --ks /tmp/megalith-lidar-release.jks \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --ks-key-alias "${KEY_ALIAS}" \
+            --key-pass env:KEY_PASSWORD \
+            --alignment-preserved \
+            --v1-signing-enabled false \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out "${SIGNED_APK}" \
+            "${ALIGNED_APK}"
+          rm -f /tmp/megalith-lidar-release.jks
+
+          "${BUILD_TOOLS}/zipalign" -c -v 4 "${SIGNED_APK}" > /dev/null
+          "${BUILD_TOOLS}/apksigner" verify --verbose --print-certs "${SIGNED_APK}"
+          (cd dist && sha256sum "$(basename "${SIGNED_APK}")" > "$(basename "${SIGNED_APK}").sha256")
+          cat "${SIGNED_APK}.sha256"
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: megalith-lidar-release
+          path: |
+            dist/megalith-lidar-*.apk
+            dist/megalith-lidar-*.apk.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    if: |
+      !cancelled() && needs.build.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout release changelog metadata
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          sparse-checkout: |
+            fastlane/metadata/android/en-US/changelogs
+          sparse-checkout-cone-mode: false
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: megalith-lidar-release
+          path: release/
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: release/*.apk
+
+      - name: Generate SHA256SUMS
+        run: |
+          : > SHA256SUMS
+          find release -maxdepth 1 -type f -name '*.apk' | sort | while read -r f; do
+            printf '%s  %s\n' "$(sha256sum "$f" | cut -d' ' -f1)" "$(basename "$f")" >> SHA256SUMS
+          done
+          cat SHA256SUMS
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: Megalith LiDAR ${{ github.event.inputs.tag || github.ref_name }}
+          body_path: fastlane/metadata/android/en-US/changelogs/320.txt
+          generate_release_notes: true
+          files: |
+            release/*.apk
+            release/*.apk.sha256
+            SHA256SUMS

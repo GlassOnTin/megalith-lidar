@@ -1,0 +1,5 @@
+# Classes resolved reflectively at runtime (Android Manifest Activity + WebView
+# @JavascriptInterface bridge). Each must keep its identity mapping in R8's
+# mapping.txt; scripts/check-r8-kept-classes.sh asserts this after minification.
+uk.megalith.lidar.MainActivity
+uk.megalith.lidar.MainActivity$AndroidBridge
