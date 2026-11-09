@@ -1,8 +1,12 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Map tiles and WMS layers are fetched from Environment Agency, National
+      Library of Scotland, and British Geological Survey servers.
 Categories:
   - Navigation
   - Science & Education
 License: AGPL-3.0-only
-AuthorName: Ian Ross Williams
+AuthorName: GlassOnTin
 WebSite: https://glassontin.github.io/megalith-lidar/
 SourceCode: https://github.com/GlassOnTin/megalith-lidar
 IssueTracker: https://github.com/GlassOnTin/megalith-lidar/issues
@@ -28,10 +32,7 @@ Builds:
 
 AllowedAPKSigningKeys: f34fa20c96d5ca12a4cc5b490fd1c34be642ac5d7f1ea7f10cdfb968b17fca15
 
-AutoUpdateMode: Version v%v
-UpdateCheckMode: HTTP
-UpdateCheckName: Ignore
-UpdateCheckData: 
-  https://raw.githubusercontent.com/GlassOnTin/megalith-lidar/refs/heads/main/android/app/build.gradle.kts|versionCode\s*=\s*(\d+)|.|versionName\s*=\s*"([^"]+)"
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
 CurrentVersion: 3.2.0
 CurrentVersionCode: 320
